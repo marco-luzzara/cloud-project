@@ -31,6 +31,19 @@ test {
 }
 jacocoTestReport {
 	dependsOn test // tests are required to run before generating the report
+	reports {
+		xml.required = true
+	}
+}
+
+jacocoTestCoverageVerification {
+	violationRules {
+		rule {
+			limit {
+				minimum = 0.5
+			}
+		}
+	}
 }
 
 

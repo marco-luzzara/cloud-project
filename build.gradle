@@ -1,8 +1,7 @@
 plugins {
 	id 'java'
-	id 'org.springframework.boot' version '3.1.1'
-	id 'io.spring.dependency-management' version '1.1.0'
 	id 'jacoco'
+	id "io.freefair.lombok" version "8.1.0"
 }
 
 group = 'unimi.it'
@@ -16,10 +15,22 @@ repositories {
 	mavenCentral()
 }
 
+def SPRING_VERSION = '3.1.1'
+def LOMBOK_VERSION = '1.18.28'
+
 dependencies {
-	implementation 'org.springframework.boot:spring-boot-starter'
+	implementation "org.springframework.boot:spring-boot-starter:${SPRING_VERSION}"
 	implementation 'org.springframework:spring-web:6.0.11'
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	implementation "org.springframework.data:spring-data-jdbc:${SPRING_VERSION}"
+	testImplementation "org.springframework.boot:spring-boot-starter-test:${SPRING_VERSION}"
+	testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
+	testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
+
+	// lombok
+	compileOnly "org.projectlombok:lombok:${LOMBOK_VERSION}"
+	annotationProcessor "org.projectlombok:lombok:${LOMBOK_VERSION}"
+	testCompileOnly "org.projectlombok:lombok:${LOMBOK_VERSION}"
+	testAnnotationProcessor "org.projectlombok:lombok:${LOMBOK_VERSION}"
 }
 
 tasks.named('test') {

@@ -1,14 +1,15 @@
 package it.unimi.cloudproject.bl;
 
 import it.unimi.cloudproject.bl.errors.ValidationError;
+import it.unimi.cloudproject.infrastructure.annotations.codecoverage.Generated;
 import it.unimi.cloudproject.infrastructure.utilities.CollectionUtils;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
-public record User(String username, Collection<Shop> favoriteShops) {
-    public User(String username, Collection<Shop> favoriteShops) {
+public record User(int id, String username, Collection<Shop> favoriteShops) {
+    public User(int id, String username, Collection<Shop> favoriteShops) {
         if (Objects.isNull(username))
             throw new IllegalArgumentException("Username cannot be null");
 
@@ -20,6 +21,7 @@ public record User(String username, Collection<Shop> favoriteShops) {
 
         this.username = username;
         this.favoriteShops = favoriteShops;
+        this.id = id;
 
         checkForDuplicateShop();
     }
@@ -42,5 +44,20 @@ public record User(String username, Collection<Shop> favoriteShops) {
     @Override
     public Collection<Shop> favoriteShops() {
         return List.copyOf(this.favoriteShops);
+    }
+
+    @Generated
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        User user = (User) o;
+        return Objects.equals(username, user.username);
+    }
+
+    @Generated
+    @Override
+    public int hashCode() {
+        return Objects.hash(username);
     }
 }

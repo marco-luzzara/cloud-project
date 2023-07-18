@@ -9,10 +9,10 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import java.util.Map;
 import java.util.stream.Stream;
 
-import static it.unimi.cloudproject.factories.bl.ShopFactory.*;
+import static it.unimi.cloudproject.factories.bl.ShopFactory.VALID_COORDINATES;
+import static it.unimi.cloudproject.factories.bl.ShopFactory.VALID_SHOP_NAME;
 
 public class ShopTest {
     static Stream<Arguments> shopConstructorSource() {
@@ -26,13 +26,13 @@ public class ShopTest {
     @MethodSource("shopConstructorSource")
     void givenShopConstructor_whenParamsNull_thenThrow(String name, Coordinates coordinates) {
         Assertions.assertThrows(IllegalArgumentException.class, () ->
-                new Shop(name, coordinates));
+                new Shop(ShopFactory.VALID_ID, name, coordinates));
     }
 
     @Test
     void givenShopConstructor_whenNameEmpty_thenThrow() {
         Assertions.assertThrows(ValidationError.EmptyNameForShopError.class, () ->
-                new Shop("", VALID_COORDINATES));
+                new Shop(ShopFactory.VALID_ID, "", VALID_COORDINATES));
     }
 
     @Test

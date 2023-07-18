@@ -30,13 +30,13 @@ public class UserTest {
     @MethodSource("userConstructorSource")
     void givenUserConstructor_whenParamsNull_thenThrow(String username, Collection<Shop> favoriteShops) {
         Assertions.assertThrows(IllegalArgumentException.class, () ->
-                new User(username, favoriteShops));
+                new User(UserFactory.VALID_ID, username, favoriteShops));
     }
 
     @Test
     void givenUserConstructor_whenNameEmpty_thenThrow() {
         Assertions.assertThrows(ValidationError.EmptyNameForUserError.class, () ->
-                new User("", UserFactory.VALID_FAVORITE_SHOPS));
+                new User(UserFactory.VALID_ID, "", UserFactory.VALID_FAVORITE_SHOPS));
     }
 
     @Test
@@ -49,6 +49,8 @@ public class UserTest {
     void givenUserConstructor_whenNoFavoriteShops_thenOk() {
         var user = UserFactory.getUser();
 
+        Assertions.assertEquals(UserFactory.VALID_ID, user.id());
+        Assertions.assertEquals(UserFactory.VALID_USERNAME, user.username());
         Assertions.assertEquals(0, user.favoriteShops().size());
     }
 

@@ -9,7 +9,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import java.util.stream.Stream;
 
 public class CoordinatesTest {
-    static Stream<Arguments> coordinatesConstructorSource() {
+    static Stream<Arguments> invalidCoordinatesConstructorSource() {
         return Stream.of(
                 Arguments.arguments(-181, CoordinatesFactory.VALID_LATITUDE),
                 Arguments.arguments(181, CoordinatesFactory.VALID_LATITUDE),
@@ -19,9 +19,29 @@ public class CoordinatesTest {
     }
 
     @ParameterizedTest
-    @MethodSource("coordinatesConstructorSource")
+    @MethodSource("invalidCoordinatesConstructorSource")
     void givenCoordinatesConstructor_whenParamsInvalid_thenThrow(double longitude, double latitude) {
         Assertions.assertThrows(IllegalArgumentException.class, () ->
                 new Coordinates(longitude, latitude));
+    }
+
+    static Stream<Arguments> validCoordinatesConstructorSource() {
+        return Stream.of(
+                Arguments.arguments(-180, CoordinatesFactory.VALID_LATITUDE),
+                Arguments.arguments(180, CoordinatesFactory.VALID_LATITUDE),
+                Arguments.arguments(CoordinatesFactory.VALID_LONGITUDE, -90),
+                Arguments.arguments(CoordinatesFactory.VALID_LONGITUDE, 90),
+                Arguments.arguments(120, CoordinatesFactory.VALID_LATITUDE),
+                Arguments.arguments(CoordinatesFactory.VALID_LONGITUDE, -60)
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("validCoordinatesConstructorSource")
+    void givenCoordinatesConstructor_whenParamsValid_thenOk(double longitude, double latitude) {
+        var coords = new Coordinates(longitude, latitude);
+
+        Assertions.assertEquals(longitude, coords.longitude());
+        Assertions.assertEquals(latitude, coords.latitude());
     }
 }

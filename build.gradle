@@ -2,6 +2,7 @@ plugins {
 	id 'java'
 	id 'jacoco'
 	id "io.freefair.lombok" version "8.1.0"
+	id 'org.liquibase.gradle' version '2.0.4'
 }
 
 group = 'unimi.it'
@@ -17,20 +18,41 @@ repositories {
 
 def SPRING_VERSION = '3.1.1'
 def LOMBOK_VERSION = '1.18.28'
+def JUNIT_VERSION = '5.8.1'
+def TESTCONTAINER_VERSION = '1.18.3'
 
 dependencies {
+	// spring
 	implementation "org.springframework.boot:spring-boot-starter:${SPRING_VERSION}"
 	implementation 'org.springframework:spring-web:6.0.11'
 	implementation "org.springframework.data:spring-data-jdbc:${SPRING_VERSION}"
+	implementation "org.springframework.boot:spring-boot-starter-jdbc:${SPRING_VERSION}"
+	implementation "org.springframework.boot:spring-boot-starter-data-jpa:${SPRING_VERSION}"
 	testImplementation "org.springframework.boot:spring-boot-starter-test:${SPRING_VERSION}"
-	testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
-	testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
+
+	// junit and assertions
+	testImplementation "org.junit.jupiter:junit-jupiter-api:${JUNIT_VERSION}"
+	testImplementation("org.assertj:assertj-core:3.24.2")
+	testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:${JUNIT_VERSION}"
+
+	// testcontainer
+	testImplementation "org.testcontainers:testcontainers:${TESTCONTAINER_VERSION}"
+	testImplementation "org.testcontainers:junit-jupiter:${TESTCONTAINER_VERSION}"
+	testImplementation "org.testcontainers:postgresql:${TESTCONTAINER_VERSION}"
+
+	// db
+	implementation "com.h2database:h2:2.2.220"
 
 	// lombok
 	compileOnly "org.projectlombok:lombok:${LOMBOK_VERSION}"
 	annotationProcessor "org.projectlombok:lombok:${LOMBOK_VERSION}"
 	testCompileOnly "org.projectlombok:lombok:${LOMBOK_VERSION}"
 	testAnnotationProcessor "org.projectlombok:lombok:${LOMBOK_VERSION}"
+
+	// liquibase
+	liquibaseRuntime 'org.liquibase:liquibase-core:4.23.0'
+	liquibaseRuntime 'org.liquibase:liquibase-groovy-dsl:2.1.1'
+	runtimeOnly("org.liquibase:liquibase-core:4.23.0")
 }
 
 tasks.named('test') {

@@ -8,8 +8,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
-public record User(int id, String username, Collection<Shop> favoriteShops) {
-    public User(int id, String username, Collection<Shop> favoriteShops) {
+public record User(Integer id, String username, Collection<Shop> favoriteShops) {
+    public User(Integer id, String username, Collection<Shop> favoriteShops) {
         if (Objects.isNull(username))
             throw new IllegalArgumentException("Username cannot be null");
 

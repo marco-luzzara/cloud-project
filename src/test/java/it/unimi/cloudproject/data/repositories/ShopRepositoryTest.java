@@ -34,22 +34,20 @@ public class ShopRepositoryTest {
     }
 
     @Test
-    void givenShopRepo_whenAddShop_thenAddItToDb() {
-        var shop = ShopFactory.getShop();
-        var shopData = ShopData.fromShop(shop);
+    void givenShop_whenAddIt_thenCanRetrieveItByName() {
+        var shop = ShopDataFactory.createShop(this.shopRepository);
 
-        shopData = shopRepository.save(shopData);
+        var shopByName = shopRepository.findByName(shop.getName()).stream().findFirst().orElseThrow();
 
-        assertThat(shopData.getId()).isNotNull();
-        assertThat(shopRepository.findById(shopData.getId()).map(ShopData::getName)).hasValue(shopData.getName());
+        assertThat(shopByName.getId()).isEqualTo(shop.getId());
     }
 
     @Test
-    void givenShopRepo_whenRemoveShop_thenRemoveItFromDb() {
+    void givenShopRepo_whenDeleteShop_thenRemoveItFromDb() {
         var shopData = ShopDataFactory.createShop(this.shopRepository);
         var shopId = shopData.getId();
 
-        shopRepository.delete(shopData);
+        shopRepository.deleteById(shopId);
 
         assertThat(shopRepository.findById(shopId)).isEmpty();
     }

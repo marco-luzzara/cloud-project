@@ -50,7 +50,7 @@ public class UserRepositoryTest {
         var userData = UserDataFactory.createUser(this.userRepository);
         var userId = userData.getId();
 
-        userRepository.delete(userData);
+        userRepository.deleteById(userId);
 
         assertThat(userRepository.findById(userId)).isEmpty();
     }

@@ -15,4 +15,5 @@ public interface ShopRepository extends CrudRepository<ShopData, Integer> {
             WHERE us.USER_ID = :userId
             """)
     List<ShopData> findFavoriteShopsByUserId(@Param("userId") int userId);
+    List<ShopData> findByName(String name);
 }

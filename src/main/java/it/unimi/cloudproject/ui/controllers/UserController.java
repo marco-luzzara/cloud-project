@@ -1,4 +1,4 @@
-package it.unimi.cloudproject.application.controllers;
+package it.unimi.cloudproject.ui.controllers;
 
 import org.springframework.web.bind.annotation.RestController;
 

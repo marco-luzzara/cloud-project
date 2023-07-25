@@ -43,7 +43,7 @@ public class ShopRepositoryTest {
     }
 
     @Test
-    void givenShopRepo_whenDeleteShop_thenRemoveItFromDb() {
+    void givenShop_whenDeleteIt_thenCannotRetrieveIt() {
         var shopData = ShopDataFactory.createShop(this.shopRepository);
         var shopId = shopData.getId();
 

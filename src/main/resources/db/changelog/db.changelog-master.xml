@@ -47,6 +47,13 @@ http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibas
                                   onUpdate="RESTRICT"
                                   referencedColumnNames="id"
                                   referencedTableName="user"/>
+        <addForeignKeyConstraint  baseColumnNames="shop_id"
+                                  baseTableName="user_shop"
+                                  constraintName="fk_user_shop_shop_id"
+                                  onDelete="CASCADE"
+                                  onUpdate="RESTRICT"
+                                  referencedColumnNames="id"
+                                  referencedTableName="shop"/>
         <addAutoIncrement tableName="user" columnName="id" columnDataType="int" startWith="1" incrementBy="1" />
         <addAutoIncrement tableName="shop" columnName="id" columnDataType="int" startWith="1" incrementBy="1" />
     </changeSet>

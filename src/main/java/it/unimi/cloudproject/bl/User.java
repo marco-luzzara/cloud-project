@@ -7,9 +7,10 @@ import it.unimi.cloudproject.infrastructure.utilities.CollectionUtils;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
-public record User(Integer id, String username, Collection<Shop> favoriteShops) {
-    public User(Integer id, String username, Collection<Shop> favoriteShops) {
+public record User(Integer id, String username, Set<Shop> favoriteShops) {
+    public User {
         if (Objects.isNull(username))
             throw new IllegalArgumentException("Username cannot be null");
 
@@ -18,32 +19,22 @@ public record User(Integer id, String username, Collection<Shop> favoriteShops) 
 
         if (favoriteShops == null || favoriteShops.stream().anyMatch(Objects::isNull))
             throw new IllegalArgumentException("favoriteShops cannot be null");
-
-        this.username = username;
-        this.favoriteShops = favoriteShops;
-        this.id = id;
-
-        checkForDuplicateShop();
-    }
-
-    private void checkForDuplicateShop() {
-        var duplicateShops = CollectionUtils.findDuplicates(this.favoriteShops);
-        if (duplicateShops.size() > 0)
-            throw new ValidationError.DuplicateShopForUserError(this, duplicateShops.stream().toList().get(0));
     }
 
     public void addFavoriteShop(Shop shop) {
         if (Objects.isNull(shop))
             throw new IllegalArgumentException("shop cannot be null");
 
+        var beforeAddSize = this.favoriteShops.size();
         this.favoriteShops.add(shop);
 
-        checkForDuplicateShop();
+        if (this.favoriteShops.size() == beforeAddSize)
+            throw new ValidationError.DuplicateShopForUserError(this, shop);
     }
 
     @Override
-    public Collection<Shop> favoriteShops() {
-        return List.copyOf(this.favoriteShops);
+    public Set<Shop> favoriteShops() {
+        return Set.copyOf(this.favoriteShops);
     }
 
     @Generated

@@ -12,4 +12,8 @@ public class ShopFactory {
     public static Shop getShop() {
         return new Shop(VALID_ID, VALID_SHOP_NAME, VALID_COORDINATES);
     }
+
+    public static Shop getShop(int seed) {
+        return new Shop(seed, VALID_SHOP_NAME + seed, new Coordinates(seed, seed));
+    }
 }

@@ -10,12 +10,14 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Stream;
 
 public class UserTest {
     static Stream<Arguments> userConstructorSource() {
-        List<Shop> invalidShops = new java.util.ArrayList<>();
+        Set<Shop> invalidShops = new HashSet<>();
         invalidShops.add(ShopFactory.getShop());
         invalidShops.add(null);
 
@@ -28,7 +30,7 @@ public class UserTest {
 
     @ParameterizedTest
     @MethodSource("userConstructorSource")
-    void givenUserConstructor_whenParamsNull_thenThrow(String username, Collection<Shop> favoriteShops) {
+    void givenUserConstructor_whenParamsNull_thenThrow(String username, Set<Shop> favoriteShops) {
         Assertions.assertThrows(IllegalArgumentException.class, () ->
                 new User(UserFactory.VALID_ID, username, favoriteShops));
     }
@@ -37,12 +39,6 @@ public class UserTest {
     void givenUserConstructor_whenNameEmpty_thenThrow() {
         Assertions.assertThrows(ValidationError.EmptyNameForUserError.class, () ->
                 new User(UserFactory.VALID_ID, "", UserFactory.VALID_FAVORITE_SHOPS));
-    }
-
-    @Test
-    void givenUserConstructor_whenDuplicateFavoriteShops_thenThrow() {
-        Assertions.assertThrows(ValidationError.DuplicateShopForUserError.class, () ->
-                UserFactory.getUser(ShopFactory.getShop(), ShopFactory.getShop()));
     }
 
     @Test

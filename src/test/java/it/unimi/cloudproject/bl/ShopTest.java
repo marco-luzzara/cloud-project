@@ -11,8 +11,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.stream.Stream;
 
-import static it.unimi.cloudproject.factories.bl.ShopFactory.VALID_COORDINATES;
-import static it.unimi.cloudproject.factories.bl.ShopFactory.VALID_SHOP_NAME;
+import static it.unimi.cloudproject.factories.bl.ShopFactory.*;
 
 public class ShopTest {
     static Stream<Arguments> shopConstructorSource() {
@@ -26,18 +25,18 @@ public class ShopTest {
     @MethodSource("shopConstructorSource")
     void givenShopConstructor_whenParamsNull_thenThrow(String name, Coordinates coordinates) {
         Assertions.assertThrows(IllegalArgumentException.class, () ->
-                new Shop(ShopFactory.VALID_ID, name, coordinates));
+                new Shop(VALID_ID, name, coordinates));
     }
 
     @Test
     void givenShopConstructor_whenNameEmpty_thenThrow() {
         Assertions.assertThrows(ValidationError.EmptyNameForShopError.class, () ->
-                new Shop(ShopFactory.VALID_ID, "", VALID_COORDINATES));
+                new Shop(VALID_ID, "", VALID_COORDINATES));
     }
 
     @Test
     void givenShopConstructor_whenParamsValid_thenOk() {
-        var shop = ShopFactory.getShop();
+        var shop = new Shop(VALID_ID, VALID_SHOP_NAME, VALID_COORDINATES);
 
         Assertions.assertEquals(ShopFactory.VALID_SHOP_NAME, shop.name());
         Assertions.assertEquals(VALID_COORDINATES, shop.coordinates());

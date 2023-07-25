@@ -3,14 +3,12 @@ package it.unimi.cloudproject.factories.bl;
 import it.unimi.cloudproject.bl.Shop;
 import it.unimi.cloudproject.bl.User;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class UserFactory {
     public static final String VALID_USERNAME = "test_user";
-    public static final Collection<Shop> VALID_FAVORITE_SHOPS = new ArrayList<>();
+    public static final Set<Shop> VALID_FAVORITE_SHOPS = new HashSet<>();
     public static final Integer VALID_ID = null;
 
     public static User getUser() {
@@ -18,6 +16,6 @@ public class UserFactory {
     }
 
     public static User getUser(Shop... shops) {
-        return new User(VALID_ID, VALID_USERNAME, Arrays.stream(shops).collect(Collectors.toList()));
+        return new User(VALID_ID, VALID_USERNAME, Arrays.stream(shops).collect(Collectors.toSet()));
     }
 }

@@ -42,7 +42,8 @@ public class UserRepositoryTest {
         userData = userRepository.save(userData);
 
         assertThat(userData.getId()).isNotNull();
-        assertThat(userRepository.findById(userData.getId()).map(UserData::getUsername)).hasValue(userData.getUsername());
+        assertThat(userRepository.findByUsername(userData.getUsername()).map(UserData::getUsername))
+                .hasValue(userData.getUsername());
     }
 
     @Test
@@ -52,7 +53,7 @@ public class UserRepositoryTest {
 
         userRepository.deleteById(userId);
 
-        assertThat(userRepository.findById(userId)).isEmpty();
+        assertThat(userRepository.findByUsername(userData.getUsername())).isEmpty();
     }
 
     @Test
@@ -69,6 +70,7 @@ public class UserRepositoryTest {
         var shopData = ShopDataFactory.createShop(this.shopRepository);
         var userData1 = UserDataFactory.createUser(this.userRepository);
         var userData2 = UserDataFactory.createUser(this.userRepository);
+        var userData3 = UserDataFactory.createUser(this.userRepository);
         userData1.getFavoriteShops().add(
                 new UserShopData(AggregateReference.to(userData1.getId()), AggregateReference.to(shopData.getId())));
         userData2.getFavoriteShops().add(

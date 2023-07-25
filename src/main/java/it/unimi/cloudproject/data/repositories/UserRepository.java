@@ -6,6 +6,7 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface UserRepository extends CrudRepository<UserData, Integer> {
     @Query("""
@@ -15,4 +16,6 @@ public interface UserRepository extends CrudRepository<UserData, Integer> {
             WHERE us.SHOP_ID = :shopId
             """)
     List<UserData> findUsersByShopId(@Param("shopId") int shopId);
+
+    Optional<UserData> findByUsername(String username);
 }

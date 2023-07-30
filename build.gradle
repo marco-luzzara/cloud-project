@@ -19,7 +19,6 @@ repositories {
 def SPRING_VERSION = '3.1.1'
 def LOMBOK_VERSION = '1.18.28'
 def JUNIT_VERSION = '5.8.1'
-def TESTCONTAINER_VERSION = '1.18.3'
 def LIQUIBASE_VERSION = '4.23.0'
 
 dependencies {
@@ -37,9 +36,11 @@ dependencies {
 	testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:${JUNIT_VERSION}"
 
 	// testcontainer
-	testImplementation "org.testcontainers:testcontainers:${TESTCONTAINER_VERSION}"
-	testImplementation "org.testcontainers:junit-jupiter:${TESTCONTAINER_VERSION}"
-	testImplementation "org.testcontainers:postgresql:${TESTCONTAINER_VERSION}"
+	implementation platform('org.testcontainers:testcontainers-bom:1.18.3')
+	testImplementation "org.testcontainers:testcontainers"
+	testImplementation "org.testcontainers:junit-jupiter"
+	testImplementation "org.testcontainers:postgresql"
+	testImplementation 'org.testcontainers:localstack'
 
 	// db
 	implementation "com.h2database:h2:2.2.220"
@@ -54,15 +55,34 @@ dependencies {
 	liquibaseRuntime "org.liquibase:liquibase-core:${LIQUIBASE_VERSION}"
 	liquibaseRuntime 'org.liquibase:liquibase-groovy-dsl:2.1.1'
 	runtimeOnly "org.liquibase:liquibase-core:${LIQUIBASE_VERSION}"
+
+	// aws
+//	implementation 'com.amazonaws:aws-java-sdk-bom:1.12.518'
+	implementation 'com.amazonaws:aws-lambda-java-core:1.2.2'
+	implementation 'com.amazonaws:aws-lambda-java-events:3.11.1'
+	runtimeOnly 'com.amazonaws:aws-lambda-java-log4j2:1.5.1'
 }
+
+task buildZip(type: Zip) {
+	into('lib') {
+		from(jar)
+		from(configurations.runtimeClasspath)
+	}
+	archiveFileName = "${rootProject.name}.zip"
+	destinationDirectory = file('dist')
+}
+
+
 
 tasks.named('test') {
 	useJUnitPlatform()
 }
 
 test {
+	dependsOn buildZip
 	finalizedBy jacocoTestReport // report is always generated after tests run
 }
+
 jacocoTestReport {
 	dependsOn test // tests are required to run before generating the report
 	reports {

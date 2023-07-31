@@ -27,7 +27,6 @@ dependencies {
 	implementation 'org.springframework:spring-web:6.0.11'
 	implementation "org.springframework.data:spring-data-jdbc:${SPRING_VERSION}"
 	implementation "org.springframework.boot:spring-boot-starter-jdbc:${SPRING_VERSION}"
-//	implementation "org.springframework.boot:spring-boot-starter-data-jpa:${SPRING_VERSION}"
 	testImplementation "org.springframework.boot:spring-boot-starter-test:${SPRING_VERSION}"
 
 	// junit and assertions
@@ -57,10 +56,13 @@ dependencies {
 	runtimeOnly "org.liquibase:liquibase-core:${LIQUIBASE_VERSION}"
 
 	// aws
-//	implementation 'com.amazonaws:aws-java-sdk-bom:1.12.518'
+	//	implementation 'com.amazonaws:aws-java-sdk-bom:1.12.518'
 	implementation 'com.amazonaws:aws-lambda-java-core:1.2.2'
 	implementation 'com.amazonaws:aws-lambda-java-events:3.11.1'
 	runtimeOnly 'com.amazonaws:aws-lambda-java-log4j2:1.5.1'
+
+	// gson
+	testImplementation 'com.google.code.gson:gson:2.10.1'
 }
 
 task buildZip(type: Zip) {

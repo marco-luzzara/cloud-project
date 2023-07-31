@@ -1,13 +1,15 @@
 package it.unimi.cloudproject.ui.testcontainer;
 
-import org.junit.jupiter.api.Assertions;
+import com.google.gson.Gson;
+import it.unimi.cloudproject.application.dto.UserCreation;
+import it.unimi.cloudproject.ui.testcontainer.model.ScriptResults;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.testcontainers.DockerClientFactory;
 import org.testcontainers.containers.Network;
 import org.testcontainers.containers.localstack.LocalStackContainer;
 import org.testcontainers.utility.DockerImageName;
 import org.testcontainers.utility.MountableFile;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
@@ -15,8 +17,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
-import java.util.function.Predicate;
 
 public class AppContainer extends LocalStackContainer {
 //    private final Path awsSetupVariablesFile = createTempFile();
@@ -26,7 +26,10 @@ public class AppContainer extends LocalStackContainer {
     public final Network NETWORK = Network.SHARED;
     private static final DockerImageName localstackImage = DockerImageName.parse("localstack/localstack:2.2.0");
 
-    private String startSFWorkflowUri;
+    private String restApiId;
+    private String apiUsersResourceId;
+    private String apiShopsResourceId;
+    private static Gson gson = new Gson();
 
     private boolean keepLambdasOpenedAfterExit;
 
@@ -64,35 +67,28 @@ public class AppContainer extends LocalStackContainer {
      * @throws IOException
      */
     public void initialize() throws IOException {
+        // copy zip file to container
         var projectFolder = Paths.get(".").toAbsolutePath();
         var distDir = projectFolder.resolve("dist");
         var zipPath = Files.list(distDir).findFirst().orElseThrow(
                 () -> new IllegalStateException("you must produce a zip file containing the lambda code before running IT tests"));
-
         copyFileInsideContainer(zipPath, "/app", "dist.zip");
-        // script utils
-        copyFileInsideContainer(getPathFromResourceId("localstack/scripts/utils/s3-utils.sh"), "/app/scripts/utils");
 
-        setupAwslocal("access_key", "secret_key", "us-east-1");
+        // copy scripts to container /app
+        var scripts = new PathMatchingResourcePatternResolver()
+                .getResources("classpath*:localstack/scripts/**/*.sh");
+
+        for (var script : scripts) {
+            var scriptId = script.getURI().toString();
+            var scriptIdFromResources = "localstack" + scriptId.substring(scriptId.lastIndexOf("/scripts/"));
+            copyFileInsideContainer(getPathFromResourceId(scriptIdFromResources),
+                    // 11 corresponds to the prefix "localstack/"
+                    "/app/" + scriptIdFromResources.substring(11, scriptIdFromResources.lastIndexOf("/")));
+        }
+
+        setupAwslocal("access_key", "secret_key");
 
 
-//
-//        final var workflowFile = getPathFromResourceId("it/addvalue/tsv/stepfunctions/workflow.json");
-//        final var awsSetupScriptPath = getPathFromResourceId("it/addvalue/tsv/sh/aws-setup.sh");
-//        final var awsLogScriptPath = getPathFromResourceId("it/addvalue/tsv/sh/aws-get-last-logs.sh");
-//
-//        copyFileInsideContainer(jarFile, "/app", "setup.zip");
-//        copyFileInsideContainer(workflowFile, "/app");
-//        copyFileInsideContainer(awsSetupScriptPath, "/scripts");
-//        copyFileInsideContainer(awsLogScriptPath, "/scripts");
-//
-//        executeScriptInsideContainer("/scripts/aws-setup.sh");
-//        initializeAwsSetupVariables();
-//        startSFWorkflowUri = "http://localhost:%d/restapis/%s/%s/_user_request_/%s".formatted(getFirstMappedPort(),
-//                awsSetupVariables.get("REST_API_ID"),
-//                awsSetupVariables.get("DEPLOYMENT_NAME"),
-//                awsSetupVariables.get("WORKFLOW_PATH_PART"));
-//
 //        this.followOutput(outFrame ->
 //        {
 //            LOGGER.log(System.Logger.Level.INFO,
@@ -100,13 +96,38 @@ public class AppContainer extends LocalStackContainer {
 //        });
     }
 
-    private void setupAwslocal(String accessKeyId, String secretKey, String region) {
-        copyFileInsideContainer(getPathFromResourceId("localstack/scripts/setup.sh"), "/app/scripts");
-        executeScriptInsideContainer("/app/scripts/setup.sh", Map.of(
+    // scripts methods
+
+    private void setupAwslocal(String accessKeyId, String secretKey) {
+        var setupResult = executeScriptInsideContainer("/app/scripts/setup.sh", Map.of(
                 "_ACCESS_KEY_ID", accessKeyId,
-                "_SECRET_KEY_ID", secretKey,
-                "_REGION", region
+                "_SECRET_KEY_ID", secretKey
+        ), ScriptResults.SetupScript.class);
+
+        this.restApiId = setupResult.restApiId();
+        this.apiUsersResourceId = setupResult.restApiId();
+        this.apiShopsResourceId = setupResult.apiShopsResourceId();
+    }
+
+    public void completeSetup() {
+        Objects.requireNonNull(this.restApiId);
+
+        executeScriptInsideContainer("/app/scripts/complete.sh", Map.of(
+                "_REST_API_ID", this.restApiId
         ));
+    }
+
+    public void createApiForCreateUser() {
+        Objects.requireNonNull(this.apiUsersResourceId);
+
+        var userCreateLambdaArn = executeScriptInsideContainer("/app/scripts/create-lambda-with-api-integration.sh",
+                Map.of(
+                        "_LAMBDA_NAME", "userCreate",
+                        "_LAMBDA_HANDLER", "it.unimi.cloudproject.ui.lambda.user.CreateUserLambda",
+                        "_RESOURCE_ID", this.apiUsersResourceId,
+                        "_HTTP_METHOD", "POST",
+                        "_REST_API_ID", this.restApiId
+                ), String.class);
     }
 
     private static Path getPathFromResourceId(String resourceId)
@@ -139,7 +160,9 @@ public class AppContainer extends LocalStackContainer {
         copyFileToContainer(MountableFile.forHostPath(file, 777), containerPath);
     }
 
-    private String executeScriptInsideContainer(String scriptPathInContainer, Map<String, String> params)
+    private <T> T executeScriptInsideContainer(String scriptPathInContainer,
+                                               Map<String, String> params,
+                                               Class<T> returnValueClass)
     {
         ExecResult scriptResult;
         try
@@ -156,7 +179,18 @@ public class AppContainer extends LocalStackContainer {
         }
 
         checkScriptSuccessful(scriptPathInContainer, scriptResult);
-        return getScriptReturnValue(scriptResult.getStdout());
+
+        if (returnValueClass != Void.class) {
+            var scriptOutput = getScriptReturnValue(scriptResult.getStdout());
+            return this.gson.fromJson(scriptOutput, returnValueClass);
+        }
+        else
+            return null;
+    }
+
+    private void executeScriptInsideContainer(String scriptPathInContainer,
+                                               Map<String, String> params) {
+        executeScriptInsideContainer(scriptPathInContainer, params, Void.class);
     }
 
     /**

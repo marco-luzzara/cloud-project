@@ -58,6 +58,8 @@ public class LambdaIT {
     @BeforeAll
     static void initializeAll() throws IOException {
         app.initialize();
+        app.createApiForCreateUser();
+        app.completeSetup();
     }
 //
 //    @AfterEach

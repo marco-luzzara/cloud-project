@@ -17,11 +17,13 @@ import java.util.Optional;
 
 @Service
 public class UserService {
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
+    private final ShopRepository shopRepository;
 
-    @Autowired
-    private ShopRepository shopRepository;
+    public UserService(@Autowired UserRepository userRepository, @Autowired ShopRepository shopRepository) {
+        this.userRepository = userRepository;
+        this.shopRepository = shopRepository;
+    }
 
     public int addUser(UserCreation userCreation) {
         var user = new User(null, userCreation.username(), new HashSet<>());

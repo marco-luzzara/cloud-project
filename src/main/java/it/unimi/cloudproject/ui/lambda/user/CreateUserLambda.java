@@ -5,14 +5,19 @@ import it.unimi.cloudproject.application.dto.UserCreation;
 import it.unimi.cloudproject.application.services.UserService;
 import it.unimi.cloudproject.ui.lambda.GenericLambda;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
+@Component
 public class CreateUserLambda extends GenericLambda<UserCreation, Integer> {
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
+
+    public CreateUserLambda(@Autowired UserService userService) {
+        this.userService = userService;
+    }
 
     @Override
     public Integer execute(UserCreation userCreation, LambdaLogger logger) {
         logger.log("Creating new user with params: " + userCreation);
-        return userService.addUser(userCreation);
+        return this.userService.addUser(userCreation);
     }
 }

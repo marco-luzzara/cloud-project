@@ -15,7 +15,7 @@ main() {
     . ./utils/s3-utils.sh
     . ./utils/apigateway-utils.sh
     . ./utils/common-utils.sh
-    . ./globals.sh
+    . ./globals.env
 
     printf "%s\n%s\n%s\n%s\n" "$_ACCESS_KEY_ID" "$_SECRET_KEY_ID" "$_GLOBALS_REGION" "text" | aws configure
 

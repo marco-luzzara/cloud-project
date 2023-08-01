@@ -12,7 +12,7 @@ fi
 cd "$(dirname "$0")"
 
 main() {
-    . ./globals.sh
+    . ./globals.env
 
     awslocal apigateway create-deployment --rest-api-id "$_REST_API_ID" --stage-name "$_GLOBALS_DEPLOYMENT_NAME"
 }

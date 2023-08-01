@@ -3,7 +3,9 @@ package it.unimi.cloudproject.ui.lambda;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
+import it.unimi.cloudproject.CloudProjectApplication;
 import it.unimi.cloudproject.infrastructure.errors.Error;
+import org.springframework.boot.builder.SpringApplicationBuilder;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -15,6 +17,7 @@ public abstract class GenericLambda<TInput, TOutput> implements RequestHandler<T
     @Override
     public TOutput handleRequest(TInput input, Context context) {
         LambdaLogger logger = context.getLogger();
+        new SpringApplicationBuilder(CloudProjectApplication.class).build().run();
         try {
             return execute(input, logger);
         }

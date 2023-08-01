@@ -15,7 +15,7 @@ create_lambda() {
             --role "$_GLOBALS_ROLE_ARN" \
             --timeout 900 \
             --environment "{
-                            \"Variables\": {\"JAVA_TOOL_OPTIONS\": \"-Dlogging.level.org.springframework=TRACE -Dspring.profiles.active=localstack\"}
+                            \"Variables\": {\"JAVA_TOOL_OPTIONS\": \"-Dlogging.level.org.springframework=DEBUG -Dorg.springframework.beans.level=DEBUG -Dspring.profiles.active=localstack\"}
                           }" \
             --query "FunctionArn"
     )"

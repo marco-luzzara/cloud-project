@@ -24,7 +24,7 @@ def LIQUIBASE_VERSION = '4.23.0'
 dependencies {
 	// spring
 	implementation "org.springframework.boot:spring-boot-starter:${SPRING_VERSION}"
-	implementation 'org.springframework:spring-web:6.0.11'
+//	implementation 'org.springframework:spring-web:6.0.11'
 	implementation "org.springframework.data:spring-data-jdbc:${SPRING_VERSION}"
 	implementation "org.springframework.boot:spring-boot-starter-jdbc:${SPRING_VERSION}"
 	testImplementation "org.springframework.boot:spring-boot-starter-test:${SPRING_VERSION}"
@@ -43,6 +43,7 @@ dependencies {
 
 	// db
 	implementation "com.h2database:h2:2.2.220"
+	implementation 'org.postgresql:postgresql:42.6.0'
 
 	// lombok
 	compileOnly "org.projectlombok:lombok:${LOMBOK_VERSION}"
@@ -63,6 +64,7 @@ dependencies {
 
 	// gson
 	testImplementation 'com.google.code.gson:gson:2.10.1'
+//	testImplementation 'commons-io:commons-io:2.13.0'
 }
 
 task buildZip(type: Zip) {
@@ -73,8 +75,6 @@ task buildZip(type: Zip) {
 	archiveFileName = "${rootProject.name}.zip"
 	destinationDirectory = file('dist')
 }
-
-
 
 tasks.named('test') {
 	useJUnitPlatform()

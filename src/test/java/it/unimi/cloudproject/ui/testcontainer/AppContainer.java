@@ -2,7 +2,9 @@ package it.unimi.cloudproject.ui.testcontainer;
 
 import com.google.gson.Gson;
 import it.unimi.cloudproject.application.dto.UserCreation;
+import it.unimi.cloudproject.ui.testcontainer.model.LocalstackGlobals;
 import it.unimi.cloudproject.ui.testcontainer.model.ScriptResults;
+import org.junit.platform.commons.util.Preconditions;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.testcontainers.DockerClientFactory;
 import org.testcontainers.containers.Network;
@@ -11,6 +13,7 @@ import org.testcontainers.utility.DockerImageName;
 import org.testcontainers.utility.MountableFile;
 
 import java.io.IOException;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -60,8 +63,10 @@ public class AppContainer extends LocalStackContainer {
         dist.zip
         scripts/
             setup.sh
+            ...
             utils/
                 s3-utils.sh
+                ...
 
      * Moreover it executes the script to reproduce the aws environment (by creating lambda and so on)
      * @throws IOException
@@ -73,6 +78,9 @@ public class AppContainer extends LocalStackContainer {
         var zipPath = Files.list(distDir).findFirst().orElseThrow(
                 () -> new IllegalStateException("you must produce a zip file containing the lambda code before running IT tests"));
         copyFileInsideContainer(zipPath, "/app", "dist.zip");
+
+        // copy env variables to container /app
+        copyFileInsideContainer(getPathFromResourceId("localstack/scripts/globals.env"), "/app/scripts");
 
         // copy scripts to container /app
         var scripts = new PathMatchingResourcePatternResolver()
@@ -105,7 +113,7 @@ public class AppContainer extends LocalStackContainer {
         ), ScriptResults.SetupScript.class);
 
         this.restApiId = setupResult.restApiId();
-        this.apiUsersResourceId = setupResult.restApiId();
+        this.apiUsersResourceId = setupResult.apiUsersResourceId();
         this.apiShopsResourceId = setupResult.apiShopsResourceId();
     }
 
@@ -118,6 +126,7 @@ public class AppContainer extends LocalStackContainer {
     }
 
     public void createApiForCreateUser() {
+        Objects.requireNonNull(this.restApiId);
         Objects.requireNonNull(this.apiUsersResourceId);
 
         var userCreateLambdaArn = executeScriptInsideContainer("/app/scripts/create-lambda-with-api-integration.sh",
@@ -128,6 +137,17 @@ public class AppContainer extends LocalStackContainer {
                         "_HTTP_METHOD", "POST",
                         "_REST_API_ID", this.restApiId
                 ), String.class);
+    }
+
+    public URI buildApiUrl(String pathPart) {
+        Objects.requireNonNull(this.restApiId);
+
+//        http://localhost:4566/restapis/$REST_API_ID/$DEPLOYMENT_NAME/_user_request_/{pathPart}
+        return URI.create("%s/restapis/%s/%s/_user_request_/%s".formatted(
+                this.getEndpoint(),
+                this.restApiId,
+                LocalstackGlobals.getDeploymentName(),
+                pathPart));
     }
 
     private static Path getPathFromResourceId(String resourceId)
@@ -180,12 +200,14 @@ public class AppContainer extends LocalStackContainer {
 
         checkScriptSuccessful(scriptPathInContainer, scriptResult);
 
-        if (returnValueClass != Void.class) {
-            var scriptOutput = getScriptReturnValue(scriptResult.getStdout());
-            return this.gson.fromJson(scriptOutput, returnValueClass);
-        }
-        else
-            return null;
+        return switch (returnValueClass.getSimpleName()) {
+            case "Void" -> null;
+            case "String" -> (T) getScriptReturnValue(scriptResult.getStdout());
+            default -> {
+                var scriptOutput = getScriptReturnValue(scriptResult.getStdout());
+                yield this.gson.fromJson(scriptOutput, returnValueClass);
+            }
+        };
     }
 
     private void executeScriptInsideContainer(String scriptPathInContainer,

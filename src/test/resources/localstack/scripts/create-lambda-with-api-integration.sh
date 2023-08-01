@@ -15,7 +15,7 @@ main() {
     . ./utils/apigateway-utils.sh
     . ./utils/lambda-utils.sh
     . ./utils/common-utils.sh
-    . ./globals.sh
+    . ./globals.env
 
     local LAMBDA_ARN
     LAMBDA_ARN="$( \

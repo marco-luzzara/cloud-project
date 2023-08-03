@@ -27,6 +27,8 @@ dependencies {
 //	implementation 'org.springframework:spring-web:6.0.11'
 	implementation "org.springframework.data:spring-data-jdbc:${SPRING_VERSION}"
 	implementation "org.springframework.boot:spring-boot-starter-jdbc:${SPRING_VERSION}"
+	implementation "org.springframework.cloud:spring-cloud-function-adapter-aws:4.0.5"
+	implementation "org.springframework.cloud:spring-cloud-function-web:4.0.5"
 	testImplementation "org.springframework.boot:spring-boot-starter-test:${SPRING_VERSION}"
 
 	// junit and assertions
@@ -64,7 +66,6 @@ dependencies {
 
 	// gson
 	testImplementation 'com.google.code.gson:gson:2.10.1'
-//	testImplementation 'commons-io:commons-io:2.13.0'
 }
 
 task buildZip(type: Zip) {

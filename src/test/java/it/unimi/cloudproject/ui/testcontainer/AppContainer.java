@@ -1,10 +1,8 @@
 package it.unimi.cloudproject.ui.testcontainer;
 
 import com.google.gson.Gson;
-import it.unimi.cloudproject.application.dto.UserCreation;
 import it.unimi.cloudproject.ui.testcontainer.model.LocalstackGlobals;
 import it.unimi.cloudproject.ui.testcontainer.model.ScriptResults;
-import org.junit.platform.commons.util.Preconditions;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.testcontainers.DockerClientFactory;
 import org.testcontainers.containers.Network;
@@ -22,9 +20,7 @@ import java.util.Map;
 import java.util.Objects;
 
 public class AppContainer extends LocalStackContainer {
-//    private final Path awsSetupVariablesFile = createTempFile();
-//
-//    private final Map<String, String> awsSetupVariables = new HashMap<>();
+    private static final System.Logger LOGGER = System.getLogger(AppContainer.class.getName());
 
     public final Network NETWORK = Network.SHARED;
     private static final DockerImageName localstackImage = DockerImageName.parse("localstack/localstack:2.2.0");
@@ -97,11 +93,11 @@ public class AppContainer extends LocalStackContainer {
         setupAwslocal("access_key", "secret_key");
 
 
-//        this.followOutput(outFrame ->
-//        {
-//            LOGGER.log(System.Logger.Level.INFO,
-//                    "%s - %s".formatted(outFrame.getType(), outFrame.getUtf8String()));
-//        });
+        this.followOutput(outFrame ->
+        {
+            LOGGER.log(System.Logger.Level.INFO,
+                    "%s - %s".formatted(outFrame.getType(), outFrame.getUtf8String()));
+        });
     }
 
     // scripts methods
@@ -132,7 +128,7 @@ public class AppContainer extends LocalStackContainer {
         var userCreateLambdaArn = executeScriptInsideContainer("/app/scripts/create-lambda-with-api-integration.sh",
                 Map.of(
                         "_LAMBDA_NAME", "userCreate",
-                        "_LAMBDA_HANDLER", "it.unimi.cloudproject.ui.lambda.user.CreateUserLambda",
+                        "_FUNCTION_NAME", "createUser",
                         "_RESOURCE_ID", this.apiUsersResourceId,
                         "_HTTP_METHOD", "POST",
                         "_REST_API_ID", this.restApiId
@@ -160,12 +156,12 @@ public class AppContainer extends LocalStackContainer {
         }
     }
 
-//    public void log()
-//    {
-//        // for complete logs we may use
-//        // https://joerg-pfruender.github.io/software/testing/2020/09/27/localstack_and_lambda.html#3-logging
-//        executeScriptInsideContainer("/scripts/aws-get-last-logs.sh");
-//    }
+    public void log()
+    {
+        // for complete logs we may use
+        // https://joerg-pfruender.github.io/software/testing/2020/09/27/localstack_and_lambda.html#3-logging
+        executeScriptInsideContainer("/app/scripts/aws-get-last-logs.sh", Map.of());
+    }
 
     private void copyFileInsideContainer(Path file, String containerBasePath)
     {

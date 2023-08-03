@@ -1,9 +1,10 @@
 package it.unimi.cloudproject.ui.lambda;
 
 import com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.http.HttpStatus;
-import it.unimi.cloudproject.application.dto.UserCreation;
+import it.unimi.cloudproject.application.dto.UserCreationRequest;
 import it.unimi.cloudproject.ui.testcontainer.AppContainer;
 import it.unimi.cloudproject.ui.testcontainer.LocalstackRestApiCaller;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.PostgreSQLContainer;
@@ -11,7 +12,6 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.io.IOException;
-import java.net.http.HttpClient;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -48,22 +48,21 @@ public class LambdaIT {
         app.createApiForCreateUser();
         app.completeSetup();
     }
-//
-//    @AfterEach
-//    void cleanupEach()
-//    {
-//        tsvContainer.log();
-//    }
-//
+
+    @AfterEach
+    void cleanupEach()
+    {
+        app.log();
+    }
+
     @Test
     void givenUserApi_whenRegister_thenIdIsReturned() throws IOException, InterruptedException
     {
-        var userCreation = new UserCreation("test");
+        var userCreation = new UserCreationRequest("test");
 
         var httpResponse = apiCaller.callUserCreateApi(userCreation);
 
         assertThat(httpResponse.statusCode()).isEqualTo(HttpStatus.SC_OK);
-        assertThat(Integer.parseInt(httpResponse.body())).isGreaterThanOrEqualTo(1);
-//        System.out.println(httpResponse.body());
+        assertThat(httpResponse.body().id()).isGreaterThanOrEqualTo(1);
     }
 }

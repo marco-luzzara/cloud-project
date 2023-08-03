@@ -1,7 +1,8 @@
 package it.unimi.cloudproject.application.services;
 
-import it.unimi.cloudproject.application.dto.UserCreation;
+import it.unimi.cloudproject.application.dto.UserCreationRequest;
 import it.unimi.cloudproject.application.dto.UserInfo;
+import it.unimi.cloudproject.application.dto.responses.UserCreationResponse;
 import it.unimi.cloudproject.application.errors.InvalidShopIdError;
 import it.unimi.cloudproject.application.errors.InvalidUsernameError;
 import it.unimi.cloudproject.bl.User;
@@ -17,20 +18,17 @@ import java.util.Optional;
 
 @Service
 public class UserService {
-    private final UserRepository userRepository;
-    private final ShopRepository shopRepository;
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private ShopRepository shopRepository;
 
-    public UserService(@Autowired UserRepository userRepository, @Autowired ShopRepository shopRepository) {
-        this.userRepository = userRepository;
-        this.shopRepository = shopRepository;
-    }
-
-    public int addUser(UserCreation userCreation) {
-        var user = new User(null, userCreation.username(), new HashSet<>());
+    public UserCreationResponse addUser(UserCreationRequest userCreationRequest) {
+        var user = new User(null, userCreationRequest.username(), new HashSet<>());
 
         var createdUser = this.userRepository.save(UserData.fromUser(user));
 
-        return createdUser.getId();
+        return new UserCreationResponse(createdUser.getId());
     }
 
     public void deleteUser(Integer userId) {

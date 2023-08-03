@@ -1,8 +1,5 @@
 package it.unimi.cloudproject.application.services;
 
-import it.unimi.cloudproject.application.dto.ShopCreation;
-import it.unimi.cloudproject.application.dto.ShopInfo;
-import it.unimi.cloudproject.application.dto.UserCreation;
 import it.unimi.cloudproject.application.dto.UserInfo;
 import it.unimi.cloudproject.application.factories.UserDtoFactory;
 import it.unimi.cloudproject.bl.errors.ValidationError;
@@ -12,9 +9,7 @@ import it.unimi.cloudproject.data.model.ShopData;
 import it.unimi.cloudproject.data.model.UserShopData;
 import it.unimi.cloudproject.data.repositories.ShopRepository;
 import it.unimi.cloudproject.data.repositories.UserRepository;
-import it.unimi.cloudproject.factories.bl.ShopFactory;
 import it.unimi.cloudproject.factories.bl.UserFactory;
-import it.unimi.cloudproject.factories.bl.valueobjects.CoordinatesFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,19 +41,19 @@ public class UserServiceTest {
 
     @Test
     void givenCreatedUser_whenGetByUsername_thenRetrieveIt() {
-        var userId = userService.addUser(UserDtoFactory.createUserCreation());
+        var userCreationResponse = userService.addUser(UserDtoFactory.createUserCreation());
 
         var userInfo = userService.getUser(UserFactory.VALID_USERNAME);
 
-        assertThat(userInfo.orElseThrow()).returns(userId, from(UserInfo::id))
+        assertThat(userInfo.orElseThrow()).returns(userCreationResponse.id(), from(UserInfo::id))
                 .returns(UserFactory.VALID_USERNAME, from(UserInfo::username));
     }
 
     @Test
     void givenUser_whenDeleteIt_thenCannotRetrieveItByUsername() {
-        var userId = userService.addUser(UserDtoFactory.createUserCreation());
+        var userCreationResponse = userService.addUser(UserDtoFactory.createUserCreation());
 
-        userService.deleteUser(userId);
+        userService.deleteUser(userCreationResponse.id());
 
         var userInfo = userService.getUser(UserFactory.VALID_USERNAME);
         assertThat(userInfo).isEmpty();

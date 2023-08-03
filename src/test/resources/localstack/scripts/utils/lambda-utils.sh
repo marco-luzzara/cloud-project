@@ -10,12 +10,15 @@ create_lambda() {
         awslocal lambda create-function \
             --function-name "$_LAMBDA_NAME" \
             --runtime "java17" \
-            --handler "$_LAMBDA_HANDLER" \
+            --handler "org.springframework.cloud.function.adapter.aws.FunctionInvoker" \
             --code "S3Bucket=$_GLOBALS_DIST_S3_BUCKET,S3Key=$_GLOBALS_DIST_S3_KEY" \
             --role "$_GLOBALS_ROLE_ARN" \
             --timeout 900 \
             --environment "{
-                            \"Variables\": {\"JAVA_TOOL_OPTIONS\": \"-Dlogging.level.org.springframework=DEBUG -Dorg.springframework.beans.level=DEBUG -Dspring.profiles.active=localstack\"}
+                            \"Variables\": {\"JAVA_TOOL_OPTIONS\": \"-DMAIN_CLASS=it.unimi.cloudproject.CloudProjectApplication \
+                                                                     -Dlogging.level.org.springframework=DEBUG \
+                                                                     -Dspring.profiles.active=localstack \
+                                                                     -Dspring.cloud.function.definition=$_FUNCTION_NAME\"}
                           }" \
             --query "FunctionArn"
     )"

@@ -24,6 +24,7 @@ def LIQUIBASE_VERSION = '4.23.0'
 dependencies {
 	// spring
 	implementation "org.springframework.boot:spring-boot-starter:${SPRING_VERSION}"
+	implementation "org.springframework.boot:spring-boot-starter-aop:${SPRING_VERSION}"
 //	implementation 'org.springframework:spring-web:6.0.11'
 	implementation "org.springframework.data:spring-data-jdbc:${SPRING_VERSION}"
 	implementation "org.springframework.boot:spring-boot-starter-jdbc:${SPRING_VERSION}"
@@ -66,6 +67,13 @@ dependencies {
 
 	// gson
 	testImplementation 'com.google.code.gson:gson:2.10.1'
+
+	// logging
+	implementation 'org.apache.logging.log4j:log4j-api:2.17.1'
+	implementation 'org.apache.logging.log4j:log4j-core:2.17.1'
+	runtimeOnly ('org.apache.logging.log4j:log4j-slf4j-impl:2.17.1') {
+		exclude group: 'org.slf4j', module: 'log4j-to-slf4j'
+	}
 }
 
 task buildZip(type: Zip) {

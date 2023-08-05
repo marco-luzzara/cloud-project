@@ -57,6 +57,7 @@ create_api_lambda_integration() {
         --integration-http-method POST \
         --uri "$_INTEGRATION_URI" \
         --passthrough-behavior WHEN_NO_MATCH
+#        --request-templates "$_REQUEST_TEMPLATES"
 
     awslocal apigateway put-integration-response \
         --rest-api-id "$_REST_API_ID" \

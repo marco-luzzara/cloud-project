@@ -27,6 +27,7 @@ public class AppContainer extends LocalStackContainer {
 
     private String restApiId;
     private String apiUsersResourceId;
+    private String apiUsersWithParamResourceId;
     private String apiShopsResourceId;
     private static Gson gson = new Gson();
 
@@ -132,7 +133,42 @@ public class AppContainer extends LocalStackContainer {
                         "_RESOURCE_ID", this.apiUsersResourceId,
                         "_HTTP_METHOD", "POST",
                         "_REST_API_ID", this.restApiId
+//                        "_REQUEST_TEMPLATES", ""
                 ), String.class);
+    }
+
+    public void createApiForDeleteUser() {
+        Objects.requireNonNull(this.restApiId);
+        Objects.requireNonNull(this.apiUsersResourceId);
+
+        conditionalCreateParamResourceIdForUser();
+
+        var userDeleteLambdaArn = executeScriptInsideContainer("/app/scripts/create-lambda-with-api-integration.sh",
+                Map.of(
+                        "_LAMBDA_NAME", "userDelete",
+                        "_FUNCTION_NAME", "deleteUser",
+                        "_RESOURCE_ID", this.apiUsersWithParamResourceId,
+                        "_HTTP_METHOD", "DELETE",
+                        "_REST_API_ID", this.restApiId
+//                        "_REQUEST_TEMPLATES", """
+//                             {
+//                               "id": "$input.params('userId')"
+//                             }"""
+                ), String.class);
+    }
+
+    public void conditionalCreateParamResourceIdForUser() {
+        Objects.requireNonNull(this.restApiId);
+        Objects.requireNonNull(this.apiUsersResourceId);
+
+        if (Objects.isNull(this.apiUsersWithParamResourceId)) {
+            this.apiUsersWithParamResourceId = executeScriptInsideContainer("/app/scripts/create-api-resource.sh",
+                    Map.of(
+                            "_REST_API_ID", this.restApiId,
+                            "_PARENT_RESOURCE_ID", this.apiUsersResourceId,
+                            "_PATH_PART", "{userId}"
+                    ), String.class);
+        }
     }
 
     public URI buildApiUrl(String pathPart) {

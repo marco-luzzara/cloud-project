@@ -1,7 +1,8 @@
 package it.unimi.cloudproject.ui.testcontainer;
 
 import com.google.gson.Gson;
-import it.unimi.cloudproject.application.dto.UserCreationRequest;
+import it.unimi.cloudproject.application.dto.requests.UserCreationRequest;
+import it.unimi.cloudproject.application.dto.requests.UserDeletionRequest;
 import it.unimi.cloudproject.application.dto.responses.UserCreationResponse;
 
 import java.io.IOException;
@@ -9,7 +10,6 @@ import java.io.InputStreamReader;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.nio.charset.StandardCharsets;
 import java.io.InputStream;
 import java.time.Duration;
 
@@ -34,6 +34,15 @@ public class LocalstackRestApiCaller {
                         .uri(this.appContainer.buildApiUrl("users"))
                         .build(),
                 new JsonBodyHandler<>(UserCreationResponse.class));
+    }
+
+    public HttpResponse<String> callUserDeleteApi(int id) throws IOException, InterruptedException {
+        return HTTP_CLIENT.send(HttpRequest.newBuilder()
+                        .DELETE()
+                        .timeout(Duration.ofSeconds(100))
+                        .uri(this.appContainer.buildApiUrl("users/%d".formatted(id)))
+                        .build(),
+                HttpResponse.BodyHandlers.ofString());
     }
 
     private static class JsonBodyHandler<T> implements HttpResponse.BodyHandler<T> {

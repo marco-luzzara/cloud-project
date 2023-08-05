@@ -1,7 +1,8 @@
 package it.unimi.cloudproject.application.services;
 
-import it.unimi.cloudproject.application.dto.UserCreationRequest;
+import it.unimi.cloudproject.application.dto.requests.UserCreationRequest;
 import it.unimi.cloudproject.application.dto.UserInfo;
+import it.unimi.cloudproject.application.dto.requests.UserDeletionRequest;
 import it.unimi.cloudproject.application.dto.responses.UserCreationResponse;
 import it.unimi.cloudproject.application.errors.InvalidShopIdError;
 import it.unimi.cloudproject.application.errors.InvalidUsernameError;
@@ -31,8 +32,8 @@ public class UserService {
         return new UserCreationResponse(createdUser.getId());
     }
 
-    public void deleteUser(Integer userId) {
-        this.userRepository.deleteById(userId);
+    public void deleteUser(UserDeletionRequest userDeletionRequest) {
+        this.userRepository.deleteById(userDeletionRequest.id());
     }
 
     public Optional<UserInfo> getUser(String username) {

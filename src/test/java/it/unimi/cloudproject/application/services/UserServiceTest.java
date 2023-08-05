@@ -1,6 +1,7 @@
 package it.unimi.cloudproject.application.services;
 
 import it.unimi.cloudproject.application.dto.UserInfo;
+import it.unimi.cloudproject.application.dto.requests.UserDeletionRequest;
 import it.unimi.cloudproject.application.factories.UserDtoFactory;
 import it.unimi.cloudproject.bl.errors.ValidationError;
 import it.unimi.cloudproject.data.factories.ShopDataFactory;
@@ -53,7 +54,7 @@ public class UserServiceTest {
     void givenUser_whenDeleteIt_thenCannotRetrieveItByUsername() {
         var userCreationResponse = userService.addUser(UserDtoFactory.createUserCreation());
 
-        userService.deleteUser(userCreationResponse.id());
+        userService.deleteUser(new UserDeletionRequest(userCreationResponse.id()));
 
         var userInfo = userService.getUser(UserFactory.VALID_USERNAME);
         assertThat(userInfo).isEmpty();

@@ -31,6 +31,7 @@ main() {
     _REST_API_ID="$_REST_API_ID" \
     _INTEGRATION_URI="arn:aws:apigateway:$_GLOBALS_REGION:lambda:path/2015-03-31/functions/$LAMBDA_ARN/invocations" \
     create_api_lambda_integration
+#    _REQUEST_TEMPLATES="$_REQUEST_TEMPLATES" \
 
     return_with "$LAMBDA_ARN"
 }

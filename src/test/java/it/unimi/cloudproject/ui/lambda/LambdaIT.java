@@ -1,7 +1,7 @@
 package it.unimi.cloudproject.ui.lambda;
 
 import com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.http.HttpStatus;
-import it.unimi.cloudproject.application.dto.UserCreationRequest;
+import it.unimi.cloudproject.application.dto.requests.UserCreationRequest;
 import it.unimi.cloudproject.ui.testcontainer.AppContainer;
 import it.unimi.cloudproject.ui.testcontainer.LocalstackRestApiCaller;
 import org.junit.jupiter.api.AfterEach;
@@ -46,6 +46,7 @@ public class LambdaIT {
     static void initializeAll() throws IOException {
         app.initialize();
         app.createApiForCreateUser();
+        app.createApiForDeleteUser();
         app.completeSetup();
     }
 
@@ -56,7 +57,7 @@ public class LambdaIT {
     }
 
     @Test
-    void givenUserApi_whenRegister_thenIdIsReturned() throws IOException, InterruptedException
+    void whenUserRegisterWithApi_thenIdIsReturned() throws IOException, InterruptedException
     {
         var userCreation = new UserCreationRequest("test");
 
@@ -64,5 +65,16 @@ public class LambdaIT {
 
         assertThat(httpResponse.statusCode()).isEqualTo(HttpStatus.SC_OK);
         assertThat(httpResponse.body().id()).isGreaterThanOrEqualTo(1);
+    }
+
+    @Test
+    void givenUser_whenDeleteWithApi_thenCannotGetInfo() throws IOException, InterruptedException
+    {
+        var userCreation = new UserCreationRequest("test");
+        var creationResponse = apiCaller.callUserCreateApi(userCreation);
+
+        var deletionResponse = apiCaller.callUserDeleteApi(creationResponse.body().id());
+
+        assertThat(deletionResponse.statusCode()).isEqualTo(HttpStatus.SC_OK);
     }
 }

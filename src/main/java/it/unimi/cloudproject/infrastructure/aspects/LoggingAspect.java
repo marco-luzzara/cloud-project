@@ -1,6 +1,8 @@
 package it.unimi.cloudproject.infrastructure.aspects;
 
 import org.aspectj.lang.JoinPoint;
+import org.aspectj.lang.ProceedingJoinPoint;
+import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.Pointcut;
@@ -16,13 +18,19 @@ public class LoggingAspect {
     @Pointcut("within(it.unimi.cloudproject.application.services.*)")
     public void logPointcutForServices() {}
 
-    @Before("logPointcutForServices()")
-    public void logMethodCallsWithinAdvice(JoinPoint joinPoint) {
+    @Around("logPointcutForServices()")
+    public Object logMethodInfo(ProceedingJoinPoint joinPoint) throws Throwable {
         var serviceClass = joinPoint.getTarget().getClass();
         var methodName = joinPoint.getSignature().getName();
         var args = Arrays.toString(joinPoint.getArgs());
 
         var logger = LoggerFactory.getLogger(serviceClass);
-        logger.info("Calling %s.%s(%s)".formatted(serviceClass.getName(), methodName, args));
+        var serviceCall = "%s.%s(%s)".formatted(serviceClass.getName(), methodName, args);
+        logger.info("Calling " + serviceCall);
+
+        var result = joinPoint.proceed();
+        logger.info("%s -> %s".formatted(serviceCall, result));
+
+        return result;
     }
 }

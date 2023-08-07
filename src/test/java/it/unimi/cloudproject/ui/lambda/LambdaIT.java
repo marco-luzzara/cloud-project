@@ -1,7 +1,7 @@
 package it.unimi.cloudproject.ui.lambda;
 
 import com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.http.HttpStatus;
-import it.unimi.cloudproject.application.dto.requests.UserCreationRequest;
+import it.unimi.cloudproject.ui.dto.requests.UserCreationRequest;
 import it.unimi.cloudproject.ui.testcontainer.AppContainer;
 import it.unimi.cloudproject.ui.testcontainer.LocalstackRestApiCaller;
 import org.junit.jupiter.api.AfterEach;
@@ -47,6 +47,7 @@ public class LambdaIT {
         app.initialize();
         app.createApiForCreateUser();
         app.createApiForDeleteUser();
+        app.createApiForGetUser();
         app.completeSetup();
     }
 
@@ -63,8 +64,10 @@ public class LambdaIT {
 
         var httpResponse = apiCaller.callUserCreateApi(userCreation);
 
+        var id = httpResponse.body().id();
         assertThat(httpResponse.statusCode()).isEqualTo(HttpStatus.SC_OK);
-        assertThat(httpResponse.body().id()).isGreaterThanOrEqualTo(1);
+        assertThat(id).isGreaterThanOrEqualTo(1);
+        assertThat(apiCaller.callUserGetApi("test").body().id()).isEqualTo(id);
     }
 
     @Test

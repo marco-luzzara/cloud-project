@@ -157,6 +157,26 @@ public class AppContainer extends LocalStackContainer {
                 ), String.class);
     }
 
+    public void createApiForGetUser() {
+        Objects.requireNonNull(this.restApiId);
+        Objects.requireNonNull(this.apiUsersResourceId);
+
+        conditionalCreateParamResourceIdForUser();
+
+        var userGetLambdaArn = executeScriptInsideContainer("/app/scripts/create-lambda-with-api-integration.sh",
+                Map.of(
+                        "_LAMBDA_NAME", "userGet",
+                        "_FUNCTION_NAME", "getUser",
+                        "_RESOURCE_ID", this.apiUsersWithParamResourceId,
+                        "_HTTP_METHOD", "GET",
+                        "_REST_API_ID", this.restApiId,
+                        "_REQUEST_TEMPLATES", """
+                        {
+                            \\"username\\": \\"\\$input.params('userId')\\"
+                        }"""
+                ), String.class);
+    }
+
     public void conditionalCreateParamResourceIdForUser() {
         Objects.requireNonNull(this.restApiId);
         Objects.requireNonNull(this.apiUsersResourceId);
@@ -196,7 +216,8 @@ public class AppContainer extends LocalStackContainer {
     {
         // for complete logs we may use
         // https://joerg-pfruender.github.io/software/testing/2020/09/27/localstack_and_lambda.html#3-logging
-        executeScriptInsideContainer("/app/scripts/aws-get-last-logs.sh", Map.of());
+        var lambdaLogs = executeScriptInsideContainer("/app/scripts/aws-get-last-logs.sh", Map.of(), String.class);
+        LOGGER.log(System.Logger.Level.INFO, lambdaLogs);
     }
 
     private void copyFileInsideContainer(Path file, String containerBasePath)
@@ -223,7 +244,7 @@ public class AppContainer extends LocalStackContainer {
             for (var param : params.entrySet())
                 sb.append("%s=\"%s\" ".formatted(param.getKey(), param.getValue()));
             sb.append(scriptPathInContainer);
-            scriptResult = execInContainer("sh", "-c", sb.toString());
+            scriptResult = execInContainer("bash", "-c", sb.toString());
         }
         catch (IOException | InterruptedException e)
         {

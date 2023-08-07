@@ -1,7 +1,7 @@
 package it.unimi.cloudproject.application.services;
 
 import it.unimi.cloudproject.application.dto.UserInfo;
-import it.unimi.cloudproject.application.dto.requests.UserDeletionRequest;
+import it.unimi.cloudproject.ui.dto.requests.UserDeletionRequest;
 import it.unimi.cloudproject.application.factories.UserDtoFactory;
 import it.unimi.cloudproject.bl.errors.ValidationError;
 import it.unimi.cloudproject.data.factories.ShopDataFactory;
@@ -42,19 +42,19 @@ public class UserServiceTest {
 
     @Test
     void givenCreatedUser_whenGetByUsername_thenRetrieveIt() {
-        var userCreationResponse = userService.addUser(UserDtoFactory.createUserCreation());
+        var id = userService.addUser(UserDtoFactory.createUserCreationData());
 
         var userInfo = userService.getUser(UserFactory.VALID_USERNAME);
 
-        assertThat(userInfo.orElseThrow()).returns(userCreationResponse.id(), from(UserInfo::id))
+        assertThat(userInfo.orElseThrow()).returns(id, from(UserInfo::id))
                 .returns(UserFactory.VALID_USERNAME, from(UserInfo::username));
     }
 
     @Test
     void givenUser_whenDeleteIt_thenCannotRetrieveItByUsername() {
-        var userCreationResponse = userService.addUser(UserDtoFactory.createUserCreation());
+        var id = userService.addUser(UserDtoFactory.createUserCreationData());
 
-        userService.deleteUser(new UserDeletionRequest(userCreationResponse.id()));
+        userService.deleteUser(id);
 
         var userInfo = userService.getUser(UserFactory.VALID_USERNAME);
         assertThat(userInfo).isEmpty();

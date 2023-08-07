@@ -1,9 +1,7 @@
 package it.unimi.cloudproject.application.services;
 
-import it.unimi.cloudproject.application.dto.requests.UserCreationRequest;
+import it.unimi.cloudproject.application.dto.UserCreationData;
 import it.unimi.cloudproject.application.dto.UserInfo;
-import it.unimi.cloudproject.application.dto.requests.UserDeletionRequest;
-import it.unimi.cloudproject.application.dto.responses.UserCreationResponse;
 import it.unimi.cloudproject.application.errors.InvalidShopIdError;
 import it.unimi.cloudproject.application.errors.InvalidUsernameError;
 import it.unimi.cloudproject.bl.User;
@@ -24,16 +22,16 @@ public class UserService {
     @Autowired
     private ShopRepository shopRepository;
 
-    public UserCreationResponse addUser(UserCreationRequest userCreationRequest) {
-        var user = new User(null, userCreationRequest.username(), new HashSet<>());
+    public int addUser(UserCreationData userCreationData) {
+        var user = new User(null, userCreationData.username(), new HashSet<>());
 
         var createdUser = this.userRepository.save(UserData.fromUser(user));
 
-        return new UserCreationResponse(createdUser.getId());
+        return createdUser.getId();
     }
 
-    public void deleteUser(UserDeletionRequest userDeletionRequest) {
-        this.userRepository.deleteById(userDeletionRequest.id());
+    public void deleteUser(int userId) {
+        this.userRepository.deleteById(userId);
     }
 
     public Optional<UserInfo> getUser(String username) {

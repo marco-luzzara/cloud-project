@@ -1,3 +1,6 @@
+# custom
+*-production.*
+
 .gradle
 build/
 !**/src/main/**/build/

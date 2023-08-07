@@ -49,6 +49,7 @@ create_api_lambda_integration() {
         --http-method "$_HTTP_METHOD" \
         --status-code 200
 
+    [[ -n "$_REQUEST_TEMPLATES" ]] && conditional_params+=(--request-templates "$_REQUEST_TEMPLATES")
     awslocal apigateway put-integration \
         --rest-api-id "$_REST_API_ID" \
         --resource-id "$_RESOURCE_ID" \
@@ -56,8 +57,8 @@ create_api_lambda_integration() {
         --type AWS \
         --integration-http-method POST \
         --uri "$_INTEGRATION_URI" \
-        --passthrough-behavior WHEN_NO_MATCH
-#        --request-templates "$_REQUEST_TEMPLATES"
+        --passthrough-behavior WHEN_NO_MATCH \
+        "${conditional_params[@]}"
 
     awslocal apigateway put-integration-response \
         --rest-api-id "$_REST_API_ID" \

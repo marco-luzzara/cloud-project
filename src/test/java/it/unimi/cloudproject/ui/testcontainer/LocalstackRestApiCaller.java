@@ -1,9 +1,9 @@
 package it.unimi.cloudproject.ui.testcontainer;
 
 import com.google.gson.Gson;
-import it.unimi.cloudproject.application.dto.requests.UserCreationRequest;
-import it.unimi.cloudproject.application.dto.requests.UserDeletionRequest;
-import it.unimi.cloudproject.application.dto.responses.UserCreationResponse;
+import it.unimi.cloudproject.application.dto.UserInfo;
+import it.unimi.cloudproject.ui.dto.requests.UserCreationRequest;
+import it.unimi.cloudproject.ui.dto.responses.UserCreationResponse;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -43,6 +43,16 @@ public class LocalstackRestApiCaller {
                         .uri(this.appContainer.buildApiUrl("users/%d".formatted(id)))
                         .build(),
                 HttpResponse.BodyHandlers.ofString());
+    }
+
+    public HttpResponse<UserInfo> callUserGetApi(String username) throws IOException, InterruptedException {
+        return HTTP_CLIENT.send(HttpRequest.newBuilder()
+                        .GET()
+                        .header("Content-Type", "application/json")
+                        .timeout(Duration.ofSeconds(100))
+                        .uri(this.appContainer.buildApiUrl("users/%s".formatted(username)))
+                        .build(),
+                new JsonBodyHandler<>(UserInfo.class));
     }
 
     private static class JsonBodyHandler<T> implements HttpResponse.BodyHandler<T> {

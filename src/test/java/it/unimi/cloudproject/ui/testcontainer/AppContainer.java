@@ -1,5 +1,7 @@
 package it.unimi.cloudproject.ui.testcontainer;
 
+import com.github.dockerjava.api.async.ResultCallback;
+import com.github.dockerjava.api.model.Frame;
 import com.google.gson.Gson;
 import it.unimi.cloudproject.ui.testcontainer.model.LocalstackGlobals;
 import it.unimi.cloudproject.ui.testcontainer.model.ScriptResults;
@@ -29,7 +31,7 @@ public class AppContainer extends LocalStackContainer {
     private String apiUsersResourceId;
     private String apiUsersWithParamResourceId;
     private String apiShopsResourceId;
-    private static Gson gson = new Gson();
+    private static final Gson gson = new Gson();
 
     private boolean keepLambdasOpenedAfterExit;
 
@@ -133,7 +135,6 @@ public class AppContainer extends LocalStackContainer {
                         "_RESOURCE_ID", this.apiUsersResourceId,
                         "_HTTP_METHOD", "POST",
                         "_REST_API_ID", this.restApiId
-//                        "_REQUEST_TEMPLATES", ""
                 ), String.class);
     }
 
@@ -149,11 +150,13 @@ public class AppContainer extends LocalStackContainer {
                         "_FUNCTION_NAME", "deleteUser",
                         "_RESOURCE_ID", this.apiUsersWithParamResourceId,
                         "_HTTP_METHOD", "DELETE",
-                        "_REST_API_ID", this.restApiId
-//                        "_REQUEST_TEMPLATES", """
-//                             {
-//                               "id": "$input.params('userId')"
-//                             }"""
+                        "_REST_API_ID", this.restApiId,
+                        "_REQUEST_TEMPLATES", """
+                                {
+                                    \\"application/json\\": \\"{\\
+                                        \\\\\\"id\\\\\\": \\\\\\"\\$input.params('userId')\\\\\\"\\
+                                    }\\"
+                                }"""
                 ), String.class);
     }
 
@@ -171,10 +174,14 @@ public class AppContainer extends LocalStackContainer {
                         "_HTTP_METHOD", "GET",
                         "_REST_API_ID", this.restApiId,
                         "_REQUEST_TEMPLATES", """
-                        {
-                            \\"username\\": \\"\\$input.params('userId')\\"
-                        }"""
+                                {
+                                    \\"application/json\\": \\"{\\
+                                        \\\\\\"id\\\\\\": \\\\\\"\\$input.params('userId')\\\\\\"\\
+                                    }\\"
+                                }"""
                 ), String.class);
+
+        addErrorResponseForApi(this.apiUsersWithParamResourceId, "GET", 404, ".*No value present.*");
     }
 
     public void conditionalCreateParamResourceIdForUser() {
@@ -189,6 +196,17 @@ public class AppContainer extends LocalStackContainer {
                             "_PATH_PART", "{userId}"
                     ), String.class);
         }
+    }
+
+    private void addErrorResponseForApi(String resourceId, String httpMethod, int statusCode, String regexErrorPattern) {
+        executeScriptInsideContainer("/app/scripts/put-method-err-response.sh",
+                Map.of(
+                        "_REST_API_ID", this.restApiId,
+                        "_RESOURCE_ID", resourceId,
+                        "_HTTP_METHOD", httpMethod,
+                        "_STATUS_CODE", String.valueOf(statusCode),
+                        "_REGEX_ERROR_PATTERN", regexErrorPattern
+                ));
     }
 
     public URI buildApiUrl(String pathPart) {
@@ -216,8 +234,8 @@ public class AppContainer extends LocalStackContainer {
     {
         // for complete logs we may use
         // https://joerg-pfruender.github.io/software/testing/2020/09/27/localstack_and_lambda.html#3-logging
-        var lambdaLogs = executeScriptInsideContainer("/app/scripts/aws-get-last-logs.sh", Map.of(), String.class);
-        LOGGER.log(System.Logger.Level.INFO, lambdaLogs);
+//        var lambdaLogs = executeScriptInsideContainer("/app/scripts/aws-get-last-logs.sh", Map.of(), String.class);
+//        LOGGER.log(System.Logger.Level.INFO, lambdaLogs);
     }
 
     private void copyFileInsideContainer(Path file, String containerBasePath)
@@ -315,6 +333,28 @@ public class AppContainer extends LocalStackContainer {
                             && c.getImage().startsWith(LAMBDA_IMAGE))
                     .forEach(c ->
                     {
+                        var containerName = dockerClient.inspectContainerCmd(c.getId())
+                                .exec()
+                                .getName();
+                        var sb = new StringBuilder("Logs from %s%n".formatted(containerName));
+                        sb.append("**************************").append(System.lineSeparator());
+                        try {
+                            dockerClient.logContainerCmd(c.getId())
+                                    .withStdOut(true)
+                                    .withStdErr(true)
+                                    .withTailAll()
+                                    .exec(new ResultCallback.Adapter<>() {
+                                        @Override
+                                        public void onNext(Frame frame)
+                                        {
+                                            sb.append(new String(frame.getPayload()));
+                                        }
+                                    }).awaitCompletion();
+                        } catch (InterruptedException e) {
+                            throw new RuntimeException(e);
+                        }
+                        sb.append("**************************").append(System.lineSeparator());
+                        LOGGER.log(System.Logger.Level.INFO, sb.toString());
                         dockerClient.stopContainerCmd(c.getId()).exec();
                         dockerClient.removeContainerCmd(c.getId()).exec();
                     });

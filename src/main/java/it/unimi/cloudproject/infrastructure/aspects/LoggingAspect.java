@@ -26,7 +26,6 @@ public class LoggingAspect {
 
         var logger = LoggerFactory.getLogger(serviceClass);
         var serviceCall = "%s.%s(%s)".formatted(serviceClass.getName(), methodName, args);
-        logger.info("Calling " + serviceCall);
 
         var result = joinPoint.proceed();
         logger.info("%s -> %s".formatted(serviceCall, result));

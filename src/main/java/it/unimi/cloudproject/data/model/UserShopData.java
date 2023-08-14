@@ -10,8 +10,8 @@ import org.springframework.data.relational.core.mapping.Table;
 @AllArgsConstructor
 @Getter
 public class UserShopData {
-    @Column("USER_ID")
+    @Column("user_id")
     private final AggregateReference<UserData, Integer> userId;
-    @Column("SHOP_ID")
+    @Column("shop_id")
     private final AggregateReference<ShopData, Integer> shopId;
 }

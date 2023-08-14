@@ -10,20 +10,27 @@ import it.unimi.cloudproject.data.repositories.ShopRepository;
 import it.unimi.cloudproject.data.repositories.UserRepository;
 import it.unimi.cloudproject.factories.bl.ShopFactory;
 import it.unimi.cloudproject.factories.bl.valueobjects.CoordinatesFactory;
+import it.unimi.cloudproject.testutils.db.DbFactory;
+import it.unimi.cloudproject.testutils.spring.DynamicPropertiesInjector;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.jdbc.core.mapping.AggregateReference;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
+import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.from;
 
+@Testcontainers
 @SpringBootTest
-@ActiveProfiles("test")
 public class ShopServiceTest {
     @Autowired
     private ShopRepository shopRepository;
@@ -33,6 +40,14 @@ public class ShopServiceTest {
 
     @Autowired
     private ShopService shopService;
+
+    @Container
+    private static final PostgreSQLContainer<?> db = DbFactory.getPostgresContainer();
+
+    @DynamicPropertySource
+    static void dbProperties(DynamicPropertyRegistry registry) {
+        DynamicPropertiesInjector.injectDatasourceFromPostgresContainer(registry, db);
+    }
 
     @AfterEach
     void cleanupEach() {

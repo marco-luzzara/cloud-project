@@ -34,6 +34,6 @@ public class UserLambda {
 
     @Bean
     public Function<UserGetRequest, UserInfo> getUser() {
-        return userGetRequest -> this.userService.getUser(userGetRequest.username()).orElseThrow();
+        return userGetRequest -> this.userService.getUser(userGetRequest.id()).orElseThrow();
     }
 }

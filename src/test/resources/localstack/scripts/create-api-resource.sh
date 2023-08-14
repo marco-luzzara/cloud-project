@@ -18,10 +18,12 @@ main() {
 
     local CREATED_RESOURCE_ID
     CREATED_RESOURCE_ID="$( \
-        _REST_API_ID="$_REST_API_ID" \
-        _PARENT_RESOURCE_ID="$_PARENT_RESOURCE_ID" \
-        _PATH_PART="$_PATH_PART" \
-        create_api_resource
+        get_retval_from "$( \
+            _REST_API_ID="$_REST_API_ID" \
+            _PARENT_RESOURCE_ID="$_PARENT_RESOURCE_ID" \
+            _PATH_PART="$_PATH_PART" \
+            create_api_resource \
+        )"
     )"
 
     return_with "$CREATED_RESOURCE_ID"

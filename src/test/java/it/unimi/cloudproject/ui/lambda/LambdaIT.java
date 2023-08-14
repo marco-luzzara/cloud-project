@@ -1,6 +1,7 @@
 package it.unimi.cloudproject.ui.lambda;
 
 import com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.http.HttpStatus;
+import it.unimi.cloudproject.testutils.db.DbFactory;
 import it.unimi.cloudproject.ui.dto.requests.UserCreationRequest;
 import it.unimi.cloudproject.ui.testcontainer.AppContainer;
 import it.unimi.cloudproject.ui.testcontainer.LocalstackRestApiCaller;
@@ -18,18 +19,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Testcontainers
 public class LambdaIT {
     @Container
-    private static final AppContainer app = new AppContainer(true);
+    private static final AppContainer app = new AppContainer();
 
     private final LocalstackRestApiCaller apiCaller = new LocalstackRestApiCaller(app);
 
     private static final String DB_CONTAINER_NAME = "localstack_db";
 
     @Container
-    private static final PostgreSQLContainer<?> localstackDb = new PostgreSQLContainer<>("postgres:15")
-            .withUsername("sa")
-            .withPassword("password")
+    private static final PostgreSQLContainer<?> localstackDb = DbFactory.getPostgresContainer()
             .withNetwork(app.NETWORK)
-            .withDatabaseName("testdb")
             .withCreateContainerCmdModifier((createContainerCmd) -> createContainerCmd.withName(DB_CONTAINER_NAME));
 
 //    // Pgadmin container to check the postgres container while debugging
@@ -67,7 +65,7 @@ public class LambdaIT {
         var id = httpResponse.body().id();
         assertThat(httpResponse.statusCode()).isEqualTo(HttpStatus.SC_OK);
         assertThat(id).isGreaterThanOrEqualTo(1);
-        assertThat(apiCaller.callUserGetApi("test").body().id()).isEqualTo(id);
+        assertThat(apiCaller.callUserGetApi(id).body().id()).isEqualTo(id);
     }
 
     @Test
@@ -75,9 +73,11 @@ public class LambdaIT {
     {
         var userCreation = new UserCreationRequest("test");
         var creationResponse = apiCaller.callUserCreateApi(userCreation);
+        var userId = creationResponse.body().id();
 
-        var deletionResponse = apiCaller.callUserDeleteApi(creationResponse.body().id());
+        var deletionResponse = apiCaller.callUserDeleteApi(userId);
 
         assertThat(deletionResponse.statusCode()).isEqualTo(HttpStatus.SC_OK);
+        assertThat(apiCaller.callUserGetApi(userId).statusCode()).isEqualTo(404);
     }
 }

@@ -1,6 +1,8 @@
 package it.unimi.cloudproject.application.services;
 
 import it.unimi.cloudproject.application.dto.UserInfo;
+import it.unimi.cloudproject.testutils.db.DbFactory;
+import it.unimi.cloudproject.testutils.spring.DynamicPropertiesInjector;
 import it.unimi.cloudproject.ui.dto.requests.UserDeletionRequest;
 import it.unimi.cloudproject.application.factories.UserDtoFactory;
 import it.unimi.cloudproject.bl.errors.ValidationError;
@@ -17,13 +19,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.jdbc.core.mapping.AggregateReference;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
+import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.*;
 
+@Testcontainers
 @SpringBootTest
-@ActiveProfiles("test")
 public class UserServiceTest {
     @Autowired
     private ShopRepository shopRepository;
@@ -34,6 +41,14 @@ public class UserServiceTest {
     @Autowired
     private UserService userService;
 
+    @Container
+    private static final PostgreSQLContainer<?> db = DbFactory.getPostgresContainer();
+
+    @DynamicPropertySource
+    static void dbProperties(DynamicPropertyRegistry registry) {
+        DynamicPropertiesInjector.injectDatasourceFromPostgresContainer(registry, db);
+    }
+
     @AfterEach
     void cleanupEach() {
         shopRepository.deleteAll();
@@ -41,22 +56,22 @@ public class UserServiceTest {
     }
 
     @Test
-    void givenCreatedUser_whenGetByUsername_thenRetrieveIt() {
+    void givenCreatedUser_whenGetById_thenRetrieveIt() {
         var id = userService.addUser(UserDtoFactory.createUserCreationData());
 
-        var userInfo = userService.getUser(UserFactory.VALID_USERNAME);
+        var userInfo = userService.getUser(id);
 
         assertThat(userInfo.orElseThrow()).returns(id, from(UserInfo::id))
                 .returns(UserFactory.VALID_USERNAME, from(UserInfo::username));
     }
 
     @Test
-    void givenUser_whenDeleteIt_thenCannotRetrieveItByUsername() {
+    void givenUser_whenDeleteIt_thenCannotRetrieveItById() {
         var id = userService.addUser(UserDtoFactory.createUserCreationData());
 
         userService.deleteUser(id);
 
-        var userInfo = userService.getUser(UserFactory.VALID_USERNAME);
+        var userInfo = userService.getUser(id);
         assertThat(userInfo).isEmpty();
     }
 
@@ -65,7 +80,7 @@ public class UserServiceTest {
         var shopData = ShopDataFactory.createShop(this.shopRepository);
         var userData1 = UserDataFactory.createUser(this.userRepository);
         var userData2 = UserDataFactory.createUser(this.userRepository);
-        var userData3 = UserDataFactory.createUser(this.userRepository);
+        UserDataFactory.createUser(this.userRepository);
         userData1.getFavoriteShops().add(
                 new UserShopData(AggregateReference.to(userData1.getId()), AggregateReference.to(shopData.getId())));
         userData2.getFavoriteShops().add(
@@ -83,7 +98,7 @@ public class UserServiceTest {
         var userData = UserDataFactory.createUser(this.userRepository);
         var shopData = ShopDataFactory.createShop(this.shopRepository);
 
-        userService.addShopToFavorite(userData.getUsername(), shopData.getId());
+        userService.addShopToFavorite(userData.getId(), shopData.getId());
 
         assertThat(shopRepository.findFavoriteShopsByUserId(userData.getId())).extracting(ShopData::getId)
                 .containsExactly(shopData.getId());
@@ -95,10 +110,10 @@ public class UserServiceTest {
         var shopData1 = ShopDataFactory.createShop(this.shopRepository);
         var shopData2 = ShopDataFactory.createShop(this.shopRepository);
 
-        userService.addShopToFavorite(userData.getUsername(), shopData1.getId());
+        userService.addShopToFavorite(userData.getId(), shopData1.getId());
 
         assertThatThrownBy(() ->
-                userService.addShopToFavorite(userData.getUsername(), shopData2.getId())
+                userService.addShopToFavorite(userData.getId(), shopData2.getId())
         ).isInstanceOf(ValidationError.DuplicateShopForUserError.class);
     }
 }

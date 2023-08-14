@@ -34,8 +34,8 @@ public class UserService {
         this.userRepository.deleteById(userId);
     }
 
-    public Optional<UserInfo> getUser(String username) {
-        var optionalUser = this.userRepository.findByUsername(username);
+    public Optional<UserInfo> getUser(int userId) {
+        var optionalUser = this.userRepository.findById(userId);
 
         return optionalUser.map(user -> new UserInfo(user.getId(), user.getUsername()));
     }
@@ -46,10 +46,10 @@ public class UserService {
                 .toList();
     }
 
-    public void addShopToFavorite(String username, int shopId) {
-        var userData = this.userRepository.findByUsername(username);
+    public void addShopToFavorite(int userId, int shopId) {
+        var userData = this.userRepository.findById(userId);
         if (userData.isEmpty())
-            throw new InvalidUsernameError(username);
+            throw new InvalidUsernameError(userId);
 
         var shopData = this.shopRepository.findById(shopId);
         if (shopData.isEmpty())

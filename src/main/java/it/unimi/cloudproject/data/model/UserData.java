@@ -20,13 +20,13 @@ import java.util.stream.Collectors;
 
 @AllArgsConstructor(access = AccessLevel.PACKAGE)
 @Getter
-@Table("user")
+@Table("USER")
 public class UserData {
     @Id
     @With
     private final Integer id;
     private final String username;
-    @MappedCollection(idColumn = "USER_ID")
+    @MappedCollection(idColumn = "user_id")
     private final Set<UserShopData> favoriteShops;
 
     public static UserData of(String username) {

@@ -6,6 +6,8 @@ import it.unimi.cloudproject.data.model.ShopData;
 import it.unimi.cloudproject.data.model.UserData;
 import it.unimi.cloudproject.data.model.UserShopData;
 import it.unimi.cloudproject.factories.bl.UserFactory;
+import it.unimi.cloudproject.testutils.db.DbFactory;
+import it.unimi.cloudproject.testutils.spring.DynamicPropertiesInjector;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,14 +15,27 @@ import org.springframework.boot.test.autoconfigure.data.jdbc.DataJdbcTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.jdbc.core.mapping.AggregateReference;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
+import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Testcontainers
 @SpringBootTest
-@ActiveProfiles("test")
 public class UserRepositoryTest {
+
+    @Container
+    private static final PostgreSQLContainer<?> db = DbFactory.getPostgresContainer();
+
+    @DynamicPropertySource
+    static void dbProperties(DynamicPropertyRegistry registry) {
+        DynamicPropertiesInjector.injectDatasourceFromPostgresContainer(registry, db);
+    }
 
     @Autowired
     private UserRepository userRepository;
@@ -42,8 +57,8 @@ public class UserRepositoryTest {
         userData = userRepository.save(userData);
 
         assertThat(userData.getId()).isNotNull();
-        assertThat(userRepository.findByUsername(userData.getUsername()).map(UserData::getUsername))
-                .hasValue(userData.getUsername());
+        assertThat(userRepository.findById(userData.getId()).map(UserData::getId))
+                .hasValue(userData.getId());
     }
 
     @Test
@@ -53,7 +68,7 @@ public class UserRepositoryTest {
 
         userRepository.deleteById(userId);
 
-        assertThat(userRepository.findByUsername(userData.getUsername())).isEmpty();
+        assertThat(userRepository.findById(userData.getId())).isEmpty();
     }
 
     @Test

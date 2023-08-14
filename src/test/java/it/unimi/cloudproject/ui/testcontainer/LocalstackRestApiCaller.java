@@ -45,12 +45,12 @@ public class LocalstackRestApiCaller {
                 HttpResponse.BodyHandlers.ofString());
     }
 
-    public HttpResponse<UserInfo> callUserGetApi(String username) throws IOException, InterruptedException {
+    public HttpResponse<UserInfo> callUserGetApi(int userId) throws IOException, InterruptedException {
         return HTTP_CLIENT.send(HttpRequest.newBuilder()
                         .GET()
                         .header("Content-Type", "application/json")
                         .timeout(Duration.ofSeconds(100))
-                        .uri(this.appContainer.buildApiUrl("users/%s".formatted(username)))
+                        .uri(this.appContainer.buildApiUrl("users/%d".formatted(userId)))
                         .build(),
                 new JsonBodyHandler<>(UserInfo.class));
     }

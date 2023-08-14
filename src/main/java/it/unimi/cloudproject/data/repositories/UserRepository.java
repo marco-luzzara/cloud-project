@@ -13,11 +13,11 @@ import java.util.Optional;
 public interface UserRepository extends CrudRepository<UserData, Integer> {
     @Query("""
             SELECT u.*
-            FROM USER_SHOP us
-            JOIN "user" u on us.USER_ID = u.ID
-            WHERE us.SHOP_ID = :shopId
+            FROM "USER_SHOP" us
+            JOIN "USER" u on us.user_id = u.id
+            WHERE us.shop_id = :shopId
             """)
     List<UserData> findUsersByShopId(@Param("shopId") int shopId);
 
-    Optional<UserData> findByUsername(String username);
+//    Optional<UserData> findByUsername(String username);
 }

@@ -12,9 +12,9 @@ import java.util.List;
 public interface ShopRepository extends CrudRepository<ShopData, Integer> {
     @Query("""
             SELECT s.*
-            FROM USER_SHOP us
-            JOIN SHOP s on us.SHOP_ID = s.ID
-            WHERE us.USER_ID = :userId
+            FROM "USER_SHOP" us
+            JOIN "SHOP" s on us.shop_id = s.id
+            WHERE us.user_id = :userId
             """)
     List<ShopData> findFavoriteShopsByUserId(@Param("userId") int userId);
     List<ShopData> findByName(String name);

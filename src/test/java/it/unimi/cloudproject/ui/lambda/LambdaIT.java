@@ -2,9 +2,9 @@ package it.unimi.cloudproject.ui.lambda;
 
 import com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.http.HttpStatus;
 import it.unimi.cloudproject.testutils.db.DbFactory;
-import it.unimi.cloudproject.ui.dto.requests.UserCreationRequest;
+import it.unimi.cloudproject.ui.dto.requests.user.UserCreationRequest;
 import it.unimi.cloudproject.ui.testcontainer.AppContainer;
-import it.unimi.cloudproject.ui.testcontainer.LocalstackRestApiCaller;
+import it.unimi.cloudproject.ui.testcontainer.helpers.LocalstackUserRestApiCaller;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -21,7 +21,7 @@ public class LambdaIT {
     @Container
     private static final AppContainer app = new AppContainer();
 
-    private final LocalstackRestApiCaller apiCaller = new LocalstackRestApiCaller(app);
+    private final LocalstackUserRestApiCaller userRestApiCaller = new LocalstackUserRestApiCaller(app);
 
     private static final String DB_CONTAINER_NAME = "localstack_db";
 
@@ -60,24 +60,37 @@ public class LambdaIT {
     {
         var userCreation = new UserCreationRequest("test");
 
-        var httpResponse = apiCaller.callUserCreateApi(userCreation);
+        var httpResponse = userRestApiCaller.callUserCreateApi(userCreation);
 
         var id = httpResponse.body().id();
         assertThat(httpResponse.statusCode()).isEqualTo(HttpStatus.SC_OK);
         assertThat(id).isGreaterThanOrEqualTo(1);
-        assertThat(apiCaller.callUserGetApi(id).body().id()).isEqualTo(id);
+        assertThat(userRestApiCaller.callUserGetApi(id).body().id()).isEqualTo(id);
     }
 
     @Test
     void givenUser_whenDeleteWithApi_thenCannotGetInfo() throws IOException, InterruptedException
     {
         var userCreation = new UserCreationRequest("test");
-        var creationResponse = apiCaller.callUserCreateApi(userCreation);
+        var creationResponse = userRestApiCaller.callUserCreateApi(userCreation);
         var userId = creationResponse.body().id();
 
-        var deletionResponse = apiCaller.callUserDeleteApi(userId);
+        var deletionResponse = userRestApiCaller.callUserDeleteApi(userId);
 
         assertThat(deletionResponse.statusCode()).isEqualTo(HttpStatus.SC_OK);
-        assertThat(apiCaller.callUserGetApi(userId).statusCode()).isEqualTo(404);
+        assertThat(userRestApiCaller.callUserGetApi(userId).statusCode()).isEqualTo(404);
+    }
+
+    @Test
+    void givenUser_whenAddShop_thenCannotGetInfo() throws IOException, InterruptedException
+    {
+        var userCreation = new UserCreationRequest("test");
+        var creationResponse = userRestApiCaller.callUserCreateApi(userCreation);
+        var userId = creationResponse.body().id();
+
+        var deletionResponse = userRestApiCaller.callUserDeleteApi(userId);
+
+        assertThat(deletionResponse.statusCode()).isEqualTo(HttpStatus.SC_OK);
+        assertThat(userRestApiCaller.callUserGetApi(userId).statusCode()).isEqualTo(404);
     }
 }

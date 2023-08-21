@@ -180,8 +180,6 @@ public class AppContainer extends LocalStackContainer {
                                     }\\"
                                 }"""
                 ), String.class);
-
-        addErrorResponseForApi(this.apiUsersWithParamResourceId, "GET", 404, ".*No value present.*");
     }
 
     public void conditionalCreateParamResourceIdForUser() {
@@ -196,17 +194,6 @@ public class AppContainer extends LocalStackContainer {
                             "_PATH_PART", "{userId}"
                     ), String.class);
         }
-    }
-
-    private void addErrorResponseForApi(String resourceId, String httpMethod, int statusCode, String regexErrorPattern) {
-        executeScriptInsideContainer("/app/scripts/put-method-err-response.sh",
-                Map.of(
-                        "_REST_API_ID", this.restApiId,
-                        "_RESOURCE_ID", resourceId,
-                        "_HTTP_METHOD", httpMethod,
-                        "_STATUS_CODE", String.valueOf(statusCode),
-                        "_REGEX_ERROR_PATTERN", regexErrorPattern
-                ));
     }
 
     public URI buildApiUrl(String pathPart) {

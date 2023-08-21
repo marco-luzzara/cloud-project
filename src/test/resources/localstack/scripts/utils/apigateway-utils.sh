@@ -54,15 +54,9 @@ create_api_lambda_integration() {
         --rest-api-id "$_REST_API_ID" \
         --resource-id "$_RESOURCE_ID" \
         --http-method "$_HTTP_METHOD" \
-        --type AWS \
+        --type AWS_PROXY \
         --integration-http-method POST \
         --uri "$_INTEGRATION_URI" \
         --passthrough-behavior WHEN_NO_MATCH \
         "${conditional_params[@]}"
-
-    awslocal apigateway put-integration-response \
-        --rest-api-id "$_REST_API_ID" \
-        --resource-id "$_RESOURCE_ID" \
-        --http-method "$_HTTP_METHOD" \
-        --status-code 200
 }

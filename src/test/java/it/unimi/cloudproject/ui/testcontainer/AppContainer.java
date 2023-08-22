@@ -4,7 +4,7 @@ import com.github.dockerjava.api.async.ResultCallback;
 import com.github.dockerjava.api.model.Frame;
 import com.google.gson.Gson;
 import it.unimi.cloudproject.ui.testcontainer.model.LocalstackGlobals;
-import it.unimi.cloudproject.ui.testcontainer.model.ScriptResults;
+import it.unimi.cloudproject.ui.testcontainer.model.SetupScriptResults;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.testcontainers.DockerClientFactory;
 import org.testcontainers.containers.Network;
@@ -29,19 +29,18 @@ public class AppContainer extends LocalStackContainer {
 
     private String restApiId;
     private String apiUsersResourceId;
-    private String apiUsersWithParamResourceId;
+    private String apiUsersWithIdResourceId;
     private String apiShopsResourceId;
+    private String routingLambdaArn;
+    private static final String ROUTING_LAMBDA_NAME = "routingLambda";
     private static final Gson gson = new Gson();
-
     private boolean keepLambdasOpenedAfterExit;
 
-    public AppContainer()
-    {
+    public AppContainer() {
         this(false);
     }
 
-    public AppContainer(boolean keepLambdasOpenedAfterExit)
-    {
+    public AppContainer(boolean keepLambdasOpenedAfterExit) {
         super(localstackImage);
 
         this.keepLambdasOpenedAfterExit = keepLambdasOpenedAfterExit;
@@ -58,16 +57,17 @@ public class AppContainer extends LocalStackContainer {
 
     /**
      * create the following tree in the localstack container
-    /app/
-        dist.zip
-        scripts/
-            setup.sh
-            ...
-            utils/
-                s3-utils.sh
-                ...
-
+     * /app/
+     * dist.zip
+     * scripts/
+     * setup.sh
+     * ...
+     * utils/
+     * s3-utils.sh
+     * ...
+     * <p>
      * Moreover it executes the script to reproduce the aws environment (by creating lambda and so on)
+     *
      * @throws IOException
      */
     public void initialize() throws IOException {
@@ -89,12 +89,12 @@ public class AppContainer extends LocalStackContainer {
             var scriptId = script.getURI().toString();
             var scriptIdFromResources = "localstack" + scriptId.substring(scriptId.lastIndexOf("/scripts/"));
             copyFileInsideContainer(getPathFromResourceId(scriptIdFromResources),
-                    // 11 corresponds to the prefix "localstack/"
-                    "/app/" + scriptIdFromResources.substring(11, scriptIdFromResources.lastIndexOf("/")));
+                    "/app/" + scriptIdFromResources.substring("localstack/".length(), scriptIdFromResources.lastIndexOf("/")));
         }
 
-        setupAwslocal("access_key", "secret_key");
+        setupAwslocal(this.getAccessKey(), this.getSecretKey());
 
+        createRoutingLambda();
 
         this.followOutput(outFrame ->
         {
@@ -109,10 +109,11 @@ public class AppContainer extends LocalStackContainer {
         var setupResult = executeScriptInsideContainer("/app/scripts/setup.sh", Map.of(
                 "_ACCESS_KEY_ID", accessKeyId,
                 "_SECRET_KEY_ID", secretKey
-        ), ScriptResults.SetupScript.class);
+        ), SetupScriptResults.SetupScript.class);
 
         this.restApiId = setupResult.restApiId();
         this.apiUsersResourceId = setupResult.apiUsersResourceId();
+        this.apiUsersWithIdResourceId = setupResult.apiUsersWithIdResourceId();
         this.apiShopsResourceId = setupResult.apiShopsResourceId();
     }
 
@@ -124,31 +125,40 @@ public class AppContainer extends LocalStackContainer {
         ));
     }
 
-    public void createApiForCreateUser() {
-        Objects.requireNonNull(this.restApiId);
-        Objects.requireNonNull(this.apiUsersResourceId);
-
-        var userCreateLambdaArn = executeScriptInsideContainer("/app/scripts/create-lambda-with-api-integration.sh",
+    private void createRoutingLambda() {
+        this.routingLambdaArn = executeScriptInsideContainer("/app/scripts/create-routing-lambda.sh",
                 Map.of(
-                        "_LAMBDA_NAME", "userCreate",
+                        "_LAMBDA_NAME", ROUTING_LAMBDA_NAME
+                ), String.class);
+    }
+
+    public void createApiForCreateUser() {
+        integrationPreconditions();
+
+        executeScriptInsideContainer("/app/scripts/create-lambda-integration.sh",
+                Map.of(
+                        "_ROUTING_LAMBDA_ARN", this.routingLambdaArn,
                         "_FUNCTION_NAME", "createUser",
                         "_RESOURCE_ID", this.apiUsersResourceId,
                         "_HTTP_METHOD", "POST",
                         "_REST_API_ID", this.restApiId
-                ), String.class);
+//                        "_REQUEST_TEMPLATES", """
+//                                {
+//                                    \\"application/json\\": \\"#set(\\$context.requestOverride.header.spring_cloud_function_definition = 'createUser')\\"
+//                                }"""
+                ));
     }
 
+    //\$input.json('\$')
+
     public void createApiForDeleteUser() {
-        Objects.requireNonNull(this.restApiId);
-        Objects.requireNonNull(this.apiUsersResourceId);
+        integrationPreconditions();
 
-        conditionalCreateParamResourceIdForUser();
-
-        var userDeleteLambdaArn = executeScriptInsideContainer("/app/scripts/create-lambda-with-api-integration.sh",
+        executeScriptInsideContainer("/app/scripts/create-lambda-integration.sh",
                 Map.of(
-                        "_LAMBDA_NAME", "userDelete",
+                        "_ROUTING_LAMBDA_ARN", this.routingLambdaArn,
                         "_FUNCTION_NAME", "deleteUser",
-                        "_RESOURCE_ID", this.apiUsersWithParamResourceId,
+                        "_RESOURCE_ID", this.apiUsersWithIdResourceId,
                         "_HTTP_METHOD", "DELETE",
                         "_REST_API_ID", this.restApiId,
                         "_REQUEST_TEMPLATES", """
@@ -157,20 +167,17 @@ public class AppContainer extends LocalStackContainer {
                                         \\\\\\"id\\\\\\": \\\\\\"\\$input.params('userId')\\\\\\"\\
                                     }\\"
                                 }"""
-                ), String.class);
+                ));
     }
 
     public void createApiForGetUser() {
-        Objects.requireNonNull(this.restApiId);
-        Objects.requireNonNull(this.apiUsersResourceId);
+        integrationPreconditions();
 
-        conditionalCreateParamResourceIdForUser();
-
-        var userGetLambdaArn = executeScriptInsideContainer("/app/scripts/create-lambda-with-api-integration.sh",
+        executeScriptInsideContainer("/app/scripts/create-lambda-integration.sh",
                 Map.of(
-                        "_LAMBDA_NAME", "userGet",
+                        "_ROUTING_LAMBDA_ARN", this.routingLambdaArn,
                         "_FUNCTION_NAME", "getUser",
-                        "_RESOURCE_ID", this.apiUsersWithParamResourceId,
+                        "_RESOURCE_ID", this.apiUsersWithIdResourceId,
                         "_HTTP_METHOD", "GET",
                         "_REST_API_ID", this.restApiId,
                         "_REQUEST_TEMPLATES", """
@@ -179,21 +186,62 @@ public class AppContainer extends LocalStackContainer {
                                         \\\\\\"id\\\\\\": \\\\\\"\\$input.params('userId')\\\\\\"\\
                                     }\\"
                                 }"""
-                ), String.class);
+                ));
     }
 
-    public void conditionalCreateParamResourceIdForUser() {
+    public void logAndPossiblyDestroyLambda() {
+        var dockerClient = DockerClientFactory.instance().client();
+        var thisNetworkId = Objects.requireNonNull(this.getNetwork()).getId();
+        // lambda containers are not removed after the test because spawned by the localstack
+        // container, and not directly by testcontainers. use docker api to
+        // remove all lambda containers connected to the same network as localstack
+
+        final String LAMBDA_IMAGE = "public.ecr.aws/lambda/java";
+        dockerClient.listContainersCmd()
+                .exec()
+                .stream()
+                .filter(c -> Objects.requireNonNull(c.getNetworkSettings())
+                        .getNetworks()
+                        .values()
+                        .stream()
+                        .anyMatch(network -> Objects.equals(network.getNetworkID(),
+                                thisNetworkId))
+                        && c.getImage().startsWith(LAMBDA_IMAGE))
+                .forEach(c ->
+                {
+                    var containerName = dockerClient.inspectContainerCmd(c.getId())
+                            .exec()
+                            .getName();
+                    var sb = new StringBuilder("Logs from %s%n".formatted(containerName));
+                    sb.append("**************************").append(System.lineSeparator());
+                    try {
+                        dockerClient.logContainerCmd(c.getId())
+                                .withStdOut(true)
+                                .withStdErr(true)
+                                .withTailAll()
+                                .exec(new ResultCallback.Adapter<>() {
+                                    @Override
+                                    public void onNext(Frame frame) {
+                                        sb.append(new String(frame.getPayload()));
+                                    }
+                                }).awaitCompletion();
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+                    sb.append("**************************").append(System.lineSeparator());
+                    LOGGER.log(System.Logger.Level.INFO, sb.toString());
+
+                    if (!keepLambdasOpenedAfterExit) {
+                        dockerClient.stopContainerCmd(c.getId()).exec();
+                        dockerClient.removeContainerCmd(c.getId()).exec();
+                    }
+                });
+    }
+
+    private void integrationPreconditions() {
         Objects.requireNonNull(this.restApiId);
         Objects.requireNonNull(this.apiUsersResourceId);
-
-        if (Objects.isNull(this.apiUsersWithParamResourceId)) {
-            this.apiUsersWithParamResourceId = executeScriptInsideContainer("/app/scripts/create-api-resource.sh",
-                    Map.of(
-                            "_REST_API_ID", this.restApiId,
-                            "_PARENT_RESOURCE_ID", this.apiUsersResourceId,
-                            "_PATH_PART", "{userId}"
-                    ), String.class);
-        }
+        Objects.requireNonNull(this.routingLambdaArn);
     }
 
     public URI buildApiUrl(String pathPart) {
@@ -207,8 +255,7 @@ public class AppContainer extends LocalStackContainer {
                 pathPart));
     }
 
-    private static Path getPathFromResourceId(String resourceId)
-    {
+    private static Path getPathFromResourceId(String resourceId) {
         try {
             return Path.of(Objects.requireNonNull(AppContainer.class.getClassLoader()
                     .getResource(resourceId)).toURI());
@@ -217,42 +264,28 @@ public class AppContainer extends LocalStackContainer {
         }
     }
 
-    public void log()
-    {
-        // for complete logs we may use
-        // https://joerg-pfruender.github.io/software/testing/2020/09/27/localstack_and_lambda.html#3-logging
-//        var lambdaLogs = executeScriptInsideContainer("/app/scripts/aws-get-last-logs.sh", Map.of(), String.class);
-//        LOGGER.log(System.Logger.Level.INFO, lambdaLogs);
-    }
-
-    private void copyFileInsideContainer(Path file, String containerBasePath)
-    {
+    private void copyFileInsideContainer(Path file, String containerBasePath) {
         copyFileInsideContainer(file, containerBasePath, file.getFileName().toString());
     }
 
     private void copyFileInsideContainer(Path file,
                                          String containerBasePath,
-                                         String containerFilename)
-    {
+                                         String containerFilename) {
         final var containerPath = containerBasePath + '/' + containerFilename;
         copyFileToContainer(MountableFile.forHostPath(file, 777), containerPath);
     }
 
     private <T> T executeScriptInsideContainer(String scriptPathInContainer,
                                                Map<String, String> params,
-                                               Class<T> returnValueClass)
-    {
+                                               Class<T> returnValueClass) {
         ExecResult scriptResult;
-        try
-        {
+        try {
             var sb = new StringBuilder();
             for (var param : params.entrySet())
                 sb.append("%s=\"%s\" ".formatted(param.getKey(), param.getValue()));
             sb.append(scriptPathInContainer);
             scriptResult = execInContainer("bash", "-c", sb.toString());
-        }
-        catch (IOException | InterruptedException e)
-        {
+        } catch (IOException | InterruptedException e) {
             throw new RuntimeException(e);
         }
 
@@ -269,12 +302,13 @@ public class AppContainer extends LocalStackContainer {
     }
 
     private void executeScriptInsideContainer(String scriptPathInContainer,
-                                               Map<String, String> params) {
+                                              Map<String, String> params) {
         executeScriptInsideContainer(scriptPathInContainer, params, Void.class);
     }
 
     /**
      * get only the last line of the stdout produced by a script execution
+     *
      * @param stdout
      * @return the last line of script output
      */
@@ -283,68 +317,10 @@ public class AppContainer extends LocalStackContainer {
         return scriptOutput[scriptOutput.length - 1];
     }
 
-    static private void checkScriptSuccessful(String scriptName, ExecResult execResult)
-    {
+    static private void checkScriptSuccessful(String scriptName, ExecResult execResult) {
         if (execResult.getExitCode() != 0)
             throw new IllegalStateException("""
                     The script %s returned with exit code %d
                     %s""".formatted(scriptName, execResult.getExitCode(), execResult.getStderr()));
-    }
-    
-    @Override
-    public void stop()
-    {
-        // store the network before stopping it. it is used later if child lambdas must be stopped
-        // as well
-        var thisNetworkId = Objects.requireNonNull(this.getNetwork()).getId();
-
-        super.stop();
-
-        var dockerClient = DockerClientFactory.instance().client();
-
-        // lambda containers are not removed after the test because spawned by the localstack
-        // container, and not directly by testcontainers. use docker api to
-        // remove all lambda containers connected to the same network as localstack
-        if (!keepLambdasOpenedAfterExit)
-        {
-            final String LAMBDA_IMAGE = "public.ecr.aws/lambda/java";
-            dockerClient.listContainersCmd()
-                    .exec()
-                    .stream()
-                    .filter(c -> Objects.requireNonNull(c.getNetworkSettings())
-                            .getNetworks()
-                            .values()
-                            .stream()
-                            .anyMatch(network -> Objects.equals(network.getNetworkID(),
-                                    thisNetworkId))
-                            && c.getImage().startsWith(LAMBDA_IMAGE))
-                    .forEach(c ->
-                    {
-                        var containerName = dockerClient.inspectContainerCmd(c.getId())
-                                .exec()
-                                .getName();
-                        var sb = new StringBuilder("Logs from %s%n".formatted(containerName));
-                        sb.append("**************************").append(System.lineSeparator());
-                        try {
-                            dockerClient.logContainerCmd(c.getId())
-                                    .withStdOut(true)
-                                    .withStdErr(true)
-                                    .withTailAll()
-                                    .exec(new ResultCallback.Adapter<>() {
-                                        @Override
-                                        public void onNext(Frame frame)
-                                        {
-                                            sb.append(new String(frame.getPayload()));
-                                        }
-                                    }).awaitCompletion();
-                        } catch (InterruptedException e) {
-                            throw new RuntimeException(e);
-                        }
-                        sb.append("**************************").append(System.lineSeparator());
-                        LOGGER.log(System.Logger.Level.INFO, sb.toString());
-                        dockerClient.stopContainerCmd(c.getId()).exec();
-                        dockerClient.removeContainerCmd(c.getId()).exec();
-                    });
-        }
     }
 }

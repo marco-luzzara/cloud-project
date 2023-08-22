@@ -59,4 +59,6 @@ create_api_lambda_integration() {
         --uri "$_INTEGRATION_URI" \
         --passthrough-behavior WHEN_NO_MATCH \
         "${conditional_params[@]}"
+
+#    --request-parameters "method.request.header.spring.cloud.function.definition=$_FUNCTION_NAME" \
 }

@@ -52,7 +52,7 @@ public class LambdaIT {
     @AfterEach
     void cleanupEach()
     {
-        app.log();
+        app.logAndPossiblyDestroyLambda();
     }
 
     @Test

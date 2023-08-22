@@ -1,13 +1,11 @@
 package it.unimi.cloudproject.ui.lambda;
 
-import com.google.gson.Gson;
 import it.unimi.cloudproject.application.dto.UserCreationData;
-import it.unimi.cloudproject.application.dto.UserInfo;
-import it.unimi.cloudproject.ui.dto.requests.user.UserGetRequest;
+import it.unimi.cloudproject.application.services.UserService;
 import it.unimi.cloudproject.ui.dto.requests.user.UserCreationRequest;
 import it.unimi.cloudproject.ui.dto.requests.user.UserDeletionRequest;
+import it.unimi.cloudproject.ui.dto.requests.user.UserGetRequest;
 import it.unimi.cloudproject.ui.dto.responses.user.UserCreationResponse;
-import it.unimi.cloudproject.application.services.UserService;
 import it.unimi.cloudproject.ui.dto.responses.user.UserGetResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -20,7 +18,6 @@ import java.util.function.Function;
 
 @Configuration
 public class UserLambda {
-    private static final Gson gson = new Gson();
     @Autowired
     private UserService userService;
 

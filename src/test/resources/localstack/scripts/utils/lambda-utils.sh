@@ -17,14 +17,13 @@ create_lambda() {
             --environment "{
                             \"Variables\": {\"JAVA_TOOL_OPTIONS\": \"-DMAIN_CLASS=it.unimi.cloudproject.CloudProjectApplication \
                                                                      -Dlogging.level.org.springframework=INFO \
-                                                                     -Dspring.profiles.active=localstack \
-                                                                     -Dspring.cloud.function.definition=$_FUNCTION_NAME\"}
+                                                                     -Dspring.profiles.active=localstack\"}
                           }" \
             --query "FunctionArn"
     )"
 
     # lambda is initially in the pending state, I can use it only when it switches to Active
-    # https://docs.aws.amazon.com/lambda/latest/dg/functions-states.html
+    # https://docs.aws.amazon.com/lambda/latest/dg/f    unctions-states.html
     awslocal lambda wait function-active-v2 --function-name "$_LAMBDA_NAME"
 
     return_with "$LAMBDA_ARN"

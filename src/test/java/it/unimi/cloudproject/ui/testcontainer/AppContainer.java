@@ -35,7 +35,7 @@ public class AppContainer extends LocalStackContainer {
     private static final String ROUTING_LAMBDA_NAME = "routingLambda";
     private static final Gson gson = new Gson();
 
-    private boolean keepLambdasOpenedAfterExit;
+    private final boolean keepLambdasOpenedAfterExit;
 
     public AppContainer()
     {
@@ -143,6 +143,23 @@ public class AppContainer extends LocalStackContainer {
                         "_RESOURCE_ID", this.apiUsersResourceId,
                         "_HTTP_METHOD", "POST",
                         "_REST_API_ID", this.restApiId
+//                        "_REQUEST_TEMPLATES", """
+//                                {
+//                                    \\"application/json\\": \\"{\\
+//                                        \\\\\\"method\\\\\\": \\\\\\"\\$context.httpMethod\\\\\\",\\
+//                                        \\\\\\"body\\\\\\" : \\$input.json('\\$'),\\
+//                                        \\\\\\"headers\\\\\\": {\\
+//                                            #foreach(\\$param in \\$input.params().header.keySet())\\
+//                                            \\\\\\"\\$param\\\\\\": \\\\\\"\\$util.escapeJavaScript(\\$input.params().header.get(\\$param))\\\\\\"\\
+//                                            #if(\\$foreach.hasNext),#end\\
+//                                            #end\\
+//                                        }\\
+//                                    }\\"
+//                                }"""
+//                            """
+//                            {
+//                                \\"application/json\\": \\"#set(\\$context.requestOverride.header.spring_cloud_function_definition = 'createUser')\\"
+//                            }"""
                 ));
     }
 
@@ -323,7 +340,7 @@ public class AppContainer extends LocalStackContainer {
 
     /**
      * get only the last line of the stdout produced by a script execution
-     * @param stdout
+     * @param stdout the script output
      * @return the last line of script output
      */
     private String getScriptReturnValue(String stdout) {

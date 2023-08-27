@@ -19,11 +19,10 @@ main() {
     _RESOURCE_ID="$_RESOURCE_ID" \
     _HTTP_METHOD="$_HTTP_METHOD" \
     _REST_API_ID="$_REST_API_ID" \
-    _INTEGRATION_URI="arn:aws:apigateway:$_GLOBALS_REGION:lambda:path/2015-03-31/functions/$LAMBDA_ARN/invocations" \
+    _INTEGRATION_URI="arn:aws:apigateway:$_GLOBALS_REGION:lambda:path/2015-03-31/functions/$_ROUTING_LAMBDA_ARN/invocations" \
+    _FUNCTION_NAME="$_FUNCTION_NAME" \
     _REQUEST_TEMPLATES="${_REQUEST_TEMPLATES:-}" \
     create_api_lambda_integration
-
-    return_with "$LAMBDA_ARN"
 }
 
 main "$@"

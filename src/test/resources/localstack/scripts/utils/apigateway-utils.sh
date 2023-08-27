@@ -58,6 +58,7 @@ create_api_lambda_integration() {
         --integration-http-method POST \
         --uri "$_INTEGRATION_URI" \
         --passthrough-behavior WHEN_NO_MATCH \
+        --request-parameters "integration.request.header.spring_cloud_function_definition=$_FUNCTION_NAME" \
         "${conditional_params[@]}"
 
     awslocal apigateway put-integration-response \

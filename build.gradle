@@ -90,8 +90,11 @@ tasks.named('test') {
 }
 
 test {
-	dependsOn buildZip
 	finalizedBy jacocoTestReport // report is always generated after tests run
+}
+
+classes {
+	finalizedBy buildZip
 }
 
 jacocoTestReport {

@@ -13,18 +13,8 @@ cd "$(dirname "$0")"
 
 main() {
     . ./utils/apigateway-utils.sh
-    . ./utils/lambda-utils.sh
     . ./utils/common-utils.sh
     . ./globals.env
-
-    local LAMBDA_ARN
-    LAMBDA_ARN="$( \
-        get_retval_from "$( \
-            _LAMBDA_NAME="$_LAMBDA_NAME" \
-            _FUNCTION_NAME="$_FUNCTION_NAME" \
-            create_lambda \
-        )" \
-    )"
 
     _RESOURCE_ID="$_RESOURCE_ID" \
     _HTTP_METHOD="$_HTTP_METHOD" \

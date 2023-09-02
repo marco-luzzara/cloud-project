@@ -1,5 +1,6 @@
 # custom
 *-production.*
+src/test/resources/localstack/apikey.secret
 
 .gradle
 build/

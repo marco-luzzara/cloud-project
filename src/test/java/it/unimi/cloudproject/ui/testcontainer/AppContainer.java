@@ -12,9 +12,11 @@ import org.testcontainers.containers.localstack.LocalStackContainer;
 import org.testcontainers.utility.DockerImageName;
 import org.testcontainers.utility.MountableFile;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -25,7 +27,7 @@ public class AppContainer extends LocalStackContainer {
     private static final System.Logger LOGGER = System.getLogger(AppContainer.class.getName());
 
     public final Network NETWORK = Network.SHARED;
-    private static final DockerImageName localstackImage = DockerImageName.parse("localstack/localstack:2.2.0");
+    private static final DockerImageName localstackImage = DockerImageName.parse("localstack/localstack-pro:latest");
 
     private String restApiId;
     private String apiUsersResourceId;
@@ -48,14 +50,27 @@ public class AppContainer extends LocalStackContainer {
 
         this.keepLambdasOpenedAfterExit = keepLambdasOpenedAfterExit;
 
+        var apiKey = getApiKeyOrThrow();
+
         withServices(Service.LAMBDA, Service.API_GATEWAY, Service.S3);
         // https://joerg-pfruender.github.io/software/testing/2020/09/27/localstack_and_lambda.html#1-networking
         withNetwork(NETWORK);
         withExposedPorts(4566);
-        withEnv(Map.of("LAMBDA_DOCKER_NETWORK",
-                ((Network.NetworkImpl) NETWORK).getName(),
-                "MAIN_DOCKER_NETWORK",
-                ((Network.NetworkImpl) NETWORK).getName()));
+        withEnv(Map.of(
+                "LAMBDA_DOCKER_NETWORK", ((Network.NetworkImpl) NETWORK).getName(),
+                "MAIN_DOCKER_NETWORK", ((Network.NetworkImpl) NETWORK).getName(),
+                "LOCALSTACK_API_KEY", apiKey
+                ));
+    }
+
+    private String getApiKeyOrThrow() {
+        try {
+            return new PathMatchingResourcePatternResolver()
+                    .getResource("localstack/apikey.secret")
+                    .getContentAsString(StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            throw new RuntimeException("Please create an accessible file called 'apikey.secret' with the Localstack API key in the folder src/test/resources/localstack");
+        }
     }
 
     /**

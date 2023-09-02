@@ -3,16 +3,15 @@ package it.unimi.cloudproject.ui.testcontainer;
 import com.github.dockerjava.api.async.ResultCallback;
 import com.github.dockerjava.api.model.Frame;
 import com.google.gson.Gson;
+import it.unimi.cloudproject.ui.lambda.LambdaIT;
 import it.unimi.cloudproject.ui.testcontainer.model.LocalstackGlobals;
 import it.unimi.cloudproject.ui.testcontainer.model.SetupScriptResults;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
-import org.testcontainers.DockerClientFactory;
 import org.testcontainers.containers.Network;
 import org.testcontainers.containers.localstack.LocalStackContainer;
 import org.testcontainers.utility.DockerImageName;
 import org.testcontainers.utility.MountableFile;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -27,7 +26,7 @@ public class AppContainer extends LocalStackContainer {
     private static final System.Logger LOGGER = System.getLogger(AppContainer.class.getName());
 
     public final Network NETWORK = Network.SHARED;
-    private static final DockerImageName localstackImage = DockerImageName.parse("localstack/localstack-pro:latest");
+    private static final DockerImageName localstackImage = DockerImageName.parse("localstack/localstack-pro:2.2.0");
 
     private String restApiId;
     private String apiUsersResourceId;
@@ -52,6 +51,7 @@ public class AppContainer extends LocalStackContainer {
 
         var apiKey = getApiKeyOrThrow();
 
+        withCreateContainerCmdModifier(cc -> cc.withHostName(LambdaIT.LOCALSTACK_HOSTNAME));
         withServices(Service.LAMBDA, Service.API_GATEWAY, Service.S3);
         // https://joerg-pfruender.github.io/software/testing/2020/09/27/localstack_and_lambda.html#1-networking
         withNetwork(NETWORK);
@@ -230,7 +230,6 @@ public class AppContainer extends LocalStackContainer {
     }
 
     public void logAndPossiblyDestroyLambda() {
-        var dockerClient = DockerClientFactory.instance().client();
         var thisNetworkId = Objects.requireNonNull(this.getNetwork()).getId();
         // lambda containers are not removed after the test because spawned by the localstack
         // container, and not directly by testcontainers. use docker api to

@@ -4,22 +4,37 @@ import com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.http.HttpStatus;
 import it.unimi.cloudproject.testutils.db.DbFactory;
 import it.unimi.cloudproject.ui.dto.requests.user.UserCreationRequest;
 import it.unimi.cloudproject.ui.testcontainer.AppContainer;
+import it.unimi.cloudproject.ui.testcontainer.containers.TerraformContainer;
 import it.unimi.cloudproject.ui.testcontainer.helpers.LocalstackUserRestApiCaller;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.io.IOException;
+import java.nio.file.Path;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Testcontainers
 public class LambdaIT {
+    public static final String LOCALSTACK_HOSTNAME = "localstack";
     @Container
     private static final AppContainer app = new AppContainer();
+
+    @Container
+    private static final TerraformContainer terraform = new TerraformContainer(
+            Path.of("src", "test", "resources", "terraform"),
+            new TerraformContainer.TfVariables(
+                    app.getAccessKey(),
+                    app.getSecretKey(),
+                    LOCALSTACK_HOSTNAME,
+                    4566
+            )
+    );
 
     private final LocalstackUserRestApiCaller userRestApiCaller = new LocalstackUserRestApiCaller(app);
 
@@ -42,11 +57,12 @@ public class LambdaIT {
 //
     @BeforeAll
     static void initializeAll() throws IOException {
-        app.initialize();
-        app.createApiForCreateUser();
-        app.createApiForDeleteUser();
-        app.createApiForGetUser();
-        app.completeSetup();
+        terraform.apply();
+//        app.initialize();
+//        app.createApiForCreateUser();
+//        app.createApiForDeleteUser();
+//        app.createApiForGetUser();
+//        app.completeSetup();
     }
 
     @AfterEach

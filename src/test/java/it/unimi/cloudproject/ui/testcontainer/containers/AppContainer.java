@@ -1,4 +1,4 @@
-package it.unimi.cloudproject.ui.testcontainer;
+package it.unimi.cloudproject.ui.testcontainer.containers;
 
 import com.github.dockerjava.api.async.ResultCallback;
 import com.github.dockerjava.api.model.Frame;

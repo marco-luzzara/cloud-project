@@ -4,7 +4,7 @@ import com.google.gson.Gson;
 import it.unimi.cloudproject.application.dto.ShopInfo;
 import it.unimi.cloudproject.ui.dto.requests.shop.ShopCreationRequest;
 import it.unimi.cloudproject.ui.dto.responses.shop.ShopCreationResponse;
-import it.unimi.cloudproject.ui.testcontainer.AppContainer;
+import it.unimi.cloudproject.ui.testcontainer.containers.AppContainer;
 
 import java.io.IOException;
 import java.net.http.HttpClient;

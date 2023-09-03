@@ -1,16 +1,13 @@
 package it.unimi.cloudproject.ui.lambda;
 
 import com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.http.HttpStatus;
-import it.unimi.cloudproject.testutils.db.DbFactory;
 import it.unimi.cloudproject.ui.dto.requests.user.UserCreationRequest;
-import it.unimi.cloudproject.ui.testcontainer.AppContainer;
+import it.unimi.cloudproject.ui.testcontainer.containers.AppContainer;
 import it.unimi.cloudproject.ui.testcontainer.containers.TerraformContainer;
 import it.unimi.cloudproject.ui.testcontainer.helpers.LocalstackUserRestApiCaller;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.testcontainers.containers.GenericContainer;
-import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -40,10 +37,10 @@ public class LambdaIT {
 
     private static final String DB_CONTAINER_NAME = "localstack_db";
 
-    @Container
-    private static final PostgreSQLContainer<?> localstackDb = DbFactory.getPostgresContainer()
-            .withNetwork(app.NETWORK)
-            .withCreateContainerCmdModifier((createContainerCmd) -> createContainerCmd.withName(DB_CONTAINER_NAME));
+//    @Container
+//    private static final PostgreSQLContainer<?> localstackDb = DbFactory.getPostgresContainer()
+//            .withNetwork(app.NETWORK)
+//            .withCreateContainerCmdModifier((createContainerCmd) -> createContainerCmd.withName(DB_CONTAINER_NAME));
 
 //    // Pgadmin container to check the postgres container while debugging
 //    // @Container
@@ -57,6 +54,7 @@ public class LambdaIT {
 //
     @BeforeAll
     static void initializeAll() throws IOException {
+        terraform.initialize();
         terraform.apply();
 //        app.initialize();
 //        app.createApiForCreateUser();

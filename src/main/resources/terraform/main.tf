@@ -19,10 +19,15 @@ variable "aws_region" {
 # endpoints must be manually set
 provider "aws" {
   region = var.aws_region
+
+  default_timeouts {
+    create = "2m"
+  }
 }
 
 module "webapp_lambda" {
   source = "./webapp_lambda"
+
   webapp_lambda_dist_path = var.webapp_lambda_dist_path
   webapp_lambda_iam_role_arn = var.webapp_lambda_iam_role_arn
   webapp_lambda_spring_active_profile = var.webapp_lambda_spring_active_profile
@@ -31,10 +36,16 @@ module "webapp_lambda" {
 }
 
 module "webapp_apigw" {
-  source = "./webapp_lambda"
-  webapp_lambda_dist_path = var.webapp_lambda_dist_path
-  webapp_lambda_iam_role_arn = var.webapp_lambda_iam_role_arn
-  webapp_lambda_spring_active_profile = var.webapp_lambda_spring_active_profile
+  depends_on = [module.webapp_lambda]
+  source = "./webapp_apigw"
 
+  webapp_lambda_arn = module.webapp_lambda.webapp_lambda_arn
   #  when = terraform.workspace == "webapp"
+}
+
+resource "aws_api_gateway_deployment" "apigw_deployment" {
+  depends_on = [module.webapp_apigw]
+
+  rest_api_id = module.webapp_apigw.webapp_apigw_rest_api_id
+  stage_name  = var.apigateway_stage_name
 }

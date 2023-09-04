@@ -12,26 +12,16 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.io.IOException;
-import java.nio.file.Path;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Testcontainers
 public class LambdaIT {
-    public static final String LOCALSTACK_HOSTNAME = "localstack";
     @Container
     private static final AppContainer app = new AppContainer();
 
     @Container
-    private static final TerraformContainer terraform = new TerraformContainer(
-            Path.of("src", "test", "resources", "terraform"),
-            new TerraformContainer.TfVariables(
-                    app.getAccessKey(),
-                    app.getSecretKey(),
-                    LOCALSTACK_HOSTNAME,
-                    4566
-            )
-    );
+    private static final TerraformContainer terraform = new TerraformContainer().withNetwork(app.NETWORK);
 
     private final LocalstackUserRestApiCaller userRestApiCaller = new LocalstackUserRestApiCaller(app);
 
@@ -53,14 +43,8 @@ public class LambdaIT {
 //    // }});
 //
     @BeforeAll
-    static void initializeAll() throws IOException {
-        terraform.initialize();
-        terraform.apply();
-//        app.initialize();
-//        app.createApiForCreateUser();
-//        app.createApiForDeleteUser();
-//        app.createApiForGetUser();
-//        app.completeSetup();
+    static void initializeAll() {
+        app.initialize(terraform);
     }
 
     @AfterEach

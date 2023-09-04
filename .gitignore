@@ -1,5 +1,5 @@
 # custom
-**/main/resources/terraform/**/*_secret.tfvars
+**/main/resources/terraform/**/*_secret.auto.tfvars
 *-production.*
 src/test/resources/localstack/apikey.secret
 

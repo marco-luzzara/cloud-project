@@ -25,7 +25,7 @@ public class LambdaIT {
 
     private final LocalstackUserRestApiCaller userRestApiCaller = new LocalstackUserRestApiCaller(app);
 
-    private static final String DB_CONTAINER_NAME = "localstack_db";
+//    private static final String DB_CONTAINER_NAME = "localstack_db";
 
 //    @Container
 //    private static final PostgreSQLContainer<?> localstackDb = DbFactory.getPostgresContainer()

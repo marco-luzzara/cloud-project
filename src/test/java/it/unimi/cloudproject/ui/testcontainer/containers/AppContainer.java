@@ -14,9 +14,9 @@ import java.util.Map;
 import java.util.Objects;
 
 public class AppContainer extends LocalStackContainer {
+    public final String NETWORK_ALIAS = "localstack";
     private static final System.Logger LOGGER = System.getLogger(AppContainer.class.getName());
     public final Network NETWORK = Network.SHARED;
-    public static final String LOCALSTACK_HOSTNAME = "localstack";
     private static final DockerImageName localstackImage = DockerImageName.parse("localstack/localstack-pro:2.2.0");
 
     private String restApiId;
@@ -37,10 +37,10 @@ public class AppContainer extends LocalStackContainer {
 
         var apiKey = getApiKeyOrThrow();
 
-        withCreateContainerCmdModifier(cc -> cc.withHostName(LOCALSTACK_HOSTNAME));
         withServices(Service.LAMBDA, Service.API_GATEWAY, Service.S3);
         // https://joerg-pfruender.github.io/software/testing/2020/09/27/localstack_and_lambda.html#1-networking
         withNetwork(NETWORK);
+        withNetworkAliases(NETWORK_ALIAS);
         withExposedPorts(4566);
         withEnv(Map.of(
                 "LAMBDA_DOCKER_NETWORK", ((Network.NetworkImpl) NETWORK).getName(),
@@ -67,7 +67,7 @@ public class AppContainer extends LocalStackContainer {
         terraform.apply(new TerraformContainer.TfVariables(
                 this.getAccessKey(),
                 this.getSecretKey(),
-                LOCALSTACK_HOSTNAME,
+                NETWORK_ALIAS,
                 4566
         ));
         this.restApiId = terraform.getOutputVar(TerraformContainer.OutputVar.REST_API_ID);

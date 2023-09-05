@@ -4,9 +4,14 @@ variable "webapp_lambda_iam_role_arn" {
   sensitive   = true
 }
 
-variable "webapp_lambda_spring_active_profile" {
+variable "webapp_lambda_system_properties" {
   description = "Spring active profile for the webapp lambda"
-  type        = string
+  type        = object({
+    spring_active_profile = string
+    spring_datasource_url = string
+    spring_datasource_username = string
+    spring_datasource_password = string
+  })
 }
 
 variable "webapp_lambda_dist_path" {

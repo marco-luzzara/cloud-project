@@ -27,7 +27,10 @@ resource "aws_lambda_function" "webapp" {
       JAVA_TOOL_OPTIONS = <<EOT
         -DMAIN_CLASS=it.unimi.cloudproject.CloudProjectApplication
         -Dlogging.level.org.springframework=INFO
-        -Dspring.profiles.active=${var.webapp_lambda_spring_active_profile}
+        -Dspring.profiles.active=${var.webapp_lambda_system_properties.spring_active_profile}
+        -Dspring.datasource.url=${var.webapp_lambda_system_properties.spring_datasource_url}
+        -Dspring.datasource.username=${var.webapp_lambda_system_properties.spring_datasource_username}
+        -Dspring.datasource.password=${var.webapp_lambda_system_properties.spring_datasource_password}
       EOT
     }
   }

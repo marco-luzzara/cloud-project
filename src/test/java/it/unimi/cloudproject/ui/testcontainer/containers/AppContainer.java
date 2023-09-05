@@ -37,11 +37,16 @@ public class AppContainer extends LocalStackContainer {
 
         var apiKey = getApiKeyOrThrow();
 
-        withServices(Service.LAMBDA, Service.API_GATEWAY, Service.S3);
         // https://joerg-pfruender.github.io/software/testing/2020/09/27/localstack_and_lambda.html#1-networking
         withNetwork(NETWORK);
         withNetworkAliases(NETWORK_ALIAS);
-        withExposedPorts(4566);
+        // 4566 - standard port, 4510 - RDS port
+        withExposedPorts(4510, 4566);
+        withServices(
+                Service.LAMBDA,
+                Service.API_GATEWAY,
+                Service.S3,
+                LocalStackContainer.EnabledService.named("rds"));
         withEnv(Map.of(
                 "LAMBDA_DOCKER_NETWORK", ((Network.NetworkImpl) NETWORK).getName(),
                 "MAIN_DOCKER_NETWORK", ((Network.NetworkImpl) NETWORK).getName(),

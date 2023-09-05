@@ -1,6 +1,3 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localstack_db/testdb?user=sa&password=password
     driverClassName: org.postgresql.Driver
-    username: sa
-    password: password

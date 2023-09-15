@@ -1,3 +1,3 @@
-output "webapp_lambda_arn" {
-  value = aws_lambda_function.webapp.arn
+output "webapp_lambda_invoke_arn" {
+  value = aws_lambda_function.webapp.invoke_arn
 }

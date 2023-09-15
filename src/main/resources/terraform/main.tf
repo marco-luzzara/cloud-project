@@ -52,7 +52,7 @@ module "webapp_apigw" {
   depends_on = [module.webapp_lambda]
   source = "./webapp_apigw"
 
-  webapp_lambda_arn = module.webapp_lambda.webapp_lambda_arn
+  webapp_lambda_invoke_arn = module.webapp_lambda.webapp_lambda_invoke_arn
   #  when = terraform.workspace == "webapp"
 }
 

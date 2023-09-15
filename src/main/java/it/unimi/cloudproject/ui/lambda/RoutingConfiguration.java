@@ -8,6 +8,8 @@ import org.springframework.cloud.function.context.MessageRoutingCallback;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.Message;
+import com.amazonaws.services.lambda.runtime.Context;
+import org.springframework.messaging.support.MessageBuilder;
 
 import java.util.Optional;
 
@@ -20,8 +22,9 @@ public class RoutingConfiguration {
         return new MessageRoutingCallback() {
             @Override
             public String routingResult(Message<?> message) {
+//                var lambdaContext = (Context) message.getHeaders().get(AWSLambdaUtils.AWS_CONTEXT);
                 logger.info("Inspecting message headers - " + message.getHeaders());
-                return Optional.ofNullable((String) message.getHeaders().get("spring_cloud_function_definition")).orElseThrow();
+                return Optional.ofNullable((String) message.getHeaders().get("X-Spring-Cloud-Function-Definition")).orElseThrow();
             }
         };
     }

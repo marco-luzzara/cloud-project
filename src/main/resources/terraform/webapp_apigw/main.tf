@@ -1,7 +1,9 @@
-data "aws_region" "current" {}
-
 locals {
-  integration_uri = "arn:aws:apigateway:${data.aws_region.current.name}:lambda:path/2015-03-31/functions/${var.webapp_lambda_arn}/invocations"
+  api_data = [
+    {
+
+    }
+  ]
 }
 
 resource "aws_api_gateway_rest_api" "webapp_rest_api" {
@@ -37,11 +39,16 @@ resource "aws_api_gateway_integration" "create_users_integration" {
   http_method   = aws_api_gateway_method.create_users.http_method
   type                    = "AWS"
   integration_http_method = "POST"
-  uri                     = local.integration_uri
+  uri                     = var.webapp_lambda_invoke_arn
   passthrough_behavior    = "WHEN_NO_MATCH"
 
   request_parameters = {
-    "integration.request.header.spring_cloud_function_definition" = "'createUser'"
+    "integration.request.header.X-Spring-Cloud-Function-Definition" = "'createUser'"
+  }
+
+  request_templates = {
+#    "application/json" = "#set($allParams = $input.params())\n{\n\"body-json\" : $input.json(\"$\"),\n\"params\" : {\n#foreach($type in $allParams.keySet())\n    #set($params = $allParams.get($type))\n\"$type\" : {\n    #foreach($paramName in $params.keySet())\n    \"$paramName\" : \"$util.escapeJavaScript($params.get($paramName))\"\n        #if($foreach.hasNext),#end\n    #end\n}\n    #if($foreach.hasNext),#end\n#end\n},\n\"stage-variables\" : {\n#foreach($key in $stageVariables.keySet())\n\"$key\" : \"$util.escapeJavaScript($stageVariables.get($key))\"\n    #if($foreach.hasNext),#end\n#end\n},\n\"context\" : {\n    \"api-id\" : \"$context.apiId\",\n    \"api-key\" : \"$context.identity.apiKey\",\n \"http-method\" : \"$context.httpMethod\",\n    \"stage\" : \"$context.stage\",\n    \"source-ip\" : \"$context.identity.sourceIp\",\n    \"user-agent\" : \"$context.identity.userAgent\",\n    \"request-id\" : \"$context.requestId\",\n    \"resource-id\" : \"$context.resourceId\",\n    \"resource-path\" : \"$context.resourcePath\"\n    }\n}\n"
+    "application/json" = "#set($context.requestOverride.header.X-Spring-Cloud-Function-Definition = 'createUser')"
   }
 }
 
@@ -86,11 +93,11 @@ resource "aws_api_gateway_integration" "get_user_integration" {
   http_method   = aws_api_gateway_method.get_user.http_method
   type                    = "AWS"
   integration_http_method = "POST"
-  uri                     = local.integration_uri
+  uri                     = var.webapp_lambda_invoke_arn
   passthrough_behavior    = "WHEN_NO_MATCH"
 
   request_parameters = {
-    "integration.request.header.spring_cloud_function_definition" = "'getUser'"
+    "integration.request.header.X-Spring-Cloud-Function-Definition" = "'getUser'"
   }
   request_templates = {
     "application/json" = <<-EOT
@@ -144,7 +151,7 @@ resource "aws_api_gateway_integration" "delete_user_integration" {
   http_method   = aws_api_gateway_method.delete_user.http_method
   type                    = "AWS"
   integration_http_method = "POST"
-  uri                     = local.integration_uri
+  uri                     = var.webapp_lambda_invoke_arn
   passthrough_behavior    = "WHEN_NO_MATCH"
 
   request_parameters = {

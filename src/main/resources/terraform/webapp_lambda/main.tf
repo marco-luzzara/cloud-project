@@ -18,12 +18,14 @@ resource "aws_lambda_function" "webapp" {
   depends_on = [aws_s3_object.webapp_lambda_distribution_zip]
   function_name = "webapp"
   runtime      = "java17"
-  handler      = "org.springframework.cloud.function.adapter.aws.FunctionInvoker"
+#  handler      = "org.springframework.cloud.function.adapter.aws.FunctionInvoker"
+  handler = "it.unimi.cloudproject.infrastructure.extensions.spring.cloud.function.adapters.aws.FunctionInvokerEnrichedWithHeaders"
   role         = var.webapp_lambda_iam_role_arn
   timeout      = 900
 
   environment {
     variables = {
+      FUNCTION_INVOKER_LATE_INITIALIZATION = "true"
       JAVA_TOOL_OPTIONS = <<EOT
         -DMAIN_CLASS=it.unimi.cloudproject.CloudProjectApplication
         -Dlogging.level.org.springframework=INFO

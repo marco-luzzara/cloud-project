@@ -29,7 +29,6 @@ public class LocalstackUserRestApiCaller {
         return HTTP_CLIENT.send(HttpRequest.newBuilder()
                         .POST(HttpRequest.BodyPublishers.ofString(strBody))
                         .header("Content-Type", "application/json")
-                        .header("spring.cloud.function.definition", "createUser")
                         .timeout(Duration.ofSeconds(100))
                         .uri(this.appContainer.buildApiUrl("users"))
                         .build(),
@@ -40,7 +39,6 @@ public class LocalstackUserRestApiCaller {
         return HTTP_CLIENT.send(HttpRequest.newBuilder()
                         .DELETE()
                         .timeout(Duration.ofSeconds(100))
-                        .header("spring.cloud.function.definition", "deleteUser")
                         .uri(this.appContainer.buildApiUrl("users/%d".formatted(id)))
                         .build(),
                 HttpResponse.BodyHandlers.ofString());
@@ -50,7 +48,6 @@ public class LocalstackUserRestApiCaller {
         return HTTP_CLIENT.send(HttpRequest.newBuilder()
                         .GET()
                         .header("Content-Type", "application/json")
-                        .header("spring.cloud.function.definition", "getUser")
                         .timeout(Duration.ofSeconds(100))
                         .uri(this.appContainer.buildApiUrl("users/%d".formatted(userId)))
                         .build(),

@@ -23,7 +23,7 @@ public class RoutingConfiguration {
             @Override
             public String routingResult(Message<?> message) {
 //                var lambdaContext = (Context) message.getHeaders().get(AWSLambdaUtils.AWS_CONTEXT);
-                logger.info("Inspecting message headers - " + message.getHeaders());
+//                logger.info("Inspecting message headers - " + message.getHeaders());
                 return Optional.ofNullable((String) message.getHeaders().get("X-Spring-Cloud-Function-Definition")).orElseThrow();
             }
         };

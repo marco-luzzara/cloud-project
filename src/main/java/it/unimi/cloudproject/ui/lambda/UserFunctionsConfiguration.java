@@ -7,6 +7,8 @@ import it.unimi.cloudproject.ui.dto.requests.user.UserDeletionRequest;
 import it.unimi.cloudproject.ui.dto.requests.user.UserGetRequest;
 import it.unimi.cloudproject.ui.dto.responses.user.UserCreationResponse;
 import it.unimi.cloudproject.ui.dto.responses.user.UserGetResponse;
+import it.unimi.cloudproject.ui.errors.user.InvalidUserIdError;
+import it.unimi.cloudproject.ui.lambda.model.InvocationWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -22,36 +24,23 @@ public class UserFunctionsConfiguration {
     private UserService userService;
 
     @Bean
-    public Function<UserCreationRequest, UserCreationResponse> createUser() {
+    public Function<InvocationWrapper<UserCreationRequest>, UserCreationResponse> createUser() {
         return (cr) -> {
-            var id = this.userService.addUser(new UserCreationData(cr.username()));
+            var id = this.userService.addUser(new UserCreationData(cr.body().username()));
             return new UserCreationResponse(id);
         };
     }
 
     @Bean
-    public Consumer<UserDeletionRequest> deleteUser() {
-        return (dr) -> this.userService.deleteUser(dr.id());
+    public Consumer<InvocationWrapper<UserDeletionRequest>> deleteUser() {
+        return (dr) -> this.userService.deleteUser(dr.body().id());
     }
 
     @Bean
-    public Function<Message<UserGetRequest>, Message<UserGetResponse>> getUser() {
-        return userGetRequestMessage -> {
-            var userGetRequest = userGetRequestMessage.getPayload();
-
-            return this.userService.getUser(userGetRequest.id())
-                    .map(userInfo -> MessageBuilder
-                            .withPayload(new UserGetResponse(userInfo.id(), userInfo.username()))
-                            .copyHeaders(userGetRequestMessage.getHeaders())
-                            .setHeader("statusCode", 200)
-                            .build())
-                    .orElse(MessageBuilder
-                            .withPayload(new UserGetResponse(-1, "Invalid id"))
-                            .copyHeaders(userGetRequestMessage.getHeaders())
-                            .setHeader("statusCode", 404)
-                            .build());
-
-        };
+    public Function<InvocationWrapper<UserGetRequest>, UserGetResponse> getUser() {
+        return userGetRequest -> this.userService.getUser(userGetRequest.body().id())
+                .map(ui -> new UserGetResponse(ui.id(), ui.username()))
+                .orElseThrow(() -> new InvalidUserIdError(userGetRequest.body().id()));
     }
 
 //    @Bean

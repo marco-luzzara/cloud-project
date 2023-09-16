@@ -1,4 +1,15 @@
 locals {
+  request_mapping_template = <<-EOT
+    {
+      "headers": {
+        #foreach($param in $input.params().header.keySet())
+          "$param": "$util.escapeJavaScript($input.params().header.get($param))"
+          #if($foreach.hasNext),#end
+        #end
+      },
+      "body" : %s
+    }
+    EOT
   api_data = [
     {
 
@@ -43,12 +54,11 @@ resource "aws_api_gateway_integration" "create_users_integration" {
   passthrough_behavior    = "WHEN_NO_MATCH"
 
   request_parameters = {
-    "integration.request.header.X-Spring-Cloud-Function-Definition" = "'createUser'"
+    "integration.request.header.X-Spring-Cloud-Function-Definition" = "createUser"
   }
 
   request_templates = {
-#    "application/json" = "#set($allParams = $input.params())\n{\n\"body-json\" : $input.json(\"$\"),\n\"params\" : {\n#foreach($type in $allParams.keySet())\n    #set($params = $allParams.get($type))\n\"$type\" : {\n    #foreach($paramName in $params.keySet())\n    \"$paramName\" : \"$util.escapeJavaScript($params.get($paramName))\"\n        #if($foreach.hasNext),#end\n    #end\n}\n    #if($foreach.hasNext),#end\n#end\n},\n\"stage-variables\" : {\n#foreach($key in $stageVariables.keySet())\n\"$key\" : \"$util.escapeJavaScript($stageVariables.get($key))\"\n    #if($foreach.hasNext),#end\n#end\n},\n\"context\" : {\n    \"api-id\" : \"$context.apiId\",\n    \"api-key\" : \"$context.identity.apiKey\",\n \"http-method\" : \"$context.httpMethod\",\n    \"stage\" : \"$context.stage\",\n    \"source-ip\" : \"$context.identity.sourceIp\",\n    \"user-agent\" : \"$context.identity.userAgent\",\n    \"request-id\" : \"$context.requestId\",\n    \"resource-id\" : \"$context.resourceId\",\n    \"resource-path\" : \"$context.resourcePath\"\n    }\n}\n"
-    "application/json" = "#set($context.requestOverride.header.X-Spring-Cloud-Function-Definition = 'createUser')"
+    "application/json" = format(local.request_mapping_template, "$input.json('$')")
   }
 }
 
@@ -97,14 +107,16 @@ resource "aws_api_gateway_integration" "get_user_integration" {
   passthrough_behavior    = "WHEN_NO_MATCH"
 
   request_parameters = {
-    "integration.request.header.X-Spring-Cloud-Function-Definition" = "'getUser'"
+    "integration.request.header.X-Spring-Cloud-Function-Definition" = "getUser"
   }
+
   request_templates = {
-    "application/json" = <<-EOT
+    "application/json" = format(local.request_mapping_template, <<-EOT
     {
       "id": "$input.params('userId')"
     }
     EOT
+    )
   }
 }
 
@@ -120,7 +132,7 @@ resource "aws_api_gateway_integration_response" "get_user_integration_response_4
   resource_id = aws_api_gateway_resource.webapp_users_with_id_resource.id
   http_method = aws_api_gateway_integration.get_user_integration.http_method
   status_code = aws_api_gateway_method_response.get_user_response_404.status_code
-  selection_pattern = ".*No value present.*"
+  selection_pattern = "user with id \\d+ does not exist"
 }
 
 # ********* DELETE /users/{userId}
@@ -155,14 +167,16 @@ resource "aws_api_gateway_integration" "delete_user_integration" {
   passthrough_behavior    = "WHEN_NO_MATCH"
 
   request_parameters = {
-    "integration.request.header.spring_cloud_function_definition" = "'deleteUser'"
+    "integration.request.header.X-Spring-Cloud-Function-Definition" = "deleteUser"
   }
+
   request_templates = {
-    "application/json" = <<-EOT
+    "application/json" = format(local.request_mapping_template, <<-EOT
     {
       "id": "$input.params('userId')"
     }
     EOT
+    )
   }
 }
 
@@ -178,7 +192,7 @@ resource "aws_api_gateway_integration_response" "delete_user_integration_respons
   resource_id = aws_api_gateway_resource.webapp_users_with_id_resource.id
   http_method = aws_api_gateway_integration.delete_user_integration.http_method
   status_code = aws_api_gateway_method_response.delete_user_response_404.status_code
-  selection_pattern = ".*No value present.*"
+  selection_pattern = "user with id \\d+ does not exist"
 }
 
 

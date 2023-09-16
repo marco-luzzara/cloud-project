@@ -79,16 +79,16 @@ public class LambdaIT {
         assertThat(userRestApiCaller.callUserGetApi(userId).statusCode()).isEqualTo(404);
     }
 
-    @Test
-    void givenUser_whenAddShop_thenCannotGetInfo() throws IOException, InterruptedException
-    {
-        var userCreation = new UserCreationRequest("test");
-        var creationResponse = userRestApiCaller.callUserCreateApi(userCreation);
-        var userId = creationResponse.body().id();
-
-        var deletionResponse = userRestApiCaller.callUserDeleteApi(userId);
-
-        assertThat(deletionResponse.statusCode()).isEqualTo(HttpStatus.SC_OK);
-        assertThat(userRestApiCaller.callUserGetApi(userId).statusCode()).isEqualTo(404);
-    }
+//    @Test
+//    void givenUser_whenAddShop_thenCannotGetInfo() throws IOException, InterruptedException
+//    {
+//        var userCreation = new UserCreationRequest("test");
+//        var creationResponse = userRestApiCaller.callUserCreateApi(userCreation);
+//        var userId = creationResponse.body().id();
+//
+//        var deletionResponse = userRestApiCaller.callUserDeleteApi(userId);
+//
+//        assertThat(deletionResponse.statusCode()).isEqualTo(HttpStatus.SC_OK);
+//        assertThat(userRestApiCaller.callUserGetApi(userId).statusCode()).isEqualTo(404);
+//    }
 }

@@ -27,6 +27,11 @@ jobs:
           distribution: 'corretto'
       - name: Validate Gradle wrapper
         uses: gradle/wrapper-validation-action@ccb4328a959376b642e027874838f60f8e596de3
+      - name: Create API Key File
+        env:
+          API_KEY: ${{ secrets.LOCALSTACK_APIKEY }}
+        run: |
+          echo "$LOCALSTACK_APIKEY" > src/test/resources/localstack/apikey.secret
       - name: Build
         uses: gradle/gradle-build-action@749f47bda3e44aa060e82d7b3ef7e40d953bd629
         with:

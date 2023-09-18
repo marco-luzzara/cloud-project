@@ -14,6 +14,18 @@ variable "webapp_lambda_dist_path" {
   type        = string
 }
 
+variable "webapp_lambda_dist_bucket" {
+  description = "Bucket for the distribution zip of the web app lambda"
+  type        = string
+  default = "lambda-dist-bucket"
+}
+
+variable "webapp_lambda_dist_bucket_key" {
+  description = "Bucket key for the distribution zip of the web app lambda"
+  type        = string
+  default = "dist.zip"
+}
+
 variable "apigateway_stage_name" {
   description = "The stage name for the api gateway"
   type    = string

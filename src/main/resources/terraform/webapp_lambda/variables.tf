@@ -18,3 +18,13 @@ variable "webapp_lambda_dist_path" {
   description = "Path of the distribution zip of the web app lambda"
   type        = string
 }
+
+variable "webapp_lambda_dist_bucket" {
+  description = "Bucket for the distribution zip of the web app lambda"
+  type        = string
+}
+
+variable "webapp_lambda_dist_bucket_key" {
+  description = "Bucket key for the distribution zip of the web app lambda"
+  type        = string
+}

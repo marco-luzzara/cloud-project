@@ -2,6 +2,7 @@
 **/main/resources/terraform/**/*_secret.auto.tfvars
 *-production.*
 src/test/resources/localstack/apikey.secret
+scripts/volumes/
 
 .gradle
 build/

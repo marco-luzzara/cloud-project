@@ -10,6 +10,7 @@ import org.testcontainers.utility.MountableFile;
 
 import java.io.IOException;
 import java.lang.System.Logger;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -84,48 +85,13 @@ public class TerraformContainer extends GenericContainer<TerraformContainer> {
         this.outputVars = gson.fromJson(outputVarJson, this.outputVars.getClass());
     }
 
-    private void createTfOverrideFileForLocalstackProvider(TfVariables tfVariables) {
-        var providerOverrideFileContent = """
-                provider "aws" {
-                  access_key                  = "%1$s"
-                  secret_key                  = "%2$s"
-                  region                      = var.aws_region
-                  s3_use_path_style           = true
-                  skip_credentials_validation = true
-                  skip_metadata_api_check     = true
-                  skip_requesting_account_id  = true
-                                
-                  endpoints {
-                    apigateway     = "%3$s"
-                    apigatewayv2   = "%3$s"
-                    cloudformation = "%3$s"
-                    cloudwatch     = "%3$s"
-                    dynamodb       = "%3$s"
-                    ec2            = "%3$s"
-                    es             = "%3$s"
-                    elasticache    = "%3$s"
-                    firehose       = "%3$s"
-                    iam            = "%3$s"
-                    kinesis        = "%3$s"
-                    lambda         = "%3$s"
-                    rds            = "%3$s"
-                    redshift       = "%3$s"
-                    route53        = "%3$s"
-                    s3             = "%3$s"
-                    secretsmanager = "%3$s"
-                    ses            = "%3$s"
-                    sns            = "%3$s"
-                    sqs            = "%3$s"
-                    ssm            = "%3$s"
-                    stepfunctions  = "%3$s"
-                    sts            = "%3$s"
-                  }
-                }
-                """.formatted(tfVariables.accessKey(),
-                    tfVariables.secretKey(),
-                    "http://%s:%s".formatted(tfVariables.localstackHostname(),
-                            tfVariables.localstackPort()));
-        this.copyFileToContainer(Transferable.of(providerOverrideFileContent), "/app/provider_override.tf");
+    private void createTfOverrideFileForLocalstackProvider(TfVariables tfVariables) throws IOException {
+        var providerOverrideTemplateTf = new PathMatchingResourcePatternResolver().getResource("terraform/provider_override_template.tf");
+        var providerOverrideTf = providerOverrideTemplateTf.getContentAsString(StandardCharsets.UTF_8)
+                .formatted(tfVariables.accessKey(),
+                        tfVariables.secretKey(),
+                        "http://%s:%s".formatted(tfVariables.localstackHostname(), tfVariables.localstackPort()));
+        this.copyFileToContainer(Transferable.of(providerOverrideTf), "/app/provider_override.tf");
     }
 
     /**
@@ -136,7 +102,7 @@ public class TerraformContainer extends GenericContainer<TerraformContainer> {
      * - module1/
      * - - main.tf
      * - - variables.tf
-     * - - localstack.auto.tfvars
+     * - localstack.auto.tfvars
      * ...
      */
     private void copyTerraformFilesToContainer() throws IOException {

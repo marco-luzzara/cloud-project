@@ -1,0 +1,40 @@
+services:
+  localstack:
+    container_name: "${LOCALSTACK_CONTAINER_NAME-localstackmain}"
+    image: localstack/localstack-pro:latest
+    ports:
+      - "127.0.0.1:${LOCALSTACK_PORT:-4566}:4566"            # LocalStack Gateway
+      - "127.0.0.1:4510-4559:4510-4559"  # external services port range
+      - "127.0.0.1:53:53"                # DNS config (required for Pro)
+      - "127.0.0.1:53:53/udp"            # DNS config (required for Pro)
+      - "127.0.0.1:443:443"              # LocalStack HTTPS Gateway (required for Pro)
+    environment:
+      - DEBUG=${DEBUG-}
+      - PERSISTENCE=${LOCALSTACK_PERSISTENCE:-1}
+      - LOCALSTACK_API_KEY=${LOCALSTACK_API_KEY:?Create the env variable LOCALSTACK_API_KEY and fill it with the api key}
+      - DOCKER_HOST=unix:///var/run/docker.sock
+      - SERVICES=lambda,s3,apigateway,logs,rds
+      - LAMBDA_DOCKER_NETWORK=localstack_network
+      - MAIN_DOCKER_NETWORK=localstack_network
+    volumes:
+      - "./volumes/${LOCALSTACK_VOLUME_DIR:-localstack_persistence}:/var/lib/localstack"
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    networks:
+      - localstack_network
+
+  terraform:
+    container_name: "${TERRAFORM_CONTAINER_NAME-terraform_for_localstack}"
+    image: hashicorp/terraform:1.5.6
+    working_dir: /app
+    entrypoint: sh -c "sleep inf"
+    depends_on:
+      localstack:
+        condition: service_healthy
+    volumes:
+      - "./volumes/${TERRAFORM_VOLUME_DIR:-terraform}:/app"
+    networks:
+      - localstack_network
+
+
+networks:
+  localstack_network:

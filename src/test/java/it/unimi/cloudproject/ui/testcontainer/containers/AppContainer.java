@@ -46,6 +46,7 @@ public class AppContainer extends LocalStackContainer {
                 Service.LAMBDA,
                 Service.API_GATEWAY,
                 Service.S3,
+                Service.CLOUDWATCHLOGS,
                 LocalStackContainer.EnabledService.named("rds"));
         withEnv(Map.of(
                 "LAMBDA_DOCKER_NETWORK", ((Network.NetworkImpl) NETWORK).getName(),

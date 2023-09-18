@@ -5,9 +5,7 @@ import it.unimi.cloudproject.ui.dto.requests.user.UserCreationRequest;
 import it.unimi.cloudproject.ui.testcontainer.containers.AppContainer;
 import it.unimi.cloudproject.ui.testcontainer.containers.TerraformContainer;
 import it.unimi.cloudproject.ui.testcontainer.helpers.LocalstackUserRestApiCaller;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 

@@ -86,7 +86,7 @@ public class TerraformContainer extends GenericContainer<TerraformContainer> {
     }
 
     private void createTfOverrideFileForLocalstackProvider(TfVariables tfVariables) throws IOException {
-        var providerOverrideTemplateTf = new PathMatchingResourcePatternResolver().getResource("terraform/provider_override_template.tf");
+        var providerOverrideTemplateTf = new PathMatchingResourcePatternResolver().getResource("terraform/provider_override.tf.template");
         var providerOverrideTf = providerOverrideTemplateTf.getContentAsString(StandardCharsets.UTF_8)
                 .formatted(tfVariables.accessKey(),
                         tfVariables.secretKey(),

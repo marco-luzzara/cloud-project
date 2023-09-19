@@ -1,10 +1,13 @@
 resource "aws_s3_bucket" "webapp_lambda_bucket" {
+  count = var.webapp_lambda_dist_bucket == "hot-reload" ? 0 : 1
+
   bucket = var.webapp_lambda_dist_bucket
 }
 
 resource "aws_s3_object" "webapp_lambda_distribution_zip" {
-  depends_on = [aws_s3_bucket.webapp_lambda_bucket]
-  bucket = var.webapp_lambda_dist_bucket
+  count = var.webapp_lambda_dist_bucket == "hot-reload" ? 0 : 1
+
+  bucket = aws_s3_bucket.webapp_lambda_bucket[count.index].bucket
   key    = var.webapp_lambda_dist_bucket_key
   source = var.webapp_lambda_dist_path
 }
@@ -33,6 +36,7 @@ resource "aws_lambda_function" "webapp" {
 
   s3_bucket = var.webapp_lambda_dist_bucket
   s3_key = var.webapp_lambda_dist_bucket_key
+  source_code_hash = var.webapp_lambda_dist_bucket == "hot-reload" ? null : filebase64sha256(var.webapp_lambda_dist_path)
 }
 
 #resource "null_resource" "wait_for_webapp_active" {

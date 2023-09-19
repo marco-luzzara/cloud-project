@@ -21,7 +21,7 @@ main() {
     TERRAFORM_VOLUME_DIR="terraform"
     LOCALSTACK_CONTAINER_NAME="localstackmain"
     LOCALSTACK_VOLUME_DIR="localstack_persistence"
-    LOCALSTACK_API_KEY="$(cat ../apikey.secret)"
+    LOCALSTACK_API_KEY="$(cat ../src/test/resources/localstack/apikey.secret)"
     LOCALSTACK_PORT=4566
     PERSISTENCE=1
     export TERRAFORM_CONTAINER_NAME

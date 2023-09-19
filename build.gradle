@@ -76,13 +76,21 @@ dependencies {
 	}
 }
 
+var DIST_FOLDER = "dist"
+
 task buildZip(type: Zip) {
 	into('lib') {
 		from(jar)
 		from(configurations.runtimeClasspath)
 	}
 	archiveFileName = "${rootProject.name}.zip"
-	destinationDirectory = file('dist')
+	destinationDirectory = file(DIST_FOLDER)
+}
+
+task buildHotReloadFolder(type: Copy) {
+	from zipTree("$DIST_FOLDER/${rootProject.name}.zip")
+	into "${project.buildDir}/hot-reload"
+	dependsOn buildZip
 }
 
 tasks.named('test') {

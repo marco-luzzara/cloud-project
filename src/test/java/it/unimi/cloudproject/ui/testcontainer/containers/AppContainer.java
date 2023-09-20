@@ -2,6 +2,7 @@ package it.unimi.cloudproject.ui.testcontainer.containers;
 
 import com.github.dockerjava.api.async.ResultCallback;
 import com.github.dockerjava.api.model.Frame;
+import it.unimi.cloudproject.ui.testcontainer.helpers.TestContainerHelper;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.testcontainers.containers.Network;
 import org.testcontainers.containers.localstack.LocalStackContainer;
@@ -11,6 +12,7 @@ import org.testcontainers.utility.DockerImageName;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Paths;
 import java.util.Map;
 import java.util.Objects;
 
@@ -23,20 +25,20 @@ public class AppContainer extends LocalStackContainer {
     private String restApiId;
     private String deploymentStageName;
 
-    private final boolean keepLambdasOpenedAfterExit;
+    private final LocalstackConfig localstackConfig;
 
     private static final String GET_LOGS_FROM_CW_SCRIPT_NAME = "aws-get-last-logs.sh";
 
     public AppContainer()
     {
-        this(false);
+        this(new LocalstackConfig(false, "info"));
     }
 
-    public AppContainer(boolean keepLambdasOpenedAfterExit)
+    public AppContainer(LocalstackConfig localstackConfig)
     {
         super(localstackImage);
 
-        this.keepLambdasOpenedAfterExit = keepLambdasOpenedAfterExit;
+        this.localstackConfig = localstackConfig;
 
         var apiKey = getApiKeyOrThrow();
 
@@ -54,7 +56,8 @@ public class AppContainer extends LocalStackContainer {
         withEnv(Map.of(
                 "LAMBDA_DOCKER_NETWORK", ((Network.NetworkImpl) NETWORK).getName(),
                 "MAIN_DOCKER_NETWORK", ((Network.NetworkImpl) NETWORK).getName(),
-                "LOCALSTACK_API_KEY", apiKey
+                "LOCALSTACK_API_KEY", apiKey,
+                "LS_LOG", this.localstackConfig.logLevel
                 ));
     }
 
@@ -140,7 +143,7 @@ public class AppContainer extends LocalStackContainer {
                     sb.append("**************************").append(System.lineSeparator());
                     LOGGER.log(System.Logger.Level.INFO, sb.toString());
 
-                    if (!keepLambdasOpenedAfterExit) {
+                    if (!localstackConfig.keepLambdasOpenedAfterExit()) {
                         dockerClient.stopContainerCmd(c.getId()).exec();
                         dockerClient.removeContainerCmd(c.getId()).exec();
                     }
@@ -157,4 +160,21 @@ public class AppContainer extends LocalStackContainer {
                 this.deploymentStageName,
                 pathPart));
     }
+
+    public void storeDiagnoseReportIfTracing() throws IOException, InterruptedException {
+        if (this.localstackConfig.logLevel().equals("trace")) {
+            var reportHostPath = Paths.get(".").toAbsolutePath()
+                    .resolve("build")
+                    .resolve("reports")
+                    .resolve("localstack_diagnose_report.json.gz");
+            var reportContainerPath = "/diagnose.json.gz";
+            // create diagnose report
+            var diagnoseReportCmd = this.execInContainer("bash", "-c", "curl -s localhost:4566/_localstack/diagnose | gzip -cf > %s".formatted(reportContainerPath));
+            TestContainerHelper.assertContainerCmdSuccessful(diagnoseReportCmd);
+            this.copyFileFromContainer(reportContainerPath, reportHostPath.toString());
+        }
+    }
+
+    public record LocalstackConfig(boolean keepLambdasOpenedAfterExit,
+                                   String logLevel) {}
 }

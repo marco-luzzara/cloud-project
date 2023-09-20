@@ -1,6 +1,7 @@
 package it.unimi.cloudproject.ui.testcontainer.containers;
 
 import com.google.gson.Gson;
+import it.unimi.cloudproject.ui.testcontainer.helpers.TestContainerHelper;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.testcontainers.containers.GenericContainer;
@@ -9,7 +10,6 @@ import org.testcontainers.utility.DockerImageName;
 import org.testcontainers.utility.MountableFile;
 
 import java.io.IOException;
-import java.lang.System.Logger;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -19,7 +19,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class TerraformContainer extends GenericContainer<TerraformContainer> {
-    private static final Logger logger = System.getLogger(TerraformContainer.class.getName());
     private static final String IMAGE = "hashicorp/terraform:1.5.6";
     private Map<String, Object> outputVars = new HashMap<>();
 
@@ -51,7 +50,7 @@ public class TerraformContainer extends GenericContainer<TerraformContainer> {
             createTfOverrideFileForLocalstackProvider(tfVariables);
 
             var applyCmdExecution = this.execInContainer("sh", "-c", "terraform apply -auto-approve");
-            assertContainerCmdSuccessful(applyCmdExecution);
+            TestContainerHelper.assertContainerCmdSuccessful(applyCmdExecution);
 
             this.populateOutputVarFromTerraform();
         } catch (IOException | InterruptedException e) {
@@ -72,11 +71,6 @@ public class TerraformContainer extends GenericContainer<TerraformContainer> {
 
     public String getOutputVar(OutputVar outputVar) {
         return ((Map<String, Object>) this.outputVars.get(outputVar.varName)).get("value").toString();
-    }
-
-    private void assertContainerCmdSuccessful(ExecResult execResult) {
-        assert execResult.getExitCode() == 0 : execResult.getStderr();
-        logger.log(Logger.Level.INFO, execResult.getStdout());
     }
 
     private void populateOutputVarFromTerraform() throws IOException, InterruptedException {

@@ -20,6 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class LambdaIT {
     @Container
     private static final AppContainer app = new AppContainer();
+//            new AppContainer.LocalstackConfig(false, "trace"));
 
     @Container
     private static final TerraformContainer terraform = new TerraformContainer().withNetwork(app.NETWORK);
@@ -57,6 +58,11 @@ public class LambdaIT {
     static void cleanupAll()
     {
         app.logAndPossiblyDestroyLambda();
+    }
+
+    @AfterAll
+    static void cleanupAll() throws IOException, InterruptedException {
+        app.storeDiagnoseReportIfTracing();
     }
 
     @Test

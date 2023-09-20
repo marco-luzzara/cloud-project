@@ -25,6 +25,10 @@ provider "aws" {
   }
 }
 
+module "authentication" {
+  source = "./authentication"
+}
+
 module "webapp_db" {
   source = "./webapp_db"
 
@@ -40,6 +44,8 @@ module "webapp_lambda" {
   webapp_lambda_dist_path = var.webapp_lambda_dist_path
   webapp_lambda_iam_role_arn = var.webapp_lambda_iam_role_arn
   webapp_lambda_system_properties = {
+    cognito_main_user_pool_id = module.authentication.cognito_main_pool_id
+    cognito_main_user_pool_client_id = module.authentication.cognito_main_pool_client_id
     spring_active_profile = var.webapp_lambda_spring_active_profile
     spring_datasource_url = "jdbc:postgresql://${module.webapp_db.rds_endpoint}/${var.webapp_db_config.db_name}"
     spring_datasource_username = var.webapp_db_credentials.username

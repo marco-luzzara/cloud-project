@@ -25,6 +25,10 @@ def JUNIT_VERSION = '5.8.1'
 def LIQUIBASE_VERSION = '4.23.0'
 
 dependencies {
+	// aws sdk
+	implementation platform('software.amazon.awssdk:bom:2.20.150')
+	implementation 'software.amazon.awssdk:cognitoidentityprovider'
+
 	// spring
 	implementation "org.springframework.boot:spring-boot-starter:${SPRING_VERSION}"
 	implementation "org.springframework.boot:spring-boot-starter-aop:${SPRING_VERSION}"

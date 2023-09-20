@@ -26,6 +26,7 @@ resource "aws_lambda_function" "webapp" {
       JAVA_TOOL_OPTIONS = <<EOT
         -DMAIN_CLASS=it.unimi.cloudproject.CloudProjectApplication
         -Dlogging.level.org.springframework=INFO
+        -Daws.cognito.user_pool_client_id=${var.webapp_lambda_system_properties.cognito_main_user_pool_client_id}
         -Dspring.profiles.active=${var.webapp_lambda_system_properties.spring_active_profile}
         -Dspring.datasource.url=${var.webapp_lambda_system_properties.spring_datasource_url}
         -Dspring.datasource.username=${var.webapp_lambda_system_properties.spring_datasource_username}

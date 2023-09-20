@@ -1,4 +1,4 @@
 package it.unimi.cloudproject.ui.dto.requests.user;
 
-public record UserCreationRequest(String username) {
+public record UserCreationRequest(String username, String password) {
 }

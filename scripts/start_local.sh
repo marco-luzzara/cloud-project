@@ -73,7 +73,7 @@ main() {
     docker exec "$TERRAFORM_CONTAINER_NAME" terraform apply \
         -auto-approve \
         -var="webapp_lambda_dist_bucket=hot-reload" \
-        -var="webapp_lambda_dist_bucket_key=/app/hot-reload"
+        -var="webapp_lambda_dist_bucket_key=$(pwd)/../build/hot-reload"
     print_done
 
     print_step_message "Cleanup"

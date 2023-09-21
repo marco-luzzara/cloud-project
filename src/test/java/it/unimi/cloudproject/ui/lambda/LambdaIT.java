@@ -45,8 +45,8 @@ public class LambdaIT {
         app.initialize(terraform);
     }
 
-    @AfterEach
-    void cleanupEach()
+    @AfterAll
+    void cleanupAll()
     {
         app.logAndPossiblyDestroyLambda();
     }

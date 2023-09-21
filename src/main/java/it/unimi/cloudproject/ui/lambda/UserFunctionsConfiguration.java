@@ -13,12 +13,12 @@ import it.unimi.cloudproject.ui.lambda.model.InvocationWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import software.amazon.awssdk.awscore.exception.AwsServiceException;
-import software.amazon.awssdk.core.exception.SdkClientException;
+import software.amazon.awssdk.core.internal.http.loader.DefaultSdkHttpClientBuilder;
+import software.amazon.awssdk.http.SdkHttpConfigurationOption;
 import software.amazon.awssdk.services.cognitoidentityprovider.CognitoIdentityProviderClient;
 import software.amazon.awssdk.services.cognitoidentityprovider.model.AttributeType;
 import software.amazon.awssdk.services.cognitoidentityprovider.model.SignUpRequest;
-import software.amazon.awssdk.services.cognitoidentityprovider.model.SignUpResponse;
+import software.amazon.awssdk.utils.AttributeMap;
 
 import java.util.Objects;
 import java.util.function.Consumer;
@@ -35,7 +35,11 @@ public class UserFunctionsConfiguration {
             var clientId = System.getProperty("aws.cognito.user_pool_client_id");
 
             Integer userId = null;
-            try (var cognitoClient = CognitoIdentityProviderClient.builder().build()) {
+            try (var cognitoClient = CognitoIdentityProviderClient.builder()
+                    .httpClient(new DefaultSdkHttpClientBuilder().buildWithDefaults(AttributeMap.builder()
+                            .put(SdkHttpConfigurationOption.TRUST_ALL_CERTIFICATES, true)
+                            .build()))
+                    .build()) {
                 userId = this.userService.addUser(new UserCreationData(cr.body().username()));
                 var signUpRequest = SignUpRequest.builder()
                         .clientId(clientId)

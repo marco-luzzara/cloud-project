@@ -17,6 +17,16 @@ variable "http_method" {
   }
 }
 
+variable "authorization" {
+  description = "The authorization type for the method"
+  type = string
+}
+
+variable "authorizer_id" {
+  description = "The authorizer id of the cognito client authorizer"
+  type = string
+}
+
 variable "http_successful_status_code" {
   description = "http status code for the successful case"
   type    = string

@@ -16,7 +16,8 @@ resource "aws_api_gateway_method" "api_method" {
   rest_api_id   = var.rest_api_id
   resource_id   = var.resource_id
   http_method   = var.http_method
-  authorization = "NONE"
+  authorization = var.authorization
+  authorizer_id = var.authorizer_id
 }
 
 resource "aws_api_gateway_method_response" "api_method_response_successful" {

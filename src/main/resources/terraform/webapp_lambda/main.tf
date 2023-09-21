@@ -22,11 +22,14 @@ resource "aws_lambda_function" "webapp" {
 
   environment {
     variables = {
-      FUNCTION_INVOKER_LATE_INITIALIZATION = "true"
+      LAMBDA_DOCKER_DNS = "127.0.0.1"
       JAVA_TOOL_OPTIONS = <<EOT
         -DMAIN_CLASS=it.unimi.cloudproject.CloudProjectApplication
         -Dlogging.level.org.springframework=INFO
+        -Dcom.amazonaws.sdk.disableCertChecking=${var.webapp_lambda_system_properties.disable_cert_checking}
+        -Daws.cognito.user_pool_id=${var.webapp_lambda_system_properties.cognito_main_user_pool_id}
         -Daws.cognito.user_pool_client_id=${var.webapp_lambda_system_properties.cognito_main_user_pool_client_id}
+        -Daws.cognito.user_pool_client_secret=${var.webapp_lambda_system_properties.cognito_main_user_pool_client_secret}
         -Dspring.profiles.active=${var.webapp_lambda_system_properties.spring_active_profile}
         -Dspring.datasource.url=${var.webapp_lambda_system_properties.spring_datasource_url}
         -Dspring.datasource.username=${var.webapp_lambda_system_properties.spring_datasource_username}

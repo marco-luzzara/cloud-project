@@ -46,13 +46,13 @@ module "webapp_lambda" {
   webapp_lambda_system_properties = {
     cognito_main_user_pool_id = module.authentication.cognito_main_pool_id
     cognito_main_user_pool_client_id = module.authentication.cognito_main_pool_client_id
+    cognito_main_user_pool_client_secret = module.authentication.cognito_main_pool_client_secret
     spring_active_profile = var.webapp_lambda_spring_active_profile
     spring_datasource_url = "jdbc:postgresql://${module.webapp_db.rds_endpoint}/${var.webapp_db_config.db_name}"
     spring_datasource_username = var.webapp_db_credentials.username
     spring_datasource_password = var.webapp_db_credentials.password
+    disable_cert_checking = var.webapp_lambda_disable_cert_checking
   }
-
-
 #  when = terraform.workspace == "webapp"
 }
 
@@ -61,6 +61,7 @@ module "webapp_apigw" {
   source = "./webapp_apigw"
 
   webapp_lambda_invoke_arn = module.webapp_lambda.webapp_lambda_invoke_arn
+  cognito_user_pool_arn = module.authentication.cognito_main_pool_arn
   #  when = terraform.workspace == "webapp"
 }
 

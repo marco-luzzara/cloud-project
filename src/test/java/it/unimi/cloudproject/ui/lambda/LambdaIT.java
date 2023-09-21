@@ -68,7 +68,7 @@ public class LambdaIT {
     @Test
     void whenUserRegisterWithApi_thenIdIsReturned() throws IOException, InterruptedException
     {
-        var userCreation = new UserCreationRequest("test");
+        var userCreation = new UserCreationRequest("test", "testtest");
 
         var httpResponse = userRestApiCaller.callUserCreateApi(userCreation);
 
@@ -81,7 +81,7 @@ public class LambdaIT {
     @Test
     void givenUser_whenDeleteWithApi_thenCannotGetInfo() throws IOException, InterruptedException
     {
-        var userCreation = new UserCreationRequest("test");
+        var userCreation = new UserCreationRequest("test", "testtest");
         var creationResponse = userRestApiCaller.callUserCreateApi(userCreation);
         var userId = creationResponse.body().id();
 

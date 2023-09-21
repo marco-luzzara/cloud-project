@@ -13,6 +13,8 @@ variable "webapp_lambda_system_properties" {
     spring_datasource_password = string
     cognito_main_user_pool_id = string
     cognito_main_user_pool_client_id = string
+    cognito_main_user_pool_client_secret = string
+    disable_cert_checking = bool
   })
 }
 

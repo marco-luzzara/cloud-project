@@ -47,7 +47,7 @@ main() {
 
     TEMPDIR=$(mktemp -d)
     echo "Created tempdir: $TEMPDIR"
-    trap 'rm -rf $TEMPDIR' EXIT
+    trap 'rm -rf $TEMPDIR && ./stop_local.sh' ERR
     # copy files inside terraform
     # create tar to preserve the tree structure
     print_step_message "Copying tf files on terraform"
@@ -56,7 +56,7 @@ main() {
     (cd ../src/test/resources/terraform && tar -czf "$TEMPDIR/tfvars_tree.tar.gz" ./*.tfvars)
     docker cp "$TEMPDIR/tf_tree.tar.gz" "$TERRAFORM_CONTAINER_NAME:/app/tf_tree.tar.gz"
     docker cp "$TEMPDIR/tfvars_tree.tar.gz" "$TERRAFORM_CONTAINER_NAME:/app/tfvars_tree.tar.gz"
-    # TODO: maybe printf is not the safest tool for variable replacement...
+    # TODO: printf does not work for variable replacement in
     cat ../src/test/resources/terraform/provider_override.tf.template | sed -e "s/%1\$s/accesskey/g" -e "s/%2\$s/secretkey/g" -e "s/%3\$s/http:\/\/$LOCALSTACK_CONTAINER_NAME:$LOCALSTACK_PORT/g" > "$TEMPDIR/provider_override.tf"
     docker cp "$TEMPDIR/provider_override.tf" "$TERRAFORM_CONTAINER_NAME:/app/provider_override.tf"
 
@@ -77,7 +77,7 @@ main() {
     print_done
 
     print_step_message "Cleanup"
-    rm -r "$TEMPDIR"
+    rm -rf "$TEMPDIR"
     print_done
 }
 

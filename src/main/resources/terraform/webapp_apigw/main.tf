@@ -16,6 +16,14 @@ resource "aws_api_gateway_rest_api" "webapp_rest_api" {
   name = "webapp-api"
 }
 
+resource "aws_api_gateway_authorizer" "user_authorizer" {
+  name                   = "user-authorizer"
+  rest_api_id             = aws_api_gateway_rest_api.webapp_rest_api.id
+  type                   = "COGNITO_USER_POOLS"
+  provider_arns           = [var.cognito_user_pool_arn]
+  identity_source        = "method.request.header.Authorization"
+}
+
 # ************************ Users API ************************
 
 # ********* POST /users
@@ -30,6 +38,8 @@ module "create_user" {
   rest_api_id = aws_api_gateway_rest_api.webapp_rest_api.id
   resource_id = aws_api_gateway_resource.webapp_users_resource.id
   http_method = "POST"
+  authorization = "NONE"
+  authorizer_id = null
   lambda_invocation_arn = var.webapp_lambda_invoke_arn
   http_successful_status_code = "200"
   request_template_for_body = "$input.json('$')"
@@ -48,6 +58,8 @@ module "get_user" {
   rest_api_id = aws_api_gateway_rest_api.webapp_rest_api.id
   resource_id = aws_api_gateway_resource.webapp_users_with_id_resource.id
   http_method = "GET"
+  authorization = "COGNITO_USER_POOLS"
+  authorizer_id = aws_api_gateway_authorizer.user_authorizer.id
   lambda_invocation_arn = var.webapp_lambda_invoke_arn
   http_successful_status_code = "200"
   request_template_for_body = <<-EOT
@@ -71,6 +83,8 @@ module "delete_user" {
   rest_api_id = aws_api_gateway_rest_api.webapp_rest_api.id
   resource_id = aws_api_gateway_resource.webapp_users_with_id_resource.id
   http_method = "DELETE"
+  authorization = "COGNITO_USER_POOLS"
+  authorizer_id = aws_api_gateway_authorizer.user_authorizer.id
   lambda_invocation_arn = var.webapp_lambda_invoke_arn
   http_successful_status_code = "200"
   request_template_for_body = <<-EOT

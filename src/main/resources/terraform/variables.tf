@@ -26,6 +26,12 @@ variable "webapp_lambda_dist_bucket_key" {
   default = "dist.zip"
 }
 
+variable "webapp_lambda_disable_cert_checking" {
+  description = "It is used to disable the SSL certificate checking when doing HTTPS request to the mocked AWS endpoints"
+  type = bool
+  default = false
+}
+
 variable "apigateway_stage_name" {
   description = "The stage name for the api gateway"
   type    = string

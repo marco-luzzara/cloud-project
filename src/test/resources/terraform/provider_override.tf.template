@@ -31,5 +31,7 @@ provider "aws" {
     ssm            = "%3$s"
     stepfunctions  = "%3$s"
     sts            = "%3$s"
+    cognitoidentity = "%3$s"
+    cognitoidp     = "%3$s"
   }
 }

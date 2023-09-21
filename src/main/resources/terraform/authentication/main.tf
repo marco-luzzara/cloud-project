@@ -1,12 +1,10 @@
 resource "aws_cognito_user_pool" "main_pool" {
   name = "main-pool"
 
-  alias_attributes = ["email"]
   auto_verified_attributes = ["email"]
   username_attributes = ["email"]
   schema {
     attribute_data_type = "Number"
-    developer_only_attribute = false
     mutable = false
     name = "dbId"  # Custom attribute name
     required = true
@@ -21,7 +19,6 @@ resource "aws_cognito_user_pool" "main_pool" {
   user_pool_add_ons {
     advanced_security_mode = "OFF"
   }
-  allowed_oauth_flows = ["password"]
 }
 
 resource "aws_cognito_user_group" "customer_user_group" {
@@ -43,6 +40,8 @@ resource "aws_cognito_user_pool_client" "main_pool_client" {
   name            = "main-pool-client"
   user_pool_id    = aws_cognito_user_pool.main_pool.id
   allowed_oauth_flows_user_pool_client = true
-  allowed_oauth_flows                 = ["password"]
-  allowed_oauth_scopes                = ["openid", "email", "profile"]
+  allowed_oauth_flows                 = ["client_credentials"]
+  allowed_oauth_scopes                = []
+
+  generate_secret = true
 }

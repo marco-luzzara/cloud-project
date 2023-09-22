@@ -46,6 +46,26 @@ module "create_user" {
   spring_cloud_function_definition_header_value = "createUser"
 }
 
+# ********* POST /login
+resource "aws_api_gateway_resource" "webapp_login_resource" {
+  rest_api_id = aws_api_gateway_rest_api.webapp_rest_api.id
+  parent_id   = aws_api_gateway_rest_api.webapp_rest_api.root_resource_id
+  path_part   = "login"
+}
+
+module "user_login" {
+  source = "../webapp_apigw_integration"
+  rest_api_id = aws_api_gateway_rest_api.webapp_rest_api.id
+  resource_id = aws_api_gateway_resource.webapp_login_resource.id
+  http_method = "POST"
+  authorization = "NONE"
+  authorizer_id = null
+  lambda_invocation_arn = var.webapp_lambda_invoke_arn
+  http_successful_status_code = "200"
+  request_template_for_body = "$input.json('$')"
+  spring_cloud_function_definition_header_value = "loginUser"
+}
+
 # ********* GET /users/{userId}
 resource "aws_api_gateway_resource" "webapp_users_with_id_resource" {
   rest_api_id = aws_api_gateway_rest_api.webapp_rest_api.id

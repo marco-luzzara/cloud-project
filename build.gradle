@@ -28,6 +28,7 @@ dependencies {
 	// aws sdk
 	implementation platform('software.amazon.awssdk:bom:2.20.150')
 	implementation 'software.amazon.awssdk:cognitoidentityprovider'
+	implementation 'software.amazon.awssdk:cognitoidentity'
 
 	// spring
 	implementation "org.springframework.boot:spring-boot-starter:${SPRING_VERSION}"

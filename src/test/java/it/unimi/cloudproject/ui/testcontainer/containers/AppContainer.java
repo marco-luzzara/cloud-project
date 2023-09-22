@@ -85,10 +85,7 @@ public class AppContainer extends LocalStackContainer {
         this.restApiId = terraform.getOutputVar(TerraformContainer.OutputVar.REST_API_ID);
         this.deploymentStageName = terraform.getOutputVar(TerraformContainer.OutputVar.DEPLOYMENT_STAGE_NAME);
 
-        // TODO: clean up code
-        var logScript = new PathMatchingResourcePatternResolver().getResource("localstack/scripts/%s".formatted(GET_LOGS_FROM_CW_SCRIPT_NAME));
-        this.copyFileToContainer(Transferable.of(logScript.getContentAsByteArray()), "/" + GET_LOGS_FROM_CW_SCRIPT_NAME);
-        this.execInContainer("chmod", "+x", "/" + GET_LOGS_FROM_CW_SCRIPT_NAME);
+        this.copyScriptToContainer("localstack/scripts/%s".formatted(GET_LOGS_FROM_CW_SCRIPT_NAME));
 
         this.followOutput(outFrame ->
                 LOGGER.log(System.Logger.Level.INFO,
@@ -96,10 +93,7 @@ public class AppContainer extends LocalStackContainer {
     }
 
     public void printCloudwatchLogs() throws IOException, InterruptedException {
-        var executeLogScriptCmd = this.execInContainer("/%s".formatted(GET_LOGS_FROM_CW_SCRIPT_NAME));
-        // TODO: to replace with helper method
-        assert executeLogScriptCmd.getExitCode() == 0 : executeLogScriptCmd.getStderr();
-        LOGGER.log(System.Logger.Level.INFO, executeLogScriptCmd.getStdout());
+        this.execScriptInContainer(GET_LOGS_FROM_CW_SCRIPT_NAME);
     }
 
     public void logAndPossiblyDestroyLambda() {
@@ -173,6 +167,17 @@ public class AppContainer extends LocalStackContainer {
             TestContainerHelper.assertContainerCmdSuccessful(diagnoseReportCmd);
             this.copyFileFromContainer(reportContainerPath, reportHostPath.toString());
         }
+    }
+
+    private void copyScriptToContainer(String scriptResourcePath) throws IOException, InterruptedException {
+        var scriptResource = new PathMatchingResourcePatternResolver().getResource(scriptResourcePath);
+        this.copyFileToContainer(Transferable.of(scriptResource.getContentAsByteArray()), "/" + scriptResource.getFilename());
+        this.execInContainer("chmod", "+x", "/" + scriptResource.getFilename());
+    }
+
+    private void execScriptInContainer(String scriptName) throws IOException, InterruptedException {
+        var executeScriptCmd = this.execInContainer("/" + scriptName);
+        TestContainerHelper.assertContainerCmdSuccessful(executeScriptCmd);
     }
 
     public record LocalstackConfig(boolean keepLambdasOpenedAfterExit,

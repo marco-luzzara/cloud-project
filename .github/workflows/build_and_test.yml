@@ -1,9 +1,10 @@
 name: Java CI
 
+env:
+  INTEGRATION_TESTS_ENABLED: ${{ startsWith(github.event.head_commit.message, '[ITENABLED]') && 'true' || 'false' }}
+
 on:
   push:
-    branches:
-      - main
 
 permissions:
   checks: write
@@ -29,13 +30,15 @@ jobs:
         uses: gradle/wrapper-validation-action@ccb4328a959376b642e027874838f60f8e596de3
       - name: Create API Key File
         env:
-          API_KEY: ${{ secrets.LOCALSTACK_APIKEY }}
+          LOCALSTACK_APIKEY: ${{ secrets.LOCALSTACK_APIKEY }}
         run: |
           mkdir -p src/test/resources/localstack && echo "$LOCALSTACK_APIKEY" > src/test/resources/localstack/apikey.secret
       - name: Build
         uses: gradle/gradle-build-action@749f47bda3e44aa060e82d7b3ef7e40d953bd629
         with:
-          arguments: build
+          arguments: |
+            build
+            -DIntegrationTestsEnabled=$INTEGRATION_TESTS_ENABLED
       - name: JaCoCo Code Coverage Report
         id: jacoco_reporter
         uses: PavanMudigonda/jacoco-reporter@v4.8

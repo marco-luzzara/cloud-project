@@ -6,6 +6,8 @@ import it.unimi.cloudproject.ui.testcontainer.containers.AppContainer;
 import it.unimi.cloudproject.ui.testcontainer.containers.TerraformContainer;
 import it.unimi.cloudproject.ui.testcontainer.helpers.LocalstackUserRestApiCaller;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.condition.EnabledIf;
+import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -13,6 +15,7 @@ import java.io.IOException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@EnabledIfSystemProperty(named = "IntegrationTestsEnabled", matches = "true")
 @Testcontainers
 public class LambdaIT {
     @Container

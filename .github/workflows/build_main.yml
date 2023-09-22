@@ -1,0 +1,43 @@
+name: Build with Gradle and Publish Coverage on Pages
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  checks: write
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build:
+    permissions:
+      checks: write
+      id-token: write
+      contents: read
+    uses: ./.github/workflows/build_only.yml
+    secrets: inherit
+
+  publish_on_pages:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Upload Code Coverage Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: code-coverage-reports
+          path: build/reports/jacoco/test
+      - name: Setup Pages
+        uses: actions/configure-pages@v3
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v2
+        with:
+          # Upload entire repository
+          path: './build/reports/jacoco/test/html'
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v2

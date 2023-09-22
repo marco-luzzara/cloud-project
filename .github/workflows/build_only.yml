@@ -1,22 +1,18 @@
-name: Java CI
+name: Build
 
 env:
   INTEGRATION_TESTS_ENABLED: ${{ startsWith(github.event.head_commit.message, '[ITENABLED]') && 'true' || 'false' }}
 
 on:
-  push:
+  workflow_call:
 
 permissions:
   checks: write
   contents: read
-  pages: write
   id-token: write
 
 jobs:
   build:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
 
     steps:
@@ -29,16 +25,17 @@ jobs:
       - name: Validate Gradle wrapper
         uses: gradle/wrapper-validation-action@ccb4328a959376b642e027874838f60f8e596de3
       - name: Create API Key File
+        if: ${{ env.INTEGRATION_TESTS_ENABLED == 'true' }}
         env:
           LOCALSTACK_APIKEY: ${{ secrets.LOCALSTACK_APIKEY }}
         run: |
-          mkdir -p src/test/resources/localstack && echo "$LOCALSTACK_APIKEY" > src/test/resources/localstack/apikey.secret
+            mkdir -p src/test/resources/localstack && echo "$LOCALSTACK_APIKEY" > src/test/resources/localstack/apikey.secret
       - name: Build
         uses: gradle/gradle-build-action@749f47bda3e44aa060e82d7b3ef7e40d953bd629
         with:
           arguments: |
-            build
-            -DIntegrationTestsEnabled=$INTEGRATION_TESTS_ENABLED
+              build
+              -DIntegrationTestsEnabled=$INTEGRATION_TESTS_ENABLED
       - name: JaCoCo Code Coverage Report
         id: jacoco_reporter
         uses: PavanMudigonda/jacoco-reporter@v4.8
@@ -53,18 +50,3 @@ jobs:
           publish_only_summary: false
       - name: Add Coverage Job Summary
         run: echo "${{ steps.jacoco_reporter.outputs.coverageSummary }}" >> $GITHUB_STEP_SUMMARY
-      - name: Upload Code Coverage Artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: code-coverage-reports
-          path: build/reports/jacoco/test
-      - name: Setup Pages
-        uses: actions/configure-pages@v3
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v2
-        with:
-          # Upload entire repository
-          path: './build/reports/jacoco/test/html'
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v2

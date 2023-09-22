@@ -1,0 +1,20 @@
+name: Build with Gradle and Publish Coverage on Pages
+
+on:
+  push:
+    branches-ignore:
+      - main
+
+permissions:
+  checks: write
+  contents: read
+  id-token: write
+
+jobs:
+  build:
+    permissions:
+      checks: write
+      id-token: write
+      contents: read
+    uses: ./.github/workflows/build_only.yml
+    secrets: inherit

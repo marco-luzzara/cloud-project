@@ -41,12 +41,17 @@ public class LambdaIT {
 //    // }});
 //
     @BeforeAll
-    static void initializeAll() {
+    static void initializeAll() throws IOException, InterruptedException {
         app.initialize(terraform);
     }
 
+    @AfterEach
+    void cleanupEach() throws IOException, InterruptedException {
+        app.printCloudwatchLogs();
+    }
+
     @AfterAll
-    void cleanupAll()
+    static void cleanupAll()
     {
         app.logAndPossiblyDestroyLambda();
     }

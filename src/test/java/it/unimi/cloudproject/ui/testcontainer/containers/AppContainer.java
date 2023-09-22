@@ -5,6 +5,7 @@ import com.github.dockerjava.api.model.Frame;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.testcontainers.containers.Network;
 import org.testcontainers.containers.localstack.LocalStackContainer;
+import org.testcontainers.images.builder.Transferable;
 import org.testcontainers.utility.DockerImageName;
 
 import java.io.IOException;
@@ -23,6 +24,8 @@ public class AppContainer extends LocalStackContainer {
     private String deploymentStageName;
 
     private final boolean keepLambdasOpenedAfterExit;
+
+    private static final String GET_LOGS_FROM_CW_SCRIPT_NAME = "aws-get-last-logs.sh";
 
     public AppContainer()
     {
@@ -68,7 +71,7 @@ public class AppContainer extends LocalStackContainer {
     /**
      * run the terraform apply to create all the necessary resources
      */
-    public void initialize(TerraformContainer terraform) {
+    public void initialize(TerraformContainer terraform) throws IOException, InterruptedException {
         terraform.initialize();
         terraform.apply(new TerraformContainer.TfVariables(
                 this.getAccessKey(),
@@ -79,9 +82,21 @@ public class AppContainer extends LocalStackContainer {
         this.restApiId = terraform.getOutputVar(TerraformContainer.OutputVar.REST_API_ID);
         this.deploymentStageName = terraform.getOutputVar(TerraformContainer.OutputVar.DEPLOYMENT_STAGE_NAME);
 
+        // TODO: clean up code
+        var logScript = new PathMatchingResourcePatternResolver().getResource("localstack/scripts/%s".formatted(GET_LOGS_FROM_CW_SCRIPT_NAME));
+        this.copyFileToContainer(Transferable.of(logScript.getContentAsByteArray()), "/" + GET_LOGS_FROM_CW_SCRIPT_NAME);
+        this.execInContainer("chmod", "+x", "/" + GET_LOGS_FROM_CW_SCRIPT_NAME);
+
         this.followOutput(outFrame ->
                 LOGGER.log(System.Logger.Level.INFO,
                         "%s - %s".formatted(outFrame.getType(), outFrame.getUtf8String())));
+    }
+
+    public void printCloudwatchLogs() throws IOException, InterruptedException {
+        var executeLogScriptCmd = this.execInContainer("/%s".formatted(GET_LOGS_FROM_CW_SCRIPT_NAME));
+        // TODO: to replace with helper method
+        assert executeLogScriptCmd.getExitCode() == 0 : executeLogScriptCmd.getStderr();
+        LOGGER.log(System.Logger.Level.INFO, executeLogScriptCmd.getStdout());
     }
 
     public void logAndPossiblyDestroyLambda() {

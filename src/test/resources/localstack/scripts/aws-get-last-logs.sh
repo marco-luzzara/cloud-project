@@ -17,13 +17,13 @@ fi
 cd "$(dirname "$0")"
 
 main() {
-    LOG_GROUPS_OUTPUT="$(awslocal logs describe-log-groups --query 'logGroups[*].logGroupName')"
+    LOG_GROUPS_OUTPUT="$(awslocal logs describe-log-groups --query 'logGroups[*].logGroupName' --output text)"
     read -ra LOG_GROUP_NAMES <<< "$LOG_GROUPS_OUTPUT"
 
     for LOG_GROUP_NAME in "${LOG_GROUP_NAMES[@]}"
     do
         echo "********* Logging group $LOG_GROUP_NAME"
-        LOG_STREAMS_OUTPUT="$(awslocal logs describe-log-streams --log-group-name "$LOG_GROUP_NAME" --query 'logStreams[*].logStreamName')"
+        LOG_STREAMS_OUTPUT="$(awslocal logs describe-log-streams --log-group-name "$LOG_GROUP_NAME" --query 'logStreams[*].logStreamName' --output text)"
         read -ra LOG_STREAM_NAMES <<< "$LOG_STREAMS_OUTPUT"
 
         for LOG_STREAM_NAME in "${LOG_STREAM_NAMES[@]}"

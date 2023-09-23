@@ -1,4 +1,4 @@
 package it.unimi.cloudproject.ui.dto.requests.user;
 
-public record UserGetRequest(int id) {
+public record UserGetRequest(int userId) {
 }

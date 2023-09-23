@@ -53,7 +53,7 @@ public class UserFunctionsConfiguration {
                                 .clientId(clientId)
                                 .username(cr.body().username())
                                 .password(cr.body().password())
-                                .userAttributes(attrTypeBuilder -> attrTypeBuilder.name("dbId").value(String.valueOf(userId)))),
+                                .userAttributes(attrTypeBuilder -> attrTypeBuilder.name("custom:dbId").value(String.valueOf(userId)))),
                         () -> new RegistrationFailedError(userId));
 
                 AwsUtils.runSdkRequestAndAssertResult(
@@ -95,7 +95,9 @@ public class UserFunctionsConfiguration {
                                 )),
                         () -> new LoginFailedError(loginRequest.body().username()));
 
-                return new LoginResponse(authResponse.authenticationResult().accessToken());
+                return new LoginResponse(
+                        authResponse.authenticationResult().accessToken(),
+                        authResponse.authenticationResult().idToken());
             }
         };
     }
@@ -107,9 +109,9 @@ public class UserFunctionsConfiguration {
 
     @Bean
     public Function<InvocationWrapper<UserGetRequest>, UserGetResponse> getUser() {
-        return userGetRequest -> this.userService.getUser(userGetRequest.body().id())
+        return userGetRequest -> this.userService.getUser(userGetRequest.body().userId())
                 .map(ui -> new UserGetResponse(ui.id(), ui.username()))
-                .orElseThrow(() -> new InvalidUserIdError(userGetRequest.body().id()));
+                .orElseThrow(() -> new InvalidUserIdError(userGetRequest.body().userId()));
     }
 
 //    @Bean

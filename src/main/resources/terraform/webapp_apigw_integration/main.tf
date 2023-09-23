@@ -25,6 +25,11 @@ resource "aws_api_gateway_method_response" "api_method_response_successful" {
   resource_id   = var.resource_id
   http_method   = aws_api_gateway_method.api_method.http_method
   status_code = var.http_successful_status_code
+
+  # TODO: to remove, setting the contenty-type in the response parameter is enough
+  response_models = {
+    "application/json" = "Empty"
+  }
 }
 
 resource "aws_api_gateway_method_response" "api_method_response_fail" {
@@ -60,6 +65,9 @@ resource "aws_api_gateway_integration_response" "api_integration_response_succes
   resource_id   = var.resource_id
   http_method = aws_api_gateway_integration.api_integration.http_method
   status_code = aws_api_gateway_method_response.api_method_response_successful.status_code
+  response_parameters = {
+    "method.response.header.Content-Type" = "application/json"
+  }
 }
 
 resource "aws_api_gateway_integration_response" "api_integration_response_fail" {

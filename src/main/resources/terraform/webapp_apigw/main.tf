@@ -66,11 +66,11 @@ module "user_login" {
   spring_cloud_function_definition_header_value = "loginUser"
 }
 
-# ********* GET /users/{userId}
+# ********* GET /users/me
 resource "aws_api_gateway_resource" "webapp_users_with_id_resource" {
   rest_api_id = aws_api_gateway_rest_api.webapp_rest_api.id
   parent_id   = aws_api_gateway_resource.webapp_users_resource.id
-  path_part   = "{userId}"
+  path_part   = "me"
 }
 
 module "get_user" {
@@ -84,7 +84,7 @@ module "get_user" {
   http_successful_status_code = "200"
   request_template_for_body = <<-EOT
     {
-      "id": "$input.params('userId')"
+      "userId": "$context.authorizer.claims['custom:dbId']"
     }
     EOT
   spring_cloud_function_definition_header_value = "getUser"

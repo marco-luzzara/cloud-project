@@ -6,8 +6,11 @@ resource "aws_cognito_user_pool" "main_pool" {
   schema {
     attribute_data_type = "Number"
     mutable = false
-    name = "dbId"  # Custom attribute name
+    name = "dbId"
     required = true
+    number_attribute_constraints {
+      min_value = 1
+    }
   }
   password_policy {
     minimum_length    = 8
@@ -40,8 +43,9 @@ resource "aws_cognito_user_pool_client" "main_pool_client" {
   name            = "main-pool-client"
   user_pool_id    = aws_cognito_user_pool.main_pool.id
   allowed_oauth_flows_user_pool_client = true
-  allowed_oauth_flows                 = ["client_credentials"]
-  allowed_oauth_scopes                = []
+  callback_urls = ["https://example.com"]
+  allowed_oauth_flows                 = ["implicit"]
+  allowed_oauth_scopes                = ["openid", "email", "profile"]
 
   generate_secret = true
 }

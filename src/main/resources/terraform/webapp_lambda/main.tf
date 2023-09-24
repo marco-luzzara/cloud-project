@@ -34,6 +34,7 @@ resource "aws_lambda_function" "webapp" {
         -Dspring.datasource.url=${var.webapp_lambda_system_properties.spring_datasource_url}
         -Dspring.datasource.username=${var.webapp_lambda_system_properties.spring_datasource_username}
         -Dspring.datasource.password=${var.webapp_lambda_system_properties.spring_datasource_password}
+        ${var.is_testing ? "-javaagent:/var/task/AwsSdkV2DisableCertificateValidation-1.0.jar" : ""}
       EOT
     }
   }

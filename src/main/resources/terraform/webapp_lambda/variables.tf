@@ -32,3 +32,8 @@ variable "webapp_lambda_dist_bucket_key" {
   description = "Bucket key for the distribution zip of the web app lambda"
   type        = string
 }
+
+variable "is_testing" {
+  description = "The application is in testing mode, this disables SSL certificates checking, for instance"
+  type = bool
+}

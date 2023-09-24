@@ -57,6 +57,7 @@ public class LambdaIT {
     @AfterAll
     static void cleanupAll() throws IOException, InterruptedException {
         app.storeDiagnoseReportIfTracing();
+        app.logAndPossiblyDestroyLambda();
     }
 
     @Test

@@ -43,6 +43,7 @@ module "webapp_lambda" {
   webapp_lambda_dist_bucket_key = var.webapp_lambda_dist_bucket_key
   webapp_lambda_dist_path = var.webapp_lambda_dist_path
   webapp_lambda_iam_role_arn = var.webapp_lambda_iam_role_arn
+  is_testing = var.is_testing
   webapp_lambda_system_properties = {
     cognito_main_user_pool_id = module.authentication.cognito_main_pool_id
     cognito_main_user_pool_client_id = module.authentication.cognito_main_pool_client_id

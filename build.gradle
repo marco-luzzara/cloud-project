@@ -122,9 +122,13 @@ task buildZip(type: Zip) {
 
 task buildHotReloadFolder(type: Copy) {
 	from zipTree("$DIST_FOLDER/${rootProject.name}.zip")
+	from "${project.rootDir}/src/test/resources/localstack/AwsSdkV2DisableCertificateValidation-1.0.jar"
 	into "${project.buildDir}/hot-reload"
+
 	dependsOn buildZip
 }
+
+task copyJavaAgent
 
 tasks.named('test') {
 	useJUnitPlatform()

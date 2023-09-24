@@ -8,11 +8,17 @@ import org.testcontainers.containers.Network;
 import org.testcontainers.containers.localstack.LocalStackContainer;
 import org.testcontainers.images.builder.Transferable;
 import org.testcontainers.utility.DockerImageName;
+import org.testcontainers.utility.MountableFile;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.Map;
 import java.util.Objects;
 
@@ -85,6 +91,8 @@ public class AppContainer extends LocalStackContainer {
         this.restApiId = terraform.getOutputVar(TerraformContainer.OutputVar.REST_API_ID);
         this.deploymentStageName = terraform.getOutputVar(TerraformContainer.OutputVar.DEPLOYMENT_STAGE_NAME);
 
+//        this.copyFileToContainer(MountableFile.forClasspathResource("localstack/AwsSdkV2DisableCertificateValidation-1.0.jar"),
+//                "/var/task/AwsSdkV2DisableCertificateValidation-1.0.jar");
         this.copyScriptToContainer("localstack/scripts/%s".formatted(GET_LOGS_FROM_CW_SCRIPT_NAME));
 
         this.followOutput(outFrame ->

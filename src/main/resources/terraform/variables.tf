@@ -56,3 +56,9 @@ variable "webapp_db_credentials" {
   })
   sensitive = true
 }
+
+variable "is_testing" {
+  description = "The application is in testing mode, this disables SSL certificates checking, for instance"
+  type = bool
+  default = false
+}

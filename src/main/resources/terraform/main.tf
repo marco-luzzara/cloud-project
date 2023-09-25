@@ -27,6 +27,8 @@ provider "aws" {
 
 module "authentication" {
   source = "./authentication"
+
+  admin_user_credentials = var.admin_user_credentials
 }
 
 module "webapp_db" {

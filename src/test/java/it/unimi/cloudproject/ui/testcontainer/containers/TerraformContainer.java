@@ -19,7 +19,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class TerraformContainer extends GenericContainer<TerraformContainer> {
-    private static final String IMAGE = "hashicorp/terraform:1.5.6";
+    private static final String IMAGE = "hashicorp/terraform:1.5.7";
     private Map<String, Object> outputVars = new HashMap<>();
 
     public TerraformContainer() {

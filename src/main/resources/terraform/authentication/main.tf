@@ -53,6 +53,7 @@ resource "aws_cognito_user_pool_client" "main_pool_client" {
 // create admin user. This special user is in the admin group and can promote other users
 
 resource "aws_secretsmanager_secret" "admin_user_credentials_secret" {
+  description = "Admin user credentials"
   recovery_window_in_days = 0 // Overriding the default recovery window of 30 days, so that it can be immediately deleted
 }
 
@@ -66,12 +67,22 @@ data "aws_secretsmanager_secret_version" "admin_user_credentials_secret_data" {
   secret_id     = aws_secretsmanager_secret.admin_user_credentials_secret.id
 }
 
+# TODO: https://github.com/hashicorp/terraform/issues/33943
+#resource "aws_cognito_user" "main_admin_user" {
+#  user_pool_id = aws_cognito_user_pool.main_pool.id
+#  username    = jsondecode(data.aws_secretsmanager_secret_version.admin_user_credentials_secret_data.secret_string)["username"]
+#  password    = jsondecode(data.aws_secretsmanager_secret_version.admin_user_credentials_secret_data.secret_string)["password"]
+#  attributes = {
+#    email = jsondecode(data.aws_secretsmanager_secret_version.admin_user_credentials_secret_data.secret_string)["username"]
+#  }
+#}
+
 resource "aws_cognito_user" "main_admin_user" {
   user_pool_id = aws_cognito_user_pool.main_pool.id
-  username    = jsondecode(data.aws_secretsmanager_secret_version.admin_user_credentials_secret_data.secret_string)["username"]
-  password    = jsondecode(data.aws_secretsmanager_secret_version.admin_user_credentials_secret_data.secret_string)["password"]
+  username    = var.admin_user_credentials.username
+  password    = var.admin_user_credentials.password
   attributes = {
-    email = jsondecode(data.aws_secretsmanager_secret_version.admin_user_credentials_secret_data.secret_string)["username"]
+    email = var.admin_user_credentials.username
   }
 }
 

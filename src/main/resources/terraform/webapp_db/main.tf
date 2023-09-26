@@ -1,4 +1,5 @@
 resource "aws_secretsmanager_secret" "webapp_db_credentials_secret" {
+  description = "Db credentials"
   recovery_window_in_days = 0 // Overriding the default recovery window of 30 days, so that it can be immediately deleted
 }
 

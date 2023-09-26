@@ -54,6 +54,13 @@ public class UserFunctionsConfiguration {
                                 .userPoolId(userPoolId)),
                         () -> new RegistrationFailedError(userId));
 
+                AwsUtils.runSdkRequestAndAssertResult(
+                        () -> cognitoClient.adminAddUserToGroup(b -> b
+                                .username(cr.body().username())
+                                .userPoolId(userPoolId)
+                                .groupName("customer-user-group")),
+                        () -> new RegistrationFailedError(userId));
+
                 return new UserCreationResponse(userId);
             }
             catch (Exception exc) {

@@ -43,17 +43,3 @@ resource "aws_lambda_function" "webapp" {
   s3_key = var.webapp_lambda_dist_bucket_key
   source_code_hash = var.webapp_lambda_dist_bucket == "hot-reload" ? null : filebase64sha256(var.webapp_lambda_dist_path)
 }
-
-#resource "null_resource" "wait_for_webapp_active" {
-#  depends_on = [aws_lambda_function.webapp]
-#
-#  triggers = {
-#    lambda_arn = aws_lambda_function.webapp.arn
-#  }
-#
-#  provisioner "local-exec" {
-#    command = <<EOT
-#      aws lambda wait function-active-v2 --function-name "${aws_lambda_function.webapp.function_name}"
-#    EOT
-#  }
-#}

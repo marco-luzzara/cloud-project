@@ -1,1 +1,4 @@
 rootProject.name = 'cloud-project'
+include 'cloud:customer-webapp'
+include 'core'
+include 'cloud:infrastructure'

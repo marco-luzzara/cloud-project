@@ -1,0 +1,13 @@
+plugins {
+    id 'cloudproject.java-common-conventions'
+}
+
+dependencies {
+    implementation project(":core")
+
+    implementation "software.amazon.awssdk:sdk-core"
+    implementation "org.springframework.boot:spring-boot-starter"
+
+    testImplementation 'com.google.code.gson:gson'
+    testImplementation 'org.testcontainers:localstack'
+}

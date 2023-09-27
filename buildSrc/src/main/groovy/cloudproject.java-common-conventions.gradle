@@ -1,0 +1,94 @@
+plugins {
+    id 'java'
+    id 'jacoco'
+    id "io.freefair.lombok"
+    id 'org.liquibase.gradle'
+}
+
+group = 'it.unimi.cloudproject'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '17'
+
+repositories {
+    mavenCentral()
+}
+
+def SPRING_VERSION = '3.1.1'
+def LOMBOK_VERSION = '1.18.28'
+def LIQUIBASE_VERSION = '4.23.0'
+def LOG4J_VERSION = '2.17.1'
+
+dependencies {
+    implementation platform("software.amazon.awssdk:bom:2.20.150")
+    testImplementation platform('org.junit:junit-bom:5.9.1')
+    testImplementation platform("org.testcontainers:testcontainers-bom:1.18.3")
+
+    constraints {
+        // spring
+        implementation "org.springframework.boot:spring-boot-starter:${SPRING_VERSION}"
+        implementation "org.springframework.boot:spring-boot-starter-aop:${SPRING_VERSION}"
+        //	implementation 'org.springframework:spring-web:6.0.11'
+        implementation "org.springframework.data:spring-data-jdbc:${SPRING_VERSION}"
+        implementation "org.springframework.boot:spring-boot-starter-jdbc:${SPRING_VERSION}"
+        implementation "org.springframework.cloud:spring-cloud-function-adapter-aws:4.0.5"
+        implementation "org.springframework.cloud:spring-cloud-function-web:4.0.5"
+        testImplementation "org.springframework.boot:spring-boot-starter-test:${SPRING_VERSION}"
+
+        // junit and assertions
+        testImplementation("org.assertj:assertj-core:3.24.2")
+
+        // db
+        implementation "com.h2database:h2:2.2.220"
+        implementation 'org.postgresql:postgresql:42.6.0'
+
+        // lombok
+        compileOnly "org.projectlombok:lombok:${LOMBOK_VERSION}"
+        annotationProcessor "org.projectlombok:lombok:${LOMBOK_VERSION}"
+        testCompileOnly "org.projectlombok:lombok:${LOMBOK_VERSION}"
+        testAnnotationProcessor "org.projectlombok:lombok:${LOMBOK_VERSION}"
+
+        // liquibase
+        liquibaseRuntime "org.liquibase:liquibase-core:${LIQUIBASE_VERSION}"
+        liquibaseRuntime 'org.liquibase:liquibase-groovy-dsl:2.1.1'
+        runtimeOnly "org.liquibase:liquibase-core:${LIQUIBASE_VERSION}"
+
+        // aws
+        //	implementation 'com.amazonaws:aws-java-sdk-bom:1.12.518'
+        implementation 'com.amazonaws:aws-lambda-java-core:1.2.2'
+        implementation 'com.amazonaws:aws-lambda-java-events:3.11.1'
+        runtimeOnly 'com.amazonaws:aws-lambda-java-log4j2:1.5.1'
+
+        // gson
+        testImplementation 'com.google.code.gson:gson:2.10.1'
+
+        // logging
+        implementation "org.apache.logging.log4j:log4j-api:${LOG4J_VERSION}"
+        implementation "org.apache.logging.log4j:log4j-core:${LOG4J_VERSION}"
+        runtimeOnly ("org.apache.logging.log4j:log4j-slf4j-impl:${LOG4J_VERSION}")
+    }
+}
+
+test {
+    useJUnitPlatform()
+    testLogging {
+        exceptionFormat = 'full'
+    }
+    finalizedBy jacocoTestReport // report is always generated after tests run
+}
+
+jacocoTestReport {
+    dependsOn test // tests are required to run before generating the report
+    reports {
+        xml.required = true
+    }
+}
+
+jacocoTestCoverageVerification {
+    violationRules {
+        rule {
+            limit {
+                minimum = 0.5
+            }
+        }
+    }
+}

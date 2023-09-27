@@ -1,0 +1,47 @@
+plugins {
+    id 'cloudproject.java-common-conventions'
+    id 'jacoco'
+    id "io.freefair.lombok"
+    id 'org.liquibase.gradle'
+}
+
+dependencies {
+    // spring
+    implementation "org.springframework.boot:spring-boot-starter"
+    implementation "org.springframework.boot:spring-boot-starter-aop"
+    implementation "org.springframework.data:spring-data-jdbc"
+    implementation "org.springframework.boot:spring-boot-starter-jdbc"
+    testImplementation "org.springframework.boot:spring-boot-starter-test"
+
+    // junit and assertions
+    testImplementation "org.junit.jupiter:junit-jupiter-api"
+    testImplementation "org.assertj:assertj-core"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine"
+
+    // testcontainer
+    testImplementation "org.testcontainers:testcontainers"
+    testImplementation "org.testcontainers:junit-jupiter"
+    testImplementation "org.testcontainers:postgresql"
+
+    // db
+    implementation "com.h2database:h2"
+    implementation 'org.postgresql:postgresql'
+
+    // lombok
+    compileOnly "org.projectlombok:lombok"
+    annotationProcessor "org.projectlombok:lombok"
+    testCompileOnly "org.projectlombok:lombok"
+    testAnnotationProcessor "org.projectlombok:lombok"
+
+    // liquibase
+    liquibaseRuntime "org.liquibase:liquibase-core"
+    liquibaseRuntime 'org.liquibase:liquibase-groovy-dsl'
+    runtimeOnly "org.liquibase:liquibase-core"
+
+    // logging
+    implementation 'org.apache.logging.log4j:log4j-api'
+    implementation 'org.apache.logging.log4j:log4j-core'
+    runtimeOnly ('org.apache.logging.log4j:log4j-slf4j-impl') {
+        exclude group: 'org.slf4j', module: 'log4j-to-slf4j'
+    }
+}

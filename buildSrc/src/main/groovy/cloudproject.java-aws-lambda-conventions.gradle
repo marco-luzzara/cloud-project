@@ -1,0 +1,80 @@
+plugins {
+    id 'java-library'
+    id 'cloudproject.java-common-conventions'
+}
+
+dependencies {
+	// aws
+	implementation 'com.amazonaws:aws-lambda-java-core'
+	implementation 'com.amazonaws:aws-lambda-java-events'
+	runtimeOnly 'com.amazonaws:aws-lambda-java-log4j2'
+
+	// logging
+	implementation "org.apache.logging.log4j:log4j-api"
+	implementation "org.apache.logging.log4j:log4j-core"
+	runtimeOnly ('org.apache.logging.log4j:log4j-slf4j-impl') {
+		exclude group: 'org.slf4j', module: 'log4j-to-slf4j'
+	}
+
+	// spring
+	implementation "org.springframework.boot:spring-boot-starter"
+	implementation "org.springframework.cloud:spring-cloud-function-adapter-aws"
+	implementation "org.springframework.cloud:spring-cloud-function-web"
+
+	// junit and assertions
+	testImplementation "org.junit.jupiter:junit-jupiter-api"
+	testImplementation "org.assertj:assertj-core"
+	testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine"
+
+	// testcontainer
+	testImplementation 'org.testcontainers:localstack'
+	testImplementation "org.testcontainers:junit-jupiter"
+}
+
+var DIST_FOLDER = "dist"
+
+task buildZip(type: Zip) {
+	into('lib') {
+		from(jar)
+		from(configurations.runtimeClasspath)
+	}
+	archiveFileName = "${rootProject.name}.zip"
+	destinationDirectory = file(DIST_FOLDER)
+}
+
+task buildHotReloadFolder(type: Copy) {
+	from zipTree("$DIST_FOLDER/${rootProject.name}.zip")
+	from "${project.rootDir}/src/test/resources/localstack/AwsSdkV2DisableCertificateValidation-1.0.jar"
+	into "${project.buildDir}/hot-reload"
+
+	dependsOn buildZip
+}
+
+classes {
+	finalizedBy buildZip
+}
+
+// ************************************************
+// For ShadowJar
+// ************************************************
+//import com.github.jengelman.gradle.plugins.shadow.transformers.*
+//
+//shadowJar {
+////	destinationfile('dist')
+//	dependencies {
+//		exclude(
+//				dependency("org.springframework.cloud:spring-cloud-function-web:4.0.5"))
+//	}
+//	// Required for Spring
+//	mergeServiceFiles()
+//	append 'META-INF/spring.handlers'
+//	append 'META-INF/spring.schemas'
+//	append 'META-INF/spring.tooling'
+//	append 'META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports'
+//	append 'META-INF/spring/org.springframework.boot.actuate.autoconfigure.web.ManagementContextConfiguration.imports'
+//	transform(PropertiesFileTransformer) {
+//		paths = ['META-INF/spring.factories']
+//		mergeStrategy = "append"
+//	}
+//}
+// ************************************************

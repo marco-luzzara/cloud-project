@@ -1,13 +1,14 @@
 plugins {
     id 'cloudproject.java-common-conventions'
+    id "java-test-fixtures"
 }
 
 dependencies {
     implementation project(":core")
 
     implementation "software.amazon.awssdk:sdk-core"
-    implementation "org.springframework.boot:spring-boot-starter"
+    testFixturesImplementation "org.springframework.boot:spring-boot-starter"
 
-    testImplementation 'com.google.code.gson:gson'
-    testImplementation 'org.testcontainers:localstack'
+    testFixturesImplementation 'com.google.code.gson:gson'
+    testFixturesImplementation 'org.testcontainers:localstack'
 }

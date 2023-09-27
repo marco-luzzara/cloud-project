@@ -1,7 +1,9 @@
 package it.unimi.cloudproject.lambda.configurations;
 
-import it.unimi.cloudproject.apigw.message.model.InvocationWrapper;
+import it.unimi.cloudproject.services.dto.UserCreationData;
+import it.unimi.cloudproject.services.services.UserService;
 import it.unimi.cloudproject.lambda.dto.requests.user.*;
+import it.unimi.cloudproject.utilities.AwsSdkUtils;
 import it.unimi.cloudproject.lambda.dto.responses.user.LoginResponse;
 import it.unimi.cloudproject.lambda.dto.responses.user.UserCreationResponse;
 import it.unimi.cloudproject.lambda.dto.responses.user.UserGetResponse;
@@ -9,9 +11,7 @@ import it.unimi.cloudproject.lambda.errors.user.CannotDeleteUserFromPoolError;
 import it.unimi.cloudproject.lambda.errors.user.InvalidUserIdError;
 import it.unimi.cloudproject.lambda.errors.user.LoginFailedError;
 import it.unimi.cloudproject.lambda.errors.user.RegistrationFailedError;
-import it.unimi.cloudproject.services.dto.UserCreationData;
-import it.unimi.cloudproject.services.services.UserService;
-import it.unimi.cloudproject.utilities.AwsSdkUtils;
+import it.unimi.cloudproject.apigw.message.model.InvocationWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

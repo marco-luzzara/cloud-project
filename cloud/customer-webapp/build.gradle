@@ -6,9 +6,8 @@ plugins {
 dependencies {
     implementation project(':core')
     implementation project(':cloud:infrastructure')
-    testImplementation project(':cloud:infrastructure')
+    testImplementation(testFixtures(project(':cloud:infrastructure')))
 
-//    implementation platform("software.amazon.awssdk:bom:${rootProject.ext.awsSdkVersion}")
     implementation 'software.amazon.awssdk:cognitoidentity'
     implementation 'software.amazon.awssdk:cognitoidentityprovider'
 

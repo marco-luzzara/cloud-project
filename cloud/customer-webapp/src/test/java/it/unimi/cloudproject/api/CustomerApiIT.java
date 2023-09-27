@@ -2,9 +2,13 @@ package it.unimi.cloudproject.api;
 
 import com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.http.HttpStatus;
 import it.unimi.cloudproject.lambda.dto.requests.user.UserCreationRequest;
-import it.unimi.cloudproject.ui.testcontainer.containers.AppContainer;
-import it.unimi.cloudproject.ui.testcontainer.containers.TerraformContainer;
+import it.unimi.cloudproject.testcontainer.containers.AppContainer;
+import it.unimi.cloudproject.testcontainer.containers.TerraformContainer;
 import it.unimi.cloudproject.helpers.CustomerApiCaller;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;

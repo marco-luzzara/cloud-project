@@ -44,6 +44,6 @@ out/
 # custom
 **/main/resources/terraform/**/*_secret.auto.tfvars
 *-production.*
-**/src/test/resources/localstack/apikey.secret
+**/localstack/apikey.secret
 scripts/volumes/
 !src/test/resources/localstack/AwsSdkV2DisableCertificateValidation-1.0.jar

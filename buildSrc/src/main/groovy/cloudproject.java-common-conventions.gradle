@@ -3,6 +3,7 @@ plugins {
     id 'jacoco'
     id "io.freefair.lombok"
     id 'org.liquibase.gradle'
+    id 'java-test-fixtures'
 }
 
 group = 'it.unimi.cloudproject'
@@ -17,15 +18,19 @@ def SPRING_VERSION = '3.1.1'
 def LOMBOK_VERSION = '1.18.28'
 def LIQUIBASE_VERSION = '4.23.0'
 def LOG4J_VERSION = '2.17.1'
+def TESTCONTAINERS_VERSION = '1.18.3'
+def GSON_VERSION = '2.10.1'
 
 dependencies {
     implementation platform("software.amazon.awssdk:bom:2.20.150")
     testImplementation platform('org.junit:junit-bom:5.9.1')
-    testImplementation platform("org.testcontainers:testcontainers-bom:1.18.3")
+    testImplementation platform("org.testcontainers:testcontainers-bom:${TESTCONTAINERS_VERSION}")
+    testFixturesImplementation platform("org.testcontainers:testcontainers-bom:${TESTCONTAINERS_VERSION}")
 
     constraints {
         // spring
         implementation "org.springframework.boot:spring-boot-starter:${SPRING_VERSION}"
+        testFixturesImplementation "org.springframework.boot:spring-boot-starter:${SPRING_VERSION}"
         implementation "org.springframework.boot:spring-boot-starter-aop:${SPRING_VERSION}"
         //	implementation 'org.springframework:spring-web:6.0.11'
         implementation "org.springframework.data:spring-data-jdbc:${SPRING_VERSION}"
@@ -59,7 +64,8 @@ dependencies {
         runtimeOnly 'com.amazonaws:aws-lambda-java-log4j2:1.5.1'
 
         // gson
-        testImplementation 'com.google.code.gson:gson:2.10.1'
+        testImplementation "com.google.code.gson:gson:${GSON_VERSION}"
+        testFixturesImplementation "com.google.code.gson:gson:${GSON_VERSION}"
 
         // logging
         implementation "org.apache.logging.log4j:log4j-api:${LOG4J_VERSION}"

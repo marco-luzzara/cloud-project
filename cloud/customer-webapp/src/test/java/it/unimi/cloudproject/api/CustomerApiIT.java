@@ -2,15 +2,15 @@ package it.unimi.cloudproject.api;
 
 import com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.http.HttpStatus;
 import it.unimi.cloudproject.lambda.dto.requests.user.UserCreationRequest;
+import it.unimi.cloudproject.lambda.dto.requests.user.UserLoginRequest;
 import it.unimi.cloudproject.testcontainer.containers.AppContainer;
 import it.unimi.cloudproject.testcontainer.containers.TerraformContainer;
-import it.unimi.cloudproject.helpers.CustomerApiCaller;
+import it.unimi.cloudproject.api.callers.CustomerApiCaller;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledIfSystemProperty;
-import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -65,41 +65,37 @@ public class CustomerApiIT {
     }
 
     @Test
-    void whenUserRegisterWithApi_thenIdIsReturned() throws IOException, InterruptedException
+    void successful_flow_userCreate_login_getUserInfo_userDelete() throws IOException, InterruptedException
     {
-        var userCreation = new UserCreationRequest("test", "testtest");
+        final var username = "test@amazon.com";
+        final var password = "testtest";
+        var userCreation = new UserCreationRequest(username, password);
 
-        var httpResponse = userRestApiCaller.callUserCreateApi(userCreation);
-
-        var id = httpResponse.body().id();
-        assertThat(httpResponse.statusCode()).isEqualTo(HttpStatus.SC_OK);
+        // create user
+        var userCreateResponse = userRestApiCaller.callUserCreateApi(userCreation);
+        var id = userCreateResponse.body().id();
+        assertThat(userCreateResponse.statusCode()).isEqualTo(HttpStatus.SC_OK);
         assertThat(id).isGreaterThanOrEqualTo(1);
-        assertThat(userRestApiCaller.callUserGetApi(id).body().id()).isEqualTo(id);
+
+        // login
+        var userLoginResponse = userRestApiCaller.callUserLoginApi(new UserLoginRequest(username, password));
+        assertThat(userLoginResponse.statusCode()).isEqualTo(HttpStatus.SC_OK);
+        var idToken = userLoginResponse.body().idToken();
+        assertThat(userLoginResponse.body().accessToken()).isNotEmpty();
+        assertThat(idToken).isNotEmpty();
+
+        // get user info
+        var getUserInfoResponse = userRestApiCaller.callUserGetInfoApi(idToken);
+        assertThat(getUserInfoResponse.statusCode()).isEqualTo(HttpStatus.SC_OK);
+        assertThat(getUserInfoResponse.body().id()).isEqualTo(id);
+        assertThat(getUserInfoResponse.body().username()).isEqualTo(username);
+
+        // delete user
+        var deleteUserResponse = userRestApiCaller.callUserDeleteApi(idToken);
+        assertThat(deleteUserResponse.statusCode()).isEqualTo(HttpStatus.SC_OK);
+
+        // get user info
+        var getUserInfoAfterDeleteResponse = userRestApiCaller.callUserGetInfoApi(idToken);
+        assertThat(getUserInfoAfterDeleteResponse.statusCode()).isEqualTo(HttpStatus.SC_NOT_FOUND);
     }
-
-    @Test
-    void givenUser_whenDeleteWithApi_thenCannotGetInfo() throws IOException, InterruptedException
-    {
-        var userCreation = new UserCreationRequest("test", "testtest");
-        var creationResponse = userRestApiCaller.callUserCreateApi(userCreation);
-        var userId = creationResponse.body().id();
-
-        var deletionResponse = userRestApiCaller.callUserDeleteApi(userId);
-
-        assertThat(deletionResponse.statusCode()).isEqualTo(HttpStatus.SC_OK);
-        assertThat(userRestApiCaller.callUserGetApi(userId).statusCode()).isEqualTo(404);
-    }
-
-//    @Test
-//    void givenUser_whenAddShop_thenCannotGetInfo() throws IOException, InterruptedException
-//    {
-//        var userCreation = new UserCreationRequest("test");
-//        var creationResponse = userRestApiCaller.callUserCreateApi(userCreation);
-//        var userId = creationResponse.body().id();
-//
-//        var deletionResponse = userRestApiCaller.callUserDeleteApi(userId);
-//
-//        assertThat(deletionResponse.statusCode()).isEqualTo(HttpStatus.SC_OK);
-//        assertThat(userRestApiCaller.callUserGetApi(userId).statusCode()).isEqualTo(404);
-//    }
 }

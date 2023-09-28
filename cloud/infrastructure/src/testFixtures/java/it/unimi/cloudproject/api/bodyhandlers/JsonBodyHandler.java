@@ -1,4 +1,4 @@
-package it.unimi.cloudproject.api;
+package it.unimi.cloudproject.api.bodyhandlers;
 
 import com.google.gson.Gson;
 

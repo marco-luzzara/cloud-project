@@ -50,8 +50,7 @@ resource "aws_api_gateway_integration" "api_integration" {
   }
 
   request_templates = {
-    "application/json" = format(local.request_mapping_template, var.request_template_for_body
-    )
+    "application/json" = format(local.request_mapping_template, var.request_template_for_body)
   }
 }
 

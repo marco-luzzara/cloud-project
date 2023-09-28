@@ -11,5 +11,7 @@ dependencies {
     implementation 'software.amazon.awssdk:cognitoidentity'
     implementation 'software.amazon.awssdk:cognitoidentityprovider'
 
-    testImplementation 'com.google.code.gson:gson'
+    testFixturesImplementation 'com.google.code.gson:gson'
+    testFixturesImplementation 'org.testcontainers:localstack'
+    testFixturesImplementation(testFixtures(project(':cloud:infrastructure')))
 }

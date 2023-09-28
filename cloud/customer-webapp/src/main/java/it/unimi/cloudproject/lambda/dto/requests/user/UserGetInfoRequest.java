@@ -1,4 +1,4 @@
 package it.unimi.cloudproject.lambda.dto.requests.user;
 
-public record UserGetRequest(int userId) {
+public record UserGetInfoRequest(int userId) {
 }

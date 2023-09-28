@@ -6,7 +6,7 @@ import it.unimi.cloudproject.lambda.dto.requests.user.*;
 import it.unimi.cloudproject.utilities.AwsSdkUtils;
 import it.unimi.cloudproject.lambda.dto.responses.user.LoginResponse;
 import it.unimi.cloudproject.lambda.dto.responses.user.UserCreationResponse;
-import it.unimi.cloudproject.lambda.dto.responses.user.UserGetResponse;
+import it.unimi.cloudproject.lambda.dto.responses.user.UserGetInfoResponse;
 import it.unimi.cloudproject.lambda.errors.user.CannotDeleteUserFromPoolError;
 import it.unimi.cloudproject.lambda.errors.user.InvalidUserIdError;
 import it.unimi.cloudproject.lambda.errors.user.LoginFailedError;
@@ -116,9 +116,9 @@ public class UserFunctionsConfiguration {
     }
 
     @Bean
-    public Function<InvocationWrapper<UserGetRequest>, UserGetResponse> getUser() {
+    public Function<InvocationWrapper<UserGetInfoRequest>, UserGetInfoResponse> getUser() {
         return userGetRequest -> this.userService.getUser(userGetRequest.body().userId())
-                .map(ui -> new UserGetResponse(ui.id(), ui.username()))
+                .map(ui -> new UserGetInfoResponse(ui.id(), ui.username()))
                 .orElseThrow(() -> new InvalidUserIdError(userGetRequest.body().userId()));
     }
 

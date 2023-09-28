@@ -24,8 +24,8 @@ resource "aws_lambda_function" "customer_lambda" {
     variables = {
       LAMBDA_DOCKER_DNS = "127.0.0.1"
       JAVA_TOOL_OPTIONS = <<EOT
-        -DMAIN_CLASS=it.unimi.cloudproject.lambda.CustomerWebappApi
-        -Dlogging.level.org.springframework=INFO
+        -DMAIN_CLASS=it.unimi.cloudproject.CustomerWebappApi
+        -Dlogging.level.org.springframework=DEBUG
         -Dcom.amazonaws.sdk.disableCertChecking=${var.customer_lambda_system_properties.disable_cert_checking}
         -Daws.cognito.user_pool_id=${var.customer_lambda_system_properties.cognito_main_user_pool_id}
         -Daws.cognito.user_pool_client_id=${var.customer_lambda_system_properties.cognito_main_user_pool_client_id}

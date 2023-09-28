@@ -40,7 +40,7 @@ module "create_user" {
   http_method = "POST"
   authorization = "NONE"
   authorizer_id = null
-  lambda_invocation_arn = var.webapp_lambda_invoke_arn
+  lambda_invocation_arn = var.customer_lambda_invoke_arn
   http_successful_status_code = "200"
   request_template_for_body = "$input.json('$')"
   spring_cloud_function_definition_header_value = "createUser"
@@ -60,7 +60,7 @@ module "user_login" {
   http_method = "POST"
   authorization = "NONE"
   authorizer_id = null
-  lambda_invocation_arn = var.webapp_lambda_invoke_arn
+  lambda_invocation_arn = var.customer_lambda_invoke_arn
   http_successful_status_code = "200"
   request_template_for_body = "$input.json('$')"
   spring_cloud_function_definition_header_value = "loginUser"
@@ -80,7 +80,7 @@ module "get_user" {
   http_method = "GET"
   authorization = "COGNITO_USER_POOLS"
   authorizer_id = aws_api_gateway_authorizer.user_authorizer.id
-  lambda_invocation_arn = var.webapp_lambda_invoke_arn
+  lambda_invocation_arn = var.customer_lambda_invoke_arn
   http_successful_status_code = "200"
   request_template_for_body = <<-EOT
     {
@@ -99,7 +99,7 @@ module "delete_user" {
   http_method = "DELETE"
   authorization = "COGNITO_USER_POOLS"
   authorizer_id = aws_api_gateway_authorizer.user_authorizer.id
-  lambda_invocation_arn = var.webapp_lambda_invoke_arn
+  lambda_invocation_arn = var.customer_lambda_invoke_arn
   http_successful_status_code = "200"
   request_template_for_body = <<-EOT
     {
@@ -130,7 +130,7 @@ module "add_user_subscription" {
   http_method = "POST"
   authorization = "COGNITO_USER_POOLS"
   authorizer_id = aws_api_gateway_authorizer.user_authorizer.id
-  lambda_invocation_arn = var.webapp_lambda_invoke_arn
+  lambda_invocation_arn = var.customer_lambda_invoke_arn
   http_successful_status_code = "200"
   request_template_for_body = <<-EOT
     {

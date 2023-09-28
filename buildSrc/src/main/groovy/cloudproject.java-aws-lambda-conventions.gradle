@@ -20,6 +20,7 @@ dependencies {
 	implementation "org.springframework.boot:spring-boot-starter"
 	implementation "org.springframework.cloud:spring-cloud-function-adapter-aws"
 	implementation "org.springframework.cloud:spring-cloud-function-web"
+	testImplementation "org.springframework.boot:spring-boot-starter-test"
 
 	// junit and assertions
 	testImplementation "org.junit.jupiter:junit-jupiter-api"
@@ -31,20 +32,20 @@ dependencies {
 	testImplementation "org.testcontainers:junit-jupiter"
 }
 
-var DIST_FOLDER = "dist"
+var DIST_FOLDER = "${project.buildDir}/dist"
 
 task buildZip(type: Zip) {
 	into('lib') {
 		from(jar)
+		from "${rootProject.rootDir}/cloud/infrastructure/src/testFixtures/resources/localstack/AwsSdkV2DisableCertificateValidation-1.0.jar"
 		from(configurations.runtimeClasspath)
 	}
-	archiveFileName = "${rootProject.name}.zip"
+	archiveFileName = "${project.name}.zip"
 	destinationDirectory = file(DIST_FOLDER)
 }
 
 task buildHotReloadFolder(type: Copy) {
-	from zipTree("$DIST_FOLDER/${rootProject.name}.zip")
-	from "${project.rootDir}/src/test/resources/localstack/AwsSdkV2DisableCertificateValidation-1.0.jar"
+	from zipTree("$DIST_FOLDER/${project.name}.zip")
 	into "${project.buildDir}/hot-reload"
 
 	dependsOn buildZip

@@ -12,15 +12,16 @@ import org.testcontainers.utility.MountableFile;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class TerraformContainer extends GenericContainer<TerraformContainer> {
     private static final String IMAGE = "hashicorp/terraform:1.5.7";
     private Map<String, Object> outputVars = new HashMap<>();
+    private final Path rootProjectDir = Path.of(System.getProperty("rootProjectDir"));
+    private final Path lambdaSubprojectCommonDir = rootProjectDir.resolve("cloud");
+    private final List<Path> lambdaSubprojects = List.of(lambdaSubprojectCommonDir.resolve("customer-webapp"));
 
     public TerraformContainer() {
         super(DockerImageName.parse(IMAGE));
@@ -32,12 +33,9 @@ public class TerraformContainer extends GenericContainer<TerraformContainer> {
 
     public void initialize() {
         try {
-            var projectFolder = Paths.get(".").toAbsolutePath();
-            var distDir = projectFolder.resolve("dist");
-            var zipPath = Files.list(distDir).findFirst().orElseThrow(
-                    () -> new IllegalStateException("you must produce a zip file containing the lambda code before its creation"));
-            this.copyFileToContainer(MountableFile.forHostPath(zipPath, 444), "/app/dist.zip");
-            copyTerraformFilesToContainer();
+            for (var lambdaSubproject : this.lambdaSubprojects)
+                this.copyLambdaDistributionToContainer(lambdaSubproject);
+            this.copyTerraformFilesToContainer();
 
             this.execInContainer("terraform", "init");
         } catch (IOException | InterruptedException e) {
@@ -73,6 +71,14 @@ public class TerraformContainer extends GenericContainer<TerraformContainer> {
         return ((Map<String, Object>) this.outputVars.get(outputVar.varName)).get("value").toString();
     }
 
+    private void copyLambdaDistributionToContainer(Path lambdaSubproject) throws IOException {
+        final var lambdaSubprojectName = lambdaSubproject.getFileName();
+        var distDir = lambdaSubproject.resolve("build").resolve("dist");
+        var zipPath = Files.list(distDir).findFirst().orElseThrow(
+                () -> new IllegalStateException("Make sure the buildZip task is executed"));
+        this.copyFileToContainer(MountableFile.forHostPath(zipPath, 444), "/app/%s.zip".formatted(lambdaSubprojectName));
+    }
+
     private void populateOutputVarFromTerraform() throws IOException, InterruptedException {
         var outputVarJson = this.execInContainer("terraform", "output", "-json").getStdout();
         var gson = new Gson();
@@ -101,7 +107,7 @@ public class TerraformContainer extends GenericContainer<TerraformContainer> {
      */
     private void copyTerraformFilesToContainer() throws IOException {
         // all .tf files are copied, but only the .tfvars files for the Localstack env are included
-        var terraformFiles = new PathMatchingResourcePatternResolver().getResources("classpath*:terraform/**/*.tf");
+        var terraformFiles = new PathMatchingResourcePatternResolver().getResources("terraform/**/*.tf");
         var terraformVars = new PathMatchingResourcePatternResolver().getResources("classpath*:terraform/**/localstack*.auto.tfvars");
 
         var terraformResources = new ArrayList<Resource>();

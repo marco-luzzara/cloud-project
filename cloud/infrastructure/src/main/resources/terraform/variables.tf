@@ -1,32 +1,32 @@
-variable "webapp_lambda_iam_role_arn" {
+variable "customer_lambda_iam_role_arn" {
   description = "Role Arn for the webapp lambda"
   type        = string
   sensitive   = true
 }
 
-variable "webapp_lambda_spring_active_profile" {
+variable "customer_lambda_spring_active_profile" {
   description = "Spring active profile for the webapp lambda"
   type        = string
 }
 
-variable "webapp_lambda_dist_path" {
+variable "customer_lambda_dist_path" {
   description = "Path of the distribution zip of the web app lambda"
   type        = string
 }
 
-variable "webapp_lambda_dist_bucket" {
+variable "customer_lambda_dist_bucket" {
   description = "Bucket for the distribution zip of the web app lambda"
   type        = string
   default = "lambda-dist-bucket"
 }
 
-variable "webapp_lambda_dist_bucket_key" {
+variable "customer_lambda_dist_bucket_key" {
   description = "Bucket key for the distribution zip of the web app lambda"
   type        = string
-  default = "dist.zip"
+  default = "customer-webapp.zip"
 }
 
-variable "webapp_lambda_disable_cert_checking" {
+variable "customer_lambda_disable_cert_checking" {
   description = "It is used to disable the SSL certificate checking when doing HTTPS request to the mocked AWS endpoints"
   type = bool
   default = false

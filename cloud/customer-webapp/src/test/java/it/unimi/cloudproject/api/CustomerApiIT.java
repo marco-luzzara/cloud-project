@@ -9,6 +9,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledIfSystemProperty;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -17,7 +18,8 @@ import java.io.IOException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@EnabledIfSystemProperty(named = "IntegrationTestsEnabled", matches = "true")
+//@EnabledIfSystemProperty(named = "IntegrationTestsEnabled", matches = "true")
+@DisabledIfSystemProperty(named = "IntegrationTestsEnabled", matches = "(?!true)")
 @Testcontainers
 public class CustomerApiIT {
     @Container

@@ -1,10 +1,17 @@
 name: Build
 
 env:
-  INTEGRATION_TESTS_ENABLED: ${{ startsWith(github.event.head_commit.message, '[ITENABLED]') && 'true' || 'false' }}
+  INTEGRATION_TESTS_ENABLED: ${{ (startsWith(github.event.head_commit.message, '[ITENABLED]') || github.event.inputs.integrationTestsEnabled == 'true') && 'true' || 'false' }}
 
 on:
   workflow_call:
+  workflow_dispatch:
+    inputs:
+      integrationTestsEnabled:
+        type: boolean
+        description: true to enable the integration tests with Localstack
+        required: true
+        default: false
 
 permissions:
   checks: write
@@ -29,7 +36,7 @@ jobs:
         env:
           LOCALSTACK_APIKEY: ${{ secrets.LOCALSTACK_APIKEY }}
         run: |
-            mkdir -p src/test/resources/localstack && echo "$LOCALSTACK_APIKEY" > src/test/resources/localstack/apikey.secret
+            mkdir -p cloud/infrastructure/src/testFixtures/resources/localstack && echo "$LOCALSTACK_APIKEY" > cloud/infrastructure/src/testFixtures/resources/localstack/apikey.secret
       - name: Build
         uses: gradle/gradle-build-action@749f47bda3e44aa060e82d7b3ef7e40d953bd629
         with:
@@ -40,7 +47,7 @@ jobs:
         id: jacoco_reporter
         uses: PavanMudigonda/jacoco-reporter@v4.8
         with:
-          coverage_results_path: ${{ github.workspace }}/build/reports/jacoco/test/jacocoTestReport.xml
+          coverage_results_path: ${{ github.workspace }}/code-coverage-report/build/reports/jacoco/testCodeCoverageReport/testCodeCoverageReport.xml
           coverage_report_name: Coverage
           coverage_report_title: JaCoCo
           github_token: ${{ secrets.GITHUB_TOKEN }}

@@ -2,3 +2,6 @@ rootProject.name = 'cloud-project'
 include 'cloud:customer-webapp'
 include 'core'
 include 'cloud:infrastructure'
+include 'cloud:admin-api'
+include 'code-coverage-report'
+

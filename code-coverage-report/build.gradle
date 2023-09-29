@@ -1,0 +1,20 @@
+plugins {
+    id 'java'
+    id 'jacoco'
+    id 'jacoco-report-aggregation'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    jacocoAggregation project(':cloud:customer-webapp')
+    jacocoAggregation project(':core')
+    jacocoAggregation project(':cloud:infrastructure')
+    jacocoAggregation project(':cloud:admin-api')
+}
+
+tasks.named('check') {
+    dependsOn tasks.named('testCodeCoverageReport', JacocoReport)
+}

@@ -1,7 +1,7 @@
 package it.unimi.cloudproject.data.repositories;
 
-import it.unimi.cloudproject.data.factories.ShopDataFactory;
-import it.unimi.cloudproject.data.factories.UserDataFactory;
+import it.unimi.cloudproject.factories.data.ShopDataFactory;
+import it.unimi.cloudproject.factories.data.UserDataFactory;
 import it.unimi.cloudproject.data.model.UserData;
 import it.unimi.cloudproject.data.model.UserShopData;
 import it.unimi.cloudproject.factories.bl.UserFactory;
@@ -47,19 +47,19 @@ public class UserRepositoryTest {
     }
 
     @Test
-    void givenUserRepo_whenAddUser_thenAddItToDb() {
+    void givenUserRepo_whenAddUser_thenCanRetrieveIt() {
         var user = UserFactory.getUser();
         var userData = UserData.fromUser(user);
 
         userData = userRepository.save(userData);
 
-        assertThat(userData.getId()).isNotNull();
-        assertThat(userRepository.findById(userData.getId()).map(UserData::getId))
-                .hasValue(userData.getId());
+        var retrievedUserData = userRepository.findById(userData.getId()).get();
+        assertThat(retrievedUserData.getId()).isEqualTo(userData.getId());
+        assertThat(retrievedUserData).isEqualTo(userData);
     }
 
     @Test
-    void givenUserRepo_whenRemoveUser_thenRemoveItFromDb() {
+    void givenUserRepo_whenRemoveUser_thenCannotBeRetrieved() {
         var userData = UserDataFactory.createUser(this.userRepository);
         var userId = userData.getId();
 
@@ -68,30 +68,30 @@ public class UserRepositoryTest {
         assertThat(userRepository.findById(userData.getId())).isEmpty();
     }
 
-    @Test
-    void givenZeroUsersForShop_whenGetUsersOfAShop_thenReturnsZero() {
-        var shopData = ShopDataFactory.createShop(this.shopRepository);
-
-        var users = userRepository.findUsersByShopId(shopData.getId());
-
-        assertThat(users).isEmpty();
-    }
-
-    @Test
-    void givenManyUsersForShop_whenGetUsersOfAShop_thenReturnsAll() {
-        var shopData = ShopDataFactory.createShop(this.shopRepository);
-        var userData1 = UserDataFactory.createUser(this.userRepository);
-        var userData2 = UserDataFactory.createUser(this.userRepository);
-        var userData3 = UserDataFactory.createUser(this.userRepository);
-        userData1.getFavoriteShops().add(
-                new UserShopData(AggregateReference.to(userData1.getId()), AggregateReference.to(shopData.getId())));
-        userData2.getFavoriteShops().add(
-                new UserShopData(AggregateReference.to(userData2.getId()), AggregateReference.to(shopData.getId())));
-        userRepository.saveAll(List.of(userData1, userData2));
-
-        var foundUsers = userRepository.findUsersByShopId(shopData.getId());
-
-        assertThat(foundUsers).hasSize(2);
-        assertThat(foundUsers).extracting(UserData::getId).contains(userData1.getId(), userData2.getId());
-    }
+//    @Test
+//    void givenZeroUsersForShop_whenGetUsersOfAShop_thenReturnsZero() {
+//        var shopData = ShopDataFactory.createShop(this.shopRepository);
+//
+//        var users = userRepository.findUsersByShopId(shopData.getId());
+//
+//        assertThat(users).isEmpty();
+//    }
+//
+//    @Test
+//    void givenManyUsersForShop_whenGetUsersOfAShop_thenReturnsAll() {
+//        var shopData = ShopDataFactory.createShop(this.shopRepository);
+//        var userData1 = UserDataFactory.createUser(this.userRepository);
+//        var userData2 = UserDataFactory.createUser(this.userRepository);
+//        var userData3 = UserDataFactory.createUser(this.userRepository);
+//        userData1.getFavoriteShops().add(
+//                new UserShopData(AggregateReference.to(userData1.getId()), AggregateReference.to(shopData.getId())));
+//        userData2.getFavoriteShops().add(
+//                new UserShopData(AggregateReference.to(userData2.getId()), AggregateReference.to(shopData.getId())));
+//        userRepository.saveAll(List.of(userData1, userData2));
+//
+//        var foundUsers = userRepository.findUsersByShopId(shopData.getId());
+//
+//        assertThat(foundUsers).hasSize(2);
+//        assertThat(foundUsers).extracting(UserData::getId).contains(userData1.getId(), userData2.getId());
+//    }
 }

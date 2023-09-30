@@ -1,11 +1,13 @@
 package it.unimi.cloudproject.services.services;
 
+import it.unimi.cloudproject.data.repositories.UserRepository;
 import it.unimi.cloudproject.services.dto.ShopCreation;
 import it.unimi.cloudproject.services.dto.ShopInfo;
 import it.unimi.cloudproject.bl.Shop;
 import it.unimi.cloudproject.bl.valueobjects.Coordinates;
 import it.unimi.cloudproject.data.model.ShopData;
 import it.unimi.cloudproject.data.repositories.ShopRepository;
+import it.unimi.cloudproject.services.errors.InvalidUserIdError;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,8 +19,14 @@ public class ShopService {
     @Autowired
     private ShopRepository shopRepository;
 
+    @Autowired
+    private UserRepository userRepository;
+
     public int addShop(ShopCreation shopCreation) {
+        var shopOwnerId = shopCreation.shopOwnerId();
+        var shopOwner = userRepository.findById(shopOwnerId).orElseThrow(() -> new InvalidUserIdError(shopOwnerId)).toUser();
         var shop = new Shop(null,
+                shopOwner,
                 shopCreation.name(),
                 new Coordinates(shopCreation.longitude(), shopCreation.latitude()));
 
@@ -37,10 +45,10 @@ public class ShopService {
         this.shopRepository.deleteById(shopId);
     }
 
-    public List<ShopInfo> getFavoriteShopsOfUser(int userId) {
-        return this.shopRepository.findFavoriteShopsByUserId(userId).stream()
-                .map(sd -> new ShopInfo(sd.getId(), sd.getName(),
-                        sd.getCoordinates().longitude(), sd.getCoordinates().latitude()))
-                .toList();
-    }
+//    public List<ShopInfo> getFavoriteShopsOfUser(int userId) {
+//        return this.shopRepository.findFavoriteShopsByUserId(userId).stream()
+//                .map(sd -> new ShopInfo(sd.getId(), sd.getName(),
+//                        sd.getCoordinates().longitude(), sd.getCoordinates().latitude()))
+//                .toList();
+//    }
 }

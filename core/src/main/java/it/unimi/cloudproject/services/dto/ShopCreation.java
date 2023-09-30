@@ -1,4 +1,4 @@
 package it.unimi.cloudproject.services.dto;
 
-public record ShopCreation(String name, double longitude, double latitude) {
+public record ShopCreation(String name, int shopOwnerId, double longitude, double latitude) {
 }

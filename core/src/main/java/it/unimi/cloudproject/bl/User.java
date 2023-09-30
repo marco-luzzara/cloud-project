@@ -6,33 +6,30 @@ import it.unimi.cloudproject.infrastructure.annotations.codecoverage.Generated;
 import java.util.Objects;
 import java.util.Set;
 
-public record User(Integer id, String username, Set<Shop> favoriteShops) {
+public record User(Integer id, String username) {
     public User {
-        if (Objects.isNull(username))
-            throw new IllegalArgumentException("Username cannot be null");
-
-        if (username.isEmpty())
+        if (username == null || username.isEmpty())
             throw new ValidationError.EmptyNameForUserError();
 
-        if (favoriteShops == null || favoriteShops.stream().anyMatch(Objects::isNull))
-            throw new IllegalArgumentException("favoriteShops cannot be null");
+//        if (favoriteShops == null || favoriteShops.stream().anyMatch(Objects::isNull))
+//            throw new IllegalArgumentException("favoriteShops cannot be null");
     }
 
-    public void addFavoriteShop(Shop shop) {
-        if (Objects.isNull(shop))
-            throw new IllegalArgumentException("shop cannot be null");
+//    public void addFavoriteShop(Shop shop) {
+//        if (Objects.isNull(shop))
+//            throw new IllegalArgumentException("shop cannot be null");
+//
+//        var beforeAddSize = this.favoriteShops.size();
+//        this.favoriteShops.add(shop);
+//
+//        if (this.favoriteShops.size() == beforeAddSize)
+//            throw new ValidationError.DuplicateShopForUserError(this, shop);
+//    }
 
-        var beforeAddSize = this.favoriteShops.size();
-        this.favoriteShops.add(shop);
-
-        if (this.favoriteShops.size() == beforeAddSize)
-            throw new ValidationError.DuplicateShopForUserError(this, shop);
-    }
-
-    @Override
-    public Set<Shop> favoriteShops() {
-        return Set.copyOf(this.favoriteShops);
-    }
+//    @Override
+//    public Set<Shop> favoriteShops() {
+//        return Set.copyOf(this.favoriteShops);
+//    }
 
     @Generated
     @Override

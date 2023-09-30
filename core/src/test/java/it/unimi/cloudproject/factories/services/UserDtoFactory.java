@@ -1,4 +1,4 @@
-package it.unimi.cloudproject.services.factories;
+package it.unimi.cloudproject.factories.services;
 
 import it.unimi.cloudproject.services.dto.UserCreationData;
 import it.unimi.cloudproject.factories.bl.UserFactory;

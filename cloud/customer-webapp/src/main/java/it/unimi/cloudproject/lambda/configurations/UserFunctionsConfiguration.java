@@ -122,8 +122,8 @@ public class UserFunctionsConfiguration {
                 .orElseThrow(() -> new InvalidUserIdError(userGetRequest.body().userId()));
     }
 
-    @Bean
-    public Consumer<InvocationWrapper<ShopSubscriptionRequest>> addShopSubscription() {
-        return (subscriptionRequest) -> this.userService.addShopToFavorite(subscriptionRequest.body().userId(), subscriptionRequest.body().shopId());
-    }
+//    @Bean
+//    public Consumer<InvocationWrapper<ShopSubscriptionRequest>> addShopSubscription() {
+//        return (subscriptionRequest) -> this.userService.addShopToFavorite(subscriptionRequest.body().userId(), subscriptionRequest.body().shopId());
+//    }
 }

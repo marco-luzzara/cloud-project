@@ -19,11 +19,11 @@ import java.util.Optional;
 public class UserService {
     @Autowired
     private UserRepository userRepository;
-    @Autowired
-    private ShopRepository shopRepository;
+//    @Autowired
+//    private ShopRepository shopRepository;
 
     public int addUser(UserCreationData userCreationData) {
-        var user = new User(null, userCreationData.username(), new HashSet<>());
+        var user = new User(null, userCreationData.username());
 
         var createdUser = this.userRepository.save(UserData.fromUser(user));
 
@@ -40,26 +40,26 @@ public class UserService {
         return optionalUser.map(user -> new UserInfo(user.getId(), user.getUsername()));
     }
 
-    public List<UserInfo> getUsersSubscribedToShop(int shopId) {
-        return this.userRepository.findUsersByShopId(shopId).stream()
-                .map(ud -> new UserInfo(ud.getId(), ud.getUsername()))
-                .toList();
-    }
-
-    public void addShopToFavorite(int userId, int shopId) {
-        var userData = this.userRepository.findById(userId);
-        if (userData.isEmpty())
-            throw new InvalidUsernameError(userId);
-
-        var shopData = this.shopRepository.findById(shopId);
-        if (shopData.isEmpty())
-            throw new InvalidShopIdError(shopId);
-
-        var user = userData.get().toUser(this.shopRepository);
-        var shop = shopData.get().toShop();
-        user.addFavoriteShop(shop);
-
-        var updatedUser = UserData.fromUser(user);
-        this.userRepository.save(updatedUser);
-    }
+//    public List<UserInfo> getUsersSubscribedToShop(int shopId) {
+//        return this.userRepository.findUsersByShopId(shopId).stream()
+//                .map(ud -> new UserInfo(ud.getId(), ud.getUsername()))
+//                .toList();
+//    }
+//
+//    public void addShopToFavorite(int userId, int shopId) {
+//        var userData = this.userRepository.findById(userId);
+//        if (userData.isEmpty())
+//            throw new InvalidUsernameError(userId);
+//
+//        var shopData = this.shopRepository.findById(shopId);
+//        if (shopData.isEmpty())
+//            throw new InvalidShopIdError(shopId);
+//
+//        var user = userData.get().toUser(this.shopRepository);
+//        var shop = shopData.get().toShop();
+//        user.addFavoriteShop(shop);
+//
+//        var updatedUser = UserData.fromUser(user);
+//        this.userRepository.save(updatedUser);
+//    }
 }

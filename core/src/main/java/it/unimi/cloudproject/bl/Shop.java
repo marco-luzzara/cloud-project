@@ -6,10 +6,13 @@ import it.unimi.cloudproject.infrastructure.annotations.codecoverage.Generated;
 
 import java.util.Objects;
 
-public record Shop(Integer id, String name, Coordinates coordinates) {
+public record Shop(Integer id, User shopOwner, String name, Coordinates coordinates) {
     public Shop {
         if (Objects.isNull(name))
             throw new IllegalArgumentException("name cannot be null");
+
+        if (Objects.isNull(shopOwner))
+            throw new IllegalArgumentException("The owner cannot be null");
 
         if (name.isEmpty())
             throw new ValidationError.EmptyNameForShopError();

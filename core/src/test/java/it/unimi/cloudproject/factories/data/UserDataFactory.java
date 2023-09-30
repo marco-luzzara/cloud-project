@@ -1,4 +1,4 @@
-package it.unimi.cloudproject.data.factories;
+package it.unimi.cloudproject.factories.data;
 
 import it.unimi.cloudproject.data.model.UserData;
 import it.unimi.cloudproject.data.repositories.UserRepository;

@@ -10,13 +10,13 @@ import java.util.List;
 
 @Repository
 public interface UserRepository extends CrudRepository<UserData, Integer> {
-    @Query("""
-            SELECT u.*
-            FROM "USER_SHOP" us
-            JOIN "USER" u on us.user_id = u.id
-            WHERE us.shop_id = :shopId
-            """)
-    List<UserData> findUsersByShopId(@Param("shopId") int shopId);
+//    @Query("""
+//            SELECT u.*
+//            FROM "USER_SHOP" us
+//            JOIN "USER" u on us.user_id = u.id
+//            WHERE us.shop_id = :shopId
+//            """)
+//    List<UserData> findUsersByShopId(@Param("shopId") int shopId);
 
 //    Optional<UserData> findByUsername(String username);
 }

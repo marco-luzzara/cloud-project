@@ -1,19 +1,17 @@
 plugins {
-    id 'java'
-}
-
-group = 'it.unimi'
-version = 'unspecified'
-
-repositories {
-    mavenCentral()
+    id 'cloudproject.java-aws-lambda-conventions'
+    id 'jacoco'
 }
 
 dependencies {
-    testImplementation platform('org.junit:junit-bom:5.9.1')
-    testImplementation 'org.junit.jupiter:junit-jupiter'
-}
+    implementation project(':core')
+    implementation project(':cloud:infrastructure')
+    testImplementation(testFixtures(project(':cloud:infrastructure')))
 
-test {
-    useJUnitPlatform()
+    implementation 'software.amazon.awssdk:cognitoidentity'
+    implementation 'software.amazon.awssdk:cognitoidentityprovider'
+
+    testFixturesImplementation 'com.google.code.gson:gson'
+    testFixturesImplementation 'org.testcontainers:localstack'
+    testFixturesImplementation(testFixtures(project(':cloud:infrastructure')))
 }

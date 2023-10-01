@@ -1,6 +1,7 @@
 package it.unimi.cloudproject.services.services;
 
 import it.unimi.cloudproject.data.repositories.UserRepository;
+import it.unimi.cloudproject.infrastructure.errors.InternalException;
 import it.unimi.cloudproject.services.dto.ShopCreation;
 import it.unimi.cloudproject.services.dto.ShopInfo;
 import it.unimi.cloudproject.bl.Shop;
@@ -12,6 +13,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -36,9 +39,12 @@ public class ShopService {
     }
 
     public List<ShopInfo> findByName(String name) {
-        return this.shopRepository.findByName(name).stream().map(u ->
-                new ShopInfo(u.getId(), u.getName(), u.getCoordinates().longitude(), u.getCoordinates().latitude()))
-                .collect(Collectors.toList());
+        return this.shopRepository.findByName(name).stream().map(s ->
+            new ShopInfo(s.getId(), s.getName(),
+                    Optional.ofNullable(s.getShopOwner().getId()).
+                            orElseThrow(() -> new InternalException("The shop owner for shop with id %d has been deleted"
+                                    .formatted(s.getId()), new NullPointerException())),
+            s.getCoordinates().longitude(), s.getCoordinates().latitude())).collect(Collectors.toList());
     }
 
     public void deleteShop(Integer shopId) {

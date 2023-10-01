@@ -1,5 +1,7 @@
 package it.unimi.cloudproject.services;
 
+import it.unimi.cloudproject.factories.bl.UserFactory;
+import it.unimi.cloudproject.services.dto.ShopCreation;
 import it.unimi.cloudproject.services.dto.ShopInfo;
 import it.unimi.cloudproject.factories.services.ShopDtoFactory;
 import it.unimi.cloudproject.factories.data.ShopDataFactory;
@@ -8,6 +10,7 @@ import it.unimi.cloudproject.data.model.UserShopData;
 import it.unimi.cloudproject.data.repositories.ShopRepository;
 import it.unimi.cloudproject.data.repositories.UserRepository;
 import it.unimi.cloudproject.factories.bl.ShopFactory;
+import it.unimi.cloudproject.services.errors.InvalidUserIdError;
 import it.unimi.cloudproject.services.services.ShopService;
 import it.unimi.cloudproject.testutils.db.DbFactory;
 import it.unimi.cloudproject.testutils.spring.DynamicPropertiesInjector;
@@ -24,8 +27,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.from;
+import static org.assertj.core.api.Assertions.*;
 
 @Testcontainers
 @SpringBootTest
@@ -63,9 +65,18 @@ public class ShopServiceTest {
 
         assertThat(shops).hasSize(1);
         assertThat(shops.get(0)).returns(shopCreationDto.name(), from(ShopInfo::name))
+                .returns(shopCreationDto.shopOwnerId(), from(ShopInfo::shopOwnerId))
                 .returns(shopCreationDto.longitude(), from(ShopInfo::longitude))
                 .returns(shopCreationDto.latitude(), from(ShopInfo::latitude))
                 .returns(shopId, from(ShopInfo::id));
+    }
+
+    @Test
+    void givenANewShop_whenOwnerDoesNotExist_thenThrow() {
+        var shopCreationDto = new ShopCreation(ShopFactory.VALID_SHOP_NAME, 1000,
+                ShopFactory.VALID_COORDINATES.longitude(), ShopFactory.VALID_COORDINATES.latitude());
+
+        assertThatThrownBy(() -> shopService.addShop(shopCreationDto)).isInstanceOf(InvalidUserIdError.class);
     }
 
     @Test

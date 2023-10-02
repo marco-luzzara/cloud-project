@@ -58,7 +58,7 @@ main() {
     docker exec "$TERRAFORM_CONTAINER_NAME" terraform apply \
         -auto-approve \
         -var="customer_lambda_dist_bucket=hot-reload" \
-        -var="customer_lambda_dist_bucket_key=$(pwd)/../cloud/customer-webapp/build/hot-reload" \
+        -var="customer_lambda_dist_bucket_key=$(pwd)/../cloud/customer-api/build/hot-reload" \
         -var="admin_lambda_dist_bucket=hot-reload" \
         -var="admin_lambda_dist_bucket_key=$(pwd)/../cloud/admin-api/build/hot-reload"
     print_done

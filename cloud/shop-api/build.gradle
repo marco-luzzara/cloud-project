@@ -1,0 +1,21 @@
+plugins {
+    id 'java'
+}
+
+plugins {
+    id 'cloudproject.java-aws-lambda-conventions'
+    id 'jacoco'
+}
+
+dependencies {
+    implementation project(':core')
+    implementation project(':cloud:infrastructure')
+    testImplementation(testFixtures(project(':cloud:infrastructure')))
+
+    implementation 'software.amazon.awssdk:cognitoidentity'
+    implementation 'software.amazon.awssdk:cognitoidentityprovider'
+
+    testFixturesImplementation 'com.google.code.gson:gson'
+    testFixturesImplementation 'org.testcontainers:localstack'
+    testFixturesImplementation(testFixtures(project(':cloud:infrastructure')))
+}

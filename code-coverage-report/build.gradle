@@ -9,10 +9,11 @@ repositories {
 }
 
 dependencies {
-    jacocoAggregation project(':cloud:customer-webapp')
     jacocoAggregation project(':core')
     jacocoAggregation project(':cloud:infrastructure')
+    jacocoAggregation project(':cloud:customer-api')
     jacocoAggregation project(':cloud:admin-api')
+    jacocoAggregation project(':cloud:shop-api')
 }
 
 tasks.named('check') {

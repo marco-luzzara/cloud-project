@@ -25,7 +25,7 @@ variable "customer_lambda_dist_bucket" {
 variable "customer_lambda_dist_bucket_key" {
   description = "Bucket key for the distribution zip of the customer lambda"
   type        = string
-  default = "customer-webapp.zip"
+  default = "customer-api.zip"
 }
 
 // ******************************** Admin Lambda Variables

@@ -8,7 +8,6 @@ import it.unimi.cloudproject.lambda.dto.responses.user.LoginResponse;
 import it.unimi.cloudproject.lambda.dto.responses.user.UserCreationResponse;
 import it.unimi.cloudproject.lambda.dto.responses.user.UserGetInfoResponse;
 import it.unimi.cloudproject.lambda.errors.user.CannotDeleteUserFromPoolError;
-import it.unimi.cloudproject.lambda.errors.user.InvalidUserIdError;
 import it.unimi.cloudproject.lambda.errors.user.LoginFailedError;
 import it.unimi.cloudproject.lambda.errors.user.RegistrationFailedError;
 import it.unimi.cloudproject.apigw.message.model.InvocationWrapper;
@@ -117,9 +116,10 @@ public class UserFunctionsConfiguration {
 
     @Bean
     public Function<InvocationWrapper<UserGetInfoRequest>, UserGetInfoResponse> getUser() {
-        return userGetRequest -> this.userService.getUser(userGetRequest.body().userId())
-                .map(ui -> new UserGetInfoResponse(ui.id(), ui.username()))
-                .orElseThrow(() -> new InvalidUserIdError(userGetRequest.body().userId()));
+        return userGetRequest -> {
+            var userInfo = this.userService.getUser(userGetRequest.body().userId());
+            return new UserGetInfoResponse(userInfo.id(), userInfo.username());
+        };
     }
 
 //    @Bean

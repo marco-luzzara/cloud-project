@@ -1,36 +1,64 @@
+// ******************************** Customer Lambda Variables
+
 variable "customer_lambda_iam_role_arn" {
-  description = "Role Arn for the webapp lambda"
+  description = "Role Arn for the customer lambda"
   type        = string
   sensitive   = true
 }
 
 variable "customer_lambda_spring_active_profile" {
-  description = "Spring active profile for the webapp lambda"
+  description = "Spring active profile for the customer lambda"
   type        = string
 }
 
 variable "customer_lambda_dist_path" {
-  description = "Path of the distribution zip of the web app lambda"
+  description = "Path of the distribution zip of the customer lambda"
   type        = string
 }
 
 variable "customer_lambda_dist_bucket" {
-  description = "Bucket for the distribution zip of the web app lambda"
+  description = "Bucket for the distribution zip of the customer lambda"
   type        = string
   default = "lambda-dist-bucket"
 }
 
 variable "customer_lambda_dist_bucket_key" {
-  description = "Bucket key for the distribution zip of the web app lambda"
+  description = "Bucket key for the distribution zip of the customer lambda"
   type        = string
   default = "customer-webapp.zip"
 }
 
-variable "customer_lambda_disable_cert_checking" {
-  description = "It is used to disable the SSL certificate checking when doing HTTPS request to the mocked AWS endpoints"
-  type = bool
-  default = false
+// ******************************** Admin Lambda Variables
+
+variable "admin_lambda_iam_role_arn" {
+  description = "Role Arn for the admin lambda"
+  type        = string
+  sensitive   = true
 }
+
+variable "admin_lambda_spring_active_profile" {
+  description = "Spring active profile for the admin lambda"
+  type        = string
+}
+
+variable "admin_lambda_dist_path" {
+  description = "Path of the distribution zip of the admin lambda"
+  type        = string
+}
+
+variable "admin_lambda_dist_bucket" {
+  description = "Bucket for the distribution zip of the admin lambda"
+  type        = string
+  default = "lambda-dist-bucket"
+}
+
+variable "admin_lambda_dist_bucket_key" {
+  description = "Bucket key for the distribution zip of the admin lambda"
+  type        = string
+  default = "admin-api.zip"
+}
+
+// ********************************
 
 variable "apigateway_stage_name" {
   description = "The stage name for the api gateway"

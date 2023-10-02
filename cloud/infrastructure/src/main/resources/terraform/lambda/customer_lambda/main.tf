@@ -25,8 +25,7 @@ resource "aws_lambda_function" "customer_lambda" {
       LAMBDA_DOCKER_DNS = "127.0.0.1"
       JAVA_TOOL_OPTIONS = <<EOT
         -DMAIN_CLASS=it.unimi.cloudproject.CustomerWebappApi
-        -Dlogging.level.org.springframework=DEBUG
-        -Dcom.amazonaws.sdk.disableCertChecking=${var.customer_lambda_system_properties.disable_cert_checking}
+        -Dlogging.level.org.springframework=INFO
         -Daws.cognito.user_pool_id=${var.customer_lambda_system_properties.cognito_main_user_pool_id}
         -Daws.cognito.user_pool_client_id=${var.customer_lambda_system_properties.cognito_main_user_pool_client_id}
         -Daws.cognito.user_pool_client_secret=${var.customer_lambda_system_properties.cognito_main_user_pool_client_secret}
@@ -41,5 +40,4 @@ resource "aws_lambda_function" "customer_lambda" {
 
   s3_bucket = var.customer_lambda_dist_bucket
   s3_key = var.customer_lambda_dist_bucket_key
-  source_code_hash = var.customer_lambda_dist_bucket == "hot-reload" ? null : filebase64sha256(var.customer_lambda_dist_path)
 }

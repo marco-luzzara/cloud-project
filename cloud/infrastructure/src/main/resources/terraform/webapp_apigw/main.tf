@@ -148,17 +148,36 @@ module "add_user_subscription" {
 }
 
 ## ************************ Shops API ************************
-#
-## ********* /shops
-#resource "aws_api_gateway_resource" "webapp_shops_resource" {
-#  rest_api_id = aws_api_gateway_rest_api.webapp_rest_api.id
-#  parent_id   = aws_api_gateway_rest_api.webapp_rest_api.root_resource_id
-#  path_part   = "shops"
-#}
-#
-## ********* /shops/{shopId}
-#resource "aws_api_gateway_resource" "webapp_shops_with_id_resource" {
-#  rest_api_id = aws_api_gateway_rest_api.webapp_rest_api.id
-#  parent_id   = aws_api_gateway_resource.webapp_shops_resource.id
-#  path_part   = "{shopId}"
-#}
+
+# ********* /shops
+resource "aws_api_gateway_resource" "webapp_shops_resource" {
+  rest_api_id = aws_api_gateway_rest_api.webapp_rest_api.id
+  parent_id   = aws_api_gateway_rest_api.webapp_rest_api.root_resource_id
+  path_part   = "shops"
+}
+
+module "create_shop" {
+  source = "../webapp_apigw_integration"
+  rest_api_id = aws_api_gateway_rest_api.webapp_rest_api.id
+  resource_id = aws_api_gateway_resource.webapp_shops_resource.id
+  http_method = "POST"
+  authorization = "COGNITO_USER_POOLS"
+  authorizer_id = aws_api_gateway_authorizer.user_authorizer.id
+  lambda_invocation_arn = var.customer_lambda_invoke_arn
+  http_successful_status_code = "200"
+  request_template_for_body = "$input.json('$')"
+  spring_cloud_function_definition_header_value = "createShop"
+  http_fail_status_codes = [
+    {
+      status_code = "404"
+      selection_pattern = "User with id \\d+ does not exist"
+    }
+  ]
+}
+
+# ********* /shops/{shopId}
+resource "aws_api_gateway_resource" "webapp_shops_with_id_resource" {
+  rest_api_id = aws_api_gateway_rest_api.webapp_rest_api.id
+  parent_id   = aws_api_gateway_resource.webapp_shops_resource.id
+  path_part   = "{shopId}"
+}

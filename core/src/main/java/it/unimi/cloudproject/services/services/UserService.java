@@ -3,6 +3,7 @@ package it.unimi.cloudproject.services.services;
 import it.unimi.cloudproject.services.dto.UserCreationData;
 import it.unimi.cloudproject.services.dto.UserInfo;
 import it.unimi.cloudproject.services.errors.InvalidShopIdError;
+import it.unimi.cloudproject.services.errors.InvalidUserIdError;
 import it.unimi.cloudproject.services.errors.InvalidUsernameError;
 import it.unimi.cloudproject.bl.User;
 import it.unimi.cloudproject.data.model.UserData;
@@ -31,13 +32,16 @@ public class UserService {
     }
 
     public void deleteUser(int userId) {
+        if (!this.userRepository.existsById(userId))
+            throw new InvalidUserIdError(userId);
+
         this.userRepository.deleteById(userId);
     }
 
-    public Optional<UserInfo> getUser(int userId) {
+    public UserInfo getUser(int userId) {
         var optionalUser = this.userRepository.findById(userId);
 
-        return optionalUser.map(user -> new UserInfo(user.getId(), user.getUsername()));
+        return optionalUser.map(user -> new UserInfo(user.getId(), user.getUsername())).orElseThrow(() -> new InvalidUserIdError(userId));
     }
 
 //    public List<UserInfo> getUsersSubscribedToShop(int shopId) {

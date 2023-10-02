@@ -39,7 +39,7 @@ module "webapp_db" {
 }
 
 module "customer_lambda" {
-  source = "./customer_lambda"
+  source = "./lambda/customer_lambda"
 
   customer_lambda_dist_bucket = var.customer_lambda_dist_bucket
   customer_lambda_dist_bucket_key = var.customer_lambda_dist_bucket_key
@@ -54,16 +54,34 @@ module "customer_lambda" {
     spring_datasource_url = "jdbc:postgresql://${module.webapp_db.rds_endpoint}/${var.webapp_db_config.db_name}"
     spring_datasource_username = var.webapp_db_credentials.username
     spring_datasource_password = var.webapp_db_credentials.password
-    disable_cert_checking = var.customer_lambda_disable_cert_checking
   }
-#  when = terraform.workspace == "webapp"
+}
+
+module "admin_lambda" {
+  source = "./lambda/admin_lambda"
+
+  admin_lambda_dist_bucket = var.admin_lambda_dist_bucket
+  admin_lambda_dist_bucket_key = var.admin_lambda_dist_bucket_key
+  admin_lambda_dist_path = var.admin_lambda_dist_path
+  admin_lambda_iam_role_arn = var.admin_lambda_iam_role_arn
+  is_testing = var.is_testing
+  admin_lambda_system_properties = {
+    cognito_main_user_pool_id = module.authentication.cognito_main_pool_id
+    cognito_main_user_pool_client_id = module.authentication.cognito_main_pool_client_id
+    cognito_main_user_pool_client_secret = module.authentication.cognito_main_pool_client_secret
+    spring_active_profile = var.admin_lambda_spring_active_profile
+    spring_datasource_url = "jdbc:postgresql://${module.webapp_db.rds_endpoint}/${var.webapp_db_config.db_name}"
+    spring_datasource_username = var.webapp_db_credentials.username
+    spring_datasource_password = var.webapp_db_credentials.password
+  }
 }
 
 module "webapp_apigw" {
-  depends_on = [module.customer_lambda]
+  depends_on = [module.customer_lambda, module.admin_lambda]
   source = "./webapp_apigw"
 
   customer_lambda_invoke_arn = module.customer_lambda.customer_lambda_invoke_arn
+  admin_lambda_invoke_arn = module.admin_lambda.admin_lambda_invoke_arn
   cognito_user_pool_arn = module.authentication.cognito_main_pool_arn
   #  when = terraform.workspace == "webapp"
 }

@@ -37,7 +37,7 @@ main() {
     # create tar to preserve the tree structure
     print_step_message "Copying tf files on terraform"
     # ./**/*.tf does not match with root level tf files (for some reason)
-    (cd ../cloud/infrastructure/src/main/resources/terraform && tar -czf "$TEMPDIR/tf_tree.tar.gz" ./*.tf ./**/*.tf)
+    (cd ../cloud/infrastructure/src/main/resources/terraform && tar -czf "$TEMPDIR/tf_tree.tar.gz" $(find . -path './**.tf'))
     (cd ../cloud/infrastructure/src/testFixtures/resources/terraform && tar -czf "$TEMPDIR/tfvars_tree.tar.gz" ./*.tfvars)
     docker cp "$TEMPDIR/tf_tree.tar.gz" "$TERRAFORM_CONTAINER_NAME:/app/tf_tree.tar.gz"
     docker cp "$TEMPDIR/tfvars_tree.tar.gz" "$TERRAFORM_CONTAINER_NAME:/app/tfvars_tree.tar.gz"
@@ -58,7 +58,9 @@ main() {
     docker exec "$TERRAFORM_CONTAINER_NAME" terraform apply \
         -auto-approve \
         -var="customer_lambda_dist_bucket=hot-reload" \
-        -var="customer_lambda_dist_bucket_key=$(pwd)/../cloud/customer-webapp/build/hot-reload"
+        -var="customer_lambda_dist_bucket_key=$(pwd)/../cloud/customer-webapp/build/hot-reload" \
+        -var="admin_lambda_dist_bucket=hot-reload" \
+        -var="admin_lambda_dist_bucket_key=$(pwd)/../cloud/admin-api/build/hot-reload"
     print_done
 
     print_step_message "Cleanup"

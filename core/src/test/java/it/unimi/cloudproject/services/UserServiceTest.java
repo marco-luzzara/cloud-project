@@ -10,6 +10,7 @@ import it.unimi.cloudproject.data.model.UserShopData;
 import it.unimi.cloudproject.data.repositories.ShopRepository;
 import it.unimi.cloudproject.data.repositories.UserRepository;
 import it.unimi.cloudproject.factories.bl.UserFactory;
+import it.unimi.cloudproject.services.errors.InvalidUserIdError;
 import it.unimi.cloudproject.services.services.UserService;
 import it.unimi.cloudproject.testutils.db.DbFactory;
 import it.unimi.cloudproject.testutils.spring.DynamicPropertiesInjector;
@@ -60,8 +61,13 @@ public class UserServiceTest {
 
         var userInfo = userService.getUser(id);
 
-        assertThat(userInfo.orElseThrow()).returns(id, from(UserInfo::id))
+        assertThat(userInfo).returns(id, from(UserInfo::id))
                 .returns(UserFactory.VALID_USERNAME, from(UserInfo::username));
+    }
+
+    @Test
+    void givenNotExistingUser_whenGetUserInfo_thenThrow() {
+        assertThatThrownBy(() -> userService.getUser(1000)).isInstanceOf(InvalidUserIdError.class);
     }
 
     @Test
@@ -70,8 +76,12 @@ public class UserServiceTest {
 
         userService.deleteUser(id);
 
-        var userInfo = userService.getUser(id);
-        assertThat(userInfo).isEmpty();
+        assertThatThrownBy(() -> userService.getUser(id)).isInstanceOf(InvalidUserIdError.class);
+    }
+
+    @Test
+    void givenUserToDelete_whenUserIdDoesNotExist_thenThrowInvalidUserId() {
+        assertThatThrownBy(() -> userService.deleteUser(1000)).isInstanceOf(InvalidUserIdError.class);
     }
 
 //    @Test

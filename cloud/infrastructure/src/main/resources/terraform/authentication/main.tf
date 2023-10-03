@@ -1,3 +1,12 @@
+data "aws_caller_identity" "current" {}
+data "aws_region" "current" {}
+
+locals {
+  aws_account_id    = data.aws_caller_identity.current.account_id
+  aws_region        = data.aws_region.current.name
+  api_resource_prefix = "arn:aws:execute-api:${local.aws_region}:${local.aws_account_id}:*/*"
+}
+
 resource "aws_cognito_user_pool" "main_pool" {
   name = "main-pool"
 
@@ -7,7 +16,6 @@ resource "aws_cognito_user_pool" "main_pool" {
     attribute_data_type = "Number"
     mutable = false
     name = "dbId"
-    required = true
     number_attribute_constraints {
       min_value = 1
     }
@@ -24,10 +32,52 @@ resource "aws_cognito_user_pool" "main_pool" {
   }
 }
 
+#resource "aws_iam_role" "cognito_customer_user_group_role" {
+#  name = "cognito-group-role"
+#  assume_role_policy = jsonencode({
+#    Version = "2012-10-17"
+#    Statement = [
+#      {
+#        Action = "execute-api:Invoke"
+#        Effect   = "Allow"
+#        Resource = "${local.api_resource_prefix}/GET/users/me"
+#      },
+#      {
+#        Action = "execute-api:Invoke"
+#        Effect   = "Deny"
+#        Resource = "${local.api_resource_prefix}/DELETE/users/me"
+#      }
+#    ]
+#  })
+#}
+
 resource "aws_cognito_user_group" "customer_user_group" {
   name         = "customer-user-group"
   user_pool_id = aws_cognito_user_pool.main_pool.id
+#  role_arn = aws_iam_role.cognito_customer_user_group_role.arn
 }
+
+#resource "aws_iam_role" "cognito_customer_user_group_role" {
+#  name = "cognito-group-role"
+#
+#  assume_role_policy = jsonencode({
+#    Version = "2012-10-17",
+#    Statement = [
+#      {
+#        Action = "sts:AssumeRoleWithWebIdentity",
+#        Effect = "Allow",
+#        Principal = {
+#          Federated = "cognito-identity.amazonaws.com"
+#        },
+#        Condition = {
+#          StringEquals = {
+#            "cognito-identity.amazonaws.com:aud" = aws_cognito_user_pool.example.id
+#          }
+#        }
+#      }
+#    ]
+#  })
+#}
 
 resource "aws_cognito_user_group" "shop_user_group" {
   name         = "shop-user-group"

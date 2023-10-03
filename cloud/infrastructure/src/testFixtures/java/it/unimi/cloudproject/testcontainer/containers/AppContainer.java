@@ -52,12 +52,14 @@ public class AppContainer extends LocalStackContainer {
                 Service.API_GATEWAY,
                 Service.S3,
                 Service.CLOUDWATCHLOGS,
-                LocalStackContainer.EnabledService.named("rds"));
+                LocalStackContainer.EnabledService.named("rds"),
+                LocalStackContainer.EnabledService.named("cognito-idp"));
         withEnv(Map.of(
                 "LAMBDA_DOCKER_NETWORK", ((Network.NetworkImpl) NETWORK).getName(),
                 "MAIN_DOCKER_NETWORK", ((Network.NetworkImpl) NETWORK).getName(),
                 "LOCALSTACK_API_KEY", apiKey,
-                "LS_LOG", this.localstackConfig.logLevel
+                "LS_LOG", this.localstackConfig.logLevel,
+                "ENFORCE_IAM", "1"
                 ));
     }
 

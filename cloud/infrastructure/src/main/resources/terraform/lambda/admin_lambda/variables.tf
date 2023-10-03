@@ -1,7 +1,6 @@
-variable "admin_lambda_iam_role_arn" {
-  description = "Role Arn for the admin lambda"
+variable "webapp_db_arn" {
+  description = "Db Arn used by the IAM role to allow the lambda to connect to it"
   type        = string
-  sensitive   = true
 }
 
 variable "admin_lambda_system_properties" {

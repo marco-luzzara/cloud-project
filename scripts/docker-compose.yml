@@ -13,9 +13,11 @@ services:
       - PERSISTENCE=${LOCALSTACK_PERSISTENCE:-1}
       - LOCALSTACK_API_KEY=${LOCALSTACK_API_KEY:?Create the env variable LOCALSTACK_API_KEY and fill it with the api key}
       - DOCKER_HOST=unix:///var/run/docker.sock
-      - SERVICES=lambda,s3,apigateway,logs,rds
+      - SERVICES=lambda,s3,apigateway,logs,rds,cognito-idp
       - LAMBDA_DOCKER_NETWORK=localstack_network
       - MAIN_DOCKER_NETWORK=localstack_network
+      - ENFORCE_IAM=1
+      - DEBUG=1
     volumes:
       - "./volumes/${LOCALSTACK_VOLUME_DIR:-localstack_persistence}:/var/lib/localstack"
       - "/var/run/docker.sock:/var/run/docker.sock"

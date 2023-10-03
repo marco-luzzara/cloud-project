@@ -1,11 +1,5 @@
 // ******************************** Customer Lambda Variables
 
-variable "customer_lambda_iam_role_arn" {
-  description = "Role Arn for the customer lambda"
-  type        = string
-  sensitive   = true
-}
-
 variable "customer_lambda_spring_active_profile" {
   description = "Spring active profile for the customer lambda"
   type        = string
@@ -29,12 +23,6 @@ variable "customer_lambda_dist_bucket_key" {
 }
 
 // ******************************** Admin Lambda Variables
-
-variable "admin_lambda_iam_role_arn" {
-  description = "Role Arn for the admin lambda"
-  type        = string
-  sensitive   = true
-}
 
 variable "admin_lambda_spring_active_profile" {
   description = "Spring active profile for the admin lambda"

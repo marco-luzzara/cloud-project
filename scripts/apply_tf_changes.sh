@@ -32,7 +32,7 @@ main() {
 
     TEMPDIR=$(mktemp -d)
     echo "Created tempdir: $TEMPDIR"
-    trap 'rm -rf $TEMPDIR && ./stop_local.sh' ERR
+    trap 'rm -rf $TEMPDIR' ERR
     # copy files inside terraform
     # create tar to preserve the tree structure
     print_step_message "Copying tf files on terraform"

@@ -44,7 +44,7 @@ module "customer_lambda" {
   customer_lambda_dist_bucket = var.customer_lambda_dist_bucket
   customer_lambda_dist_bucket_key = var.customer_lambda_dist_bucket_key
   customer_lambda_dist_path = var.customer_lambda_dist_path
-  customer_lambda_iam_role_arn = var.customer_lambda_iam_role_arn
+  webapp_db_arn = module.webapp_db.arn
   is_testing = var.is_testing
   customer_lambda_system_properties = {
     cognito_main_user_pool_id = module.authentication.cognito_main_pool_id
@@ -63,7 +63,7 @@ module "admin_lambda" {
   admin_lambda_dist_bucket = var.admin_lambda_dist_bucket
   admin_lambda_dist_bucket_key = var.admin_lambda_dist_bucket_key
   admin_lambda_dist_path = var.admin_lambda_dist_path
-  admin_lambda_iam_role_arn = var.admin_lambda_iam_role_arn
+  webapp_db_arn = module.webapp_db.arn
   is_testing = var.is_testing
   admin_lambda_system_properties = {
     cognito_main_user_pool_id = module.authentication.cognito_main_pool_id

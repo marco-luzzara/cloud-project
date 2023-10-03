@@ -45,6 +45,8 @@ main() {
     export PERSISTENCE
     docker-compose up -d
 
+    trap './stop_local.sh' ERR
+
     ./apply_tf_changes.sh
 }
 

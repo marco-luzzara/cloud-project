@@ -12,12 +12,51 @@ resource "aws_s3_object" "customer_lambda_distribution_zip" {
   source = var.customer_lambda_dist_path
 }
 
+data "aws_iam_policy_document" "customer_trust_policy" {
+  statement {
+    effect = "Allow"
+
+    principals {
+      type        = "Service"
+      identifiers = ["lambda.amazonaws.com"]
+    }
+
+    actions = ["sts:AssumeRole"]
+  }
+}
+
+resource "aws_iam_role" "customer_lambda_role" {
+  name               = "customer-lambda-role"
+  assume_role_policy = data.aws_iam_policy_document.customer_trust_policy.json
+}
+
+resource "aws_iam_policy" "customer_lambda_policy" {
+  name = "customer-lambda-policy"
+  description = "IAM policy for customer lambda execution"
+
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [{
+      Action = [
+        "rds-db:connect"
+      ],
+      Effect   = "Allow",
+      Resource = var.webapp_db_arn,
+    }]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "customer_lambda_policy_attachment" {
+  policy_arn = aws_iam_policy.customer_lambda_policy.arn
+  role = aws_iam_role.customer_lambda_role.name
+}
+
 resource "aws_lambda_function" "customer_lambda" {
   depends_on = [aws_s3_object.customer_lambda_distribution_zip]
   function_name = "customer-lambda"
   runtime      = "java17"
   handler      = "org.springframework.cloud.function.adapter.aws.FunctionInvoker"
-  role         = var.customer_lambda_iam_role_arn
+  role         = aws_iam_role.customer_lambda_role.arn
   timeout      = 900
 
   environment {

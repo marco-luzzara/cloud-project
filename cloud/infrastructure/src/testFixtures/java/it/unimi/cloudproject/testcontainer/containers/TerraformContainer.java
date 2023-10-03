@@ -23,7 +23,9 @@ public class TerraformContainer extends GenericContainer<TerraformContainer> {
     private final Path lambdaSubprojectCommonDir = rootProjectDir.resolve("cloud");
     private final List<Path> lambdaSubprojects = List.of(
             lambdaSubprojectCommonDir.resolve("customer-api"),
-            lambdaSubprojectCommonDir.resolve("admin-api"));
+            lambdaSubprojectCommonDir.resolve("admin-api"),
+            lambdaSubprojectCommonDir.resolve("shop-api"),
+            lambdaSubprojectCommonDir.resolve("apigateway-authorizer"));
 
     public TerraformContainer() {
         super(DockerImageName.parse(IMAGE));

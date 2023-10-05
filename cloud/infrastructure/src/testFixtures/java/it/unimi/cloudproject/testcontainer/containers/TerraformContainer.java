@@ -23,9 +23,9 @@ public class TerraformContainer extends GenericContainer<TerraformContainer> {
     private final Path lambdaSubprojectCommonDir = rootProjectDir.resolve("cloud");
     private final List<Path> lambdaSubprojects = List.of(
             lambdaSubprojectCommonDir.resolve("customer-api"),
-            lambdaSubprojectCommonDir.resolve("admin-api"),
+            lambdaSubprojectCommonDir.resolve("admin-api")/*,
             lambdaSubprojectCommonDir.resolve("shop-api"),
-            lambdaSubprojectCommonDir.resolve("apigateway-authorizer"));
+            lambdaSubprojectCommonDir.resolve("apigateway-authorizer")*/);
 
     public TerraformContainer() {
         super(DockerImageName.parse(IMAGE));
@@ -78,8 +78,9 @@ public class TerraformContainer extends GenericContainer<TerraformContainer> {
     private void copyLambdaDistributionToContainer(Path lambdaSubproject) throws IOException {
         final var lambdaSubprojectName = lambdaSubproject.getFileName();
         var distDir = lambdaSubproject.resolve("build").resolve("dist");
-        var zipPath = Files.list(distDir).findFirst().orElseThrow(
-                () -> new IllegalStateException("Make sure the buildZip task is executed"));
+        var zipPath = distDir.resolve(lambdaSubproject.getFileName() + ".zip");
+        if (Files.notExists(zipPath))
+            throw new IllegalStateException("Make sure the buildZip task is executed");
         this.copyFileToContainer(MountableFile.forHostPath(zipPath, 444), "/app/%s.zip".formatted(lambdaSubprojectName));
     }
 

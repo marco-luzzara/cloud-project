@@ -16,6 +16,67 @@ resource "aws_api_gateway_rest_api" "webapp_rest_api" {
   name = "webapp-api"
 }
 
+#resource "aws_iam_role" "apigw_role" {
+#  name               = "apigw-role"
+#  assume_role_policy = jsonencode({
+#    Version = "2012-10-17",
+#    Statement = [
+#      {
+#        Action = "sts:AssumeRole",
+#        Effect = "Allow",
+#        Principal = {
+#          Service = "apigateway.amazonaws.com"
+#        }
+#      }
+#    ]
+#  })
+#}
+#
+#resource "aws_iam_policy" "apigw_policy" {
+#  name = "apigw-policy"
+#  description = "IAM policy for the Api Gateway"
+#
+#  policy = jsonencode({
+#    Version = "2012-10-17",
+#    Statement = [{
+#      Action = [
+#        "lambda:InvokeFunction"
+#      ],
+#      Effect   = "Allow",
+#      Resource = "*"
+##      Resource = [
+##        var.customer_lambda_info.lambda_arn,
+##        var.admin_lambda_info.lambda_arn
+##      ]
+#    }]
+#  })
+#}
+#
+#resource "aws_iam_role_policy_attachment" "apigw_policy_attachment" {
+#  policy_arn = aws_iam_policy.apigw_policy.arn
+#  role = aws_iam_role.apigw_role.name
+#}
+
+#resource "aws_lambda_permission" "lambda_permission" {
+#  for_each = toset([
+#    var.customer_lambda_info.function_name,
+#    var.admin_lambda_info.function_name
+#  ])
+#  statement_id  = "ApiGatewayInvoke${each.key}"
+#  action        = "lambda:InvokeFunction"
+#  function_name = each.key
+#  principal     = "apigateway.amazonaws.com"
+#  source_arn = "${aws_api_gateway_rest_api.webapp_rest_api.execution_arn}/*/*"
+#}
+
+resource "aws_lambda_permission" "lambda_permission" {
+  statement_id  = "AllowApiGatewayInvoke"
+  action        = "lambda:InvokeFunction"
+  function_name = var.customer_lambda_info.function_name
+  principal     = "apigateway.amazonaws.com"
+#  source_arn = "${aws_api_gateway_rest_api.webapp_rest_api.execution_arn}/*/*"
+}
+
 resource "aws_api_gateway_authorizer" "user_authorizer" {
   name                   = "user-authorizer"
   rest_api_id             = aws_api_gateway_rest_api.webapp_rest_api.id
@@ -40,7 +101,7 @@ module "create_user" {
   http_method = "POST"
   authorization = "NONE"
   authorizer_id = null
-  lambda_invocation_arn = var.customer_lambda_invoke_arn
+  lambda_invocation_arn = var.customer_lambda_info.invoke_arn
   http_successful_status_code = "200"
   request_template_for_body = "$input.json('$')"
   spring_cloud_function_definition_header_value = "createUser"
@@ -60,7 +121,7 @@ module "user_login" {
   http_method = "POST"
   authorization = "NONE"
   authorizer_id = null
-  lambda_invocation_arn = var.customer_lambda_invoke_arn
+  lambda_invocation_arn = var.customer_lambda_info.invoke_arn
   http_successful_status_code = "200"
   request_template_for_body = "$input.json('$')"
   spring_cloud_function_definition_header_value = "loginUser"
@@ -80,7 +141,7 @@ module "get_user" {
   http_method = "GET"
   authorization = "COGNITO_USER_POOLS"
   authorizer_id = aws_api_gateway_authorizer.user_authorizer.id
-  lambda_invocation_arn = var.customer_lambda_invoke_arn
+  lambda_invocation_arn = var.customer_lambda_info.invoke_arn
   http_successful_status_code = "200"
   request_template_for_body = <<-EOT
     {
@@ -99,7 +160,7 @@ module "delete_user" {
   http_method = "DELETE"
   authorization = "COGNITO_USER_POOLS"
   authorizer_id = aws_api_gateway_authorizer.user_authorizer.id
-  lambda_invocation_arn = var.customer_lambda_invoke_arn
+  lambda_invocation_arn = var.customer_lambda_info.invoke_arn
   http_successful_status_code = "200"
   request_template_for_body = <<-EOT
     {
@@ -130,7 +191,7 @@ module "add_user_subscription" {
   http_method = "POST"
   authorization = "COGNITO_USER_POOLS"
   authorizer_id = aws_api_gateway_authorizer.user_authorizer.id
-  lambda_invocation_arn = var.customer_lambda_invoke_arn
+  lambda_invocation_arn = var.customer_lambda_info.invoke_arn
   http_successful_status_code = "200"
   request_template_for_body = <<-EOT
     {
@@ -163,7 +224,7 @@ module "create_shop" {
   http_method = "POST"
   authorization = "COGNITO_USER_POOLS"
   authorizer_id = aws_api_gateway_authorizer.user_authorizer.id
-  lambda_invocation_arn = var.customer_lambda_invoke_arn
+  lambda_invocation_arn = var.admin_lambda_info.invoke_arn
   http_successful_status_code = "200"
   request_template_for_body = "$input.json('$')"
   spring_cloud_function_definition_header_value = "createShop"

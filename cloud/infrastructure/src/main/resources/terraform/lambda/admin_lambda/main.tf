@@ -12,22 +12,20 @@ resource "aws_s3_object" "admin_lambda_distribution_zip" {
   source = var.admin_lambda_dist_path
 }
 
-data "aws_iam_policy_document" "admin_trust_policy" {
-  statement {
-    effect = "Allow"
-
-    principals {
-      type        = "Service"
-      identifiers = ["lambda.amazonaws.com"]
-    }
-
-    actions = ["sts:AssumeRole"]
-  }
-}
-
 resource "aws_iam_role" "admin_lambda_role" {
   name               = "admin-lambda-role"
-  assume_role_policy = data.aws_iam_policy_document.admin_trust_policy.json
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Action = "sts:AssumeRole",
+        Effect = "Allow",
+        Principal = {
+          Service = "lambda.amazonaws.com"
+        }
+      }
+    ]
+  })
 }
 
 resource "aws_iam_policy" "admin_lambda_policy" {
@@ -36,13 +34,31 @@ resource "aws_iam_policy" "admin_lambda_policy" {
 
   policy = jsonencode({
     Version = "2012-10-17",
-    Statement = [{
-      Action = [
-        "rds-db:connect"
-      ],
-      Effect   = "Allow",
-      Resource = var.webapp_db_arn,
-    }]
+    Statement = [
+      {
+        Action = [
+          "rds-db:connect"
+        ],
+        Effect   = "Allow",
+        Resource = var.webapp_db_arn,
+      },
+      {
+        Action = [
+          "logs:CreateLogGroup",
+          "logs:CreateLogStream",
+          "logs:PutLogEvents"
+        ],
+        Effect   = "Allow",
+        Resource = "arn:aws:logs:*:*:*",
+      },
+      {
+        Action = [
+          "cognito-idp:AdminAddUserToGroup"
+        ],
+        Effect   = "Allow",
+        Resource = "*",
+      }
+    ]
   })
 }
 

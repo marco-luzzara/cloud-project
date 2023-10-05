@@ -77,11 +77,18 @@ module "admin_lambda" {
 }
 
 module "webapp_apigw" {
-  depends_on = [module.customer_lambda, module.admin_lambda]
   source = "./webapp_apigw"
 
-  customer_lambda_invoke_arn = module.customer_lambda.customer_lambda_invoke_arn
-  admin_lambda_invoke_arn = module.admin_lambda.admin_lambda_invoke_arn
+  customer_lambda_info = {
+    invoke_arn = module.customer_lambda.invoke_arn
+    function_name = module.customer_lambda.function_name
+    lambda_arn = module.customer_lambda.lambda_arn
+  }
+  admin_lambda_info = {
+    invoke_arn = module.admin_lambda.invoke_arn
+    function_name = module.admin_lambda.function_name
+    lambda_arn = module.admin_lambda.lambda_arn
+  }
   cognito_user_pool_arn = module.authentication.cognito_main_pool_arn
   #  when = terraform.workspace == "webapp"
 }

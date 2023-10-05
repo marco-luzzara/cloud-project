@@ -23,8 +23,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Testcontainers
 public class CustomerApiIT {
     @Container
-//    private static final AppContainer app = new AppContainer();
-    private static final AppContainer app = new AppContainer(new AppContainer.LocalstackConfig(false, "trace"));
+    private static final AppContainer app = new AppContainer();
+//    private static final AppContainer app = new AppContainer(new AppContainer.LocalstackConfig(false, "trace"));
 
     @Container
     private static final TerraformContainer terraform = new TerraformContainer().withNetwork(app.NETWORK);

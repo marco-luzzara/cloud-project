@@ -1,11 +1,19 @@
-variable "customer_lambda_invoke_arn" {
-  description = "The invoke arn of the customer lambda function"
-  type    = string
+variable "customer_lambda_info" {
+  description = "The customer lambda info"
+  type    = object({
+    invoke_arn: string
+    function_name: string
+    lambda_arn: string
+  })
 }
 
-variable "admin_lambda_invoke_arn" {
-  description = "The invoke arn of the admin lambda function"
-  type    = string
+variable "admin_lambda_info" {
+  description = "The admin lambda info"
+  type    = object({
+    invoke_arn: string
+    function_name: string
+    lambda_arn: string
+  })
 }
 
 variable "cognito_user_pool_arn" {

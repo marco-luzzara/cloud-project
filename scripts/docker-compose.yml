@@ -13,7 +13,7 @@ services:
       - PERSISTENCE=${LOCALSTACK_PERSISTENCE:-1}
       - LOCALSTACK_API_KEY=${LOCALSTACK_API_KEY:?Create the env variable LOCALSTACK_API_KEY and fill it with the api key}
       - DOCKER_HOST=unix:///var/run/docker.sock
-      - SERVICES=lambda,s3,apigateway,logs,rds,cognito-idp
+      - SERVICES=lambda,s3,apigateway,logs,rds,cognito-idp,sns
       - LAMBDA_DOCKER_NETWORK=localstack_network
       - MAIN_DOCKER_NETWORK=localstack_network
       - ENFORCE_IAM=1

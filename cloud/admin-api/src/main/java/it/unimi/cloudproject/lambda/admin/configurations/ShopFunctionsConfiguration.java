@@ -3,7 +3,7 @@ package it.unimi.cloudproject.lambda.admin.configurations;
 import it.unimi.cloudproject.apigw.message.model.InvocationWrapper;
 import it.unimi.cloudproject.lambda.admin.dto.requests.shop.ShopCreationRequest;
 import it.unimi.cloudproject.lambda.admin.dto.responses.shop.ShopCreationResponse;
-import it.unimi.cloudproject.lambda.admin.errors.user.CannotPromoteUserToShopError;
+import it.unimi.cloudproject.lambda.admin.errors.user.CannotCreateShop;
 import it.unimi.cloudproject.services.dto.ShopCreation;
 import it.unimi.cloudproject.services.services.ShopService;
 import it.unimi.cloudproject.services.services.UserService;
@@ -13,6 +13,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import software.amazon.awssdk.core.internal.http.loader.DefaultSdkHttpClientBuilder;
 import software.amazon.awssdk.services.cognitoidentityprovider.CognitoIdentityProviderClient;
+import software.amazon.awssdk.services.sns.SnsClient;
 import software.amazon.awssdk.utils.AttributeMap;
 
 import java.util.function.Function;
@@ -34,10 +35,7 @@ public class ShopFunctionsConfiguration {
             var userPoolId = System.getProperty("aws.cognito.user_pool_id");
 
             final int shopId = this.shopService.addShop(shopCreation);
-            try (var cognitoClient = CognitoIdentityProviderClient.builder()
-                    .httpClient(new DefaultSdkHttpClientBuilder().buildWithDefaults(AttributeMap.builder()
-                            .build()))
-                    .build()) {
+            try (var cognitoClient = CognitoIdentityProviderClient.create(); var snsClient = SnsClient.create()) {
                 var userInfo = this.userService.getUser(sc.body().shopOwnerId());
 
                 AwsSdkUtils.runSdkRequestAndAssertResult(
@@ -45,12 +43,16 @@ public class ShopFunctionsConfiguration {
                                 .userPoolId(userPoolId)
                                 .groupName("shop-user-group")
                                 .username(userInfo.username())),
-                        (e) -> new CannotPromoteUserToShopError(sc.body().shopOwnerId(), shopId, e));
+                        (e) -> new CannotCreateShop(sc.body().shopOwnerId(), e));
+
+                AwsSdkUtils.runSdkRequestAndAssertResult(
+                        () -> snsClient.createTopic(b -> b.name(Integer.toString(shopId))),
+                        (e) -> new CannotCreateShop(sc.body().shopOwnerId(), e));
 
                 return new ShopCreationResponse(shopId);
             }
             catch (Exception exc) {
-                this.shopService.deleteShop(shopId);
+                this.shopService.deleteShop(sc.body().shopOwnerId(), shopId);
                 throw exc;
             }
         };

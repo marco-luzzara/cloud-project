@@ -1,16 +1,15 @@
 package it.unimi.cloudproject.services;
 
-import it.unimi.cloudproject.factories.bl.UserFactory;
 import it.unimi.cloudproject.services.dto.ShopCreation;
 import it.unimi.cloudproject.services.dto.ShopInfo;
 import it.unimi.cloudproject.factories.services.ShopDtoFactory;
-import it.unimi.cloudproject.factories.data.ShopDataFactory;
 import it.unimi.cloudproject.factories.data.UserDataFactory;
-import it.unimi.cloudproject.data.model.UserShopData;
 import it.unimi.cloudproject.data.repositories.ShopRepository;
 import it.unimi.cloudproject.data.repositories.UserRepository;
 import it.unimi.cloudproject.factories.bl.ShopFactory;
+import it.unimi.cloudproject.services.errors.InvalidShopIdError;
 import it.unimi.cloudproject.services.errors.InvalidUserIdError;
+import it.unimi.cloudproject.services.errors.UnauthorizedUserForShopError;
 import it.unimi.cloudproject.services.services.ShopService;
 import it.unimi.cloudproject.testutils.db.DbFactory;
 import it.unimi.cloudproject.testutils.spring.DynamicPropertiesInjector;
@@ -18,14 +17,11 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.jdbc.core.mapping.AggregateReference;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-
-import java.util.List;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -85,9 +81,28 @@ public class ShopServiceTest {
         var shopCreationDto = ShopDtoFactory.createShopCreation(shopOwner);
         var shopId = shopService.addShop(shopCreationDto);
 
-        shopService.deleteShop(shopId);
+        shopService.deleteShop(shopOwner.getId(), shopId);
 
         assertThat(shopService.findByName(shopCreationDto.name())).isEmpty();
+    }
+
+    @Test
+    void givenAShop_whenDeletedByNotItsOwner_thenThrow() {
+        var shopOwner = UserDataFactory.createUser(this.userRepository);
+        var otherUser = UserDataFactory.createUser(this.userRepository);
+        var shopCreationDto = ShopDtoFactory.createShopCreation(shopOwner);
+        var shopId = shopService.addShop(shopCreationDto);
+
+        assertThatThrownBy(() -> shopService.deleteShop(otherUser.getId(), shopId)).isInstanceOf(UnauthorizedUserForShopError.class);
+    }
+
+    @Test
+    void givenAShop_whenDeletedWithIncorrectId_thenThrow() {
+        var shopOwner = UserDataFactory.createUser(this.userRepository);
+        var shopCreationDto = ShopDtoFactory.createShopCreation(shopOwner);
+        var shopId = shopService.addShop(shopCreationDto);
+
+        assertThatThrownBy(() -> shopService.deleteShop(shopOwner.getId(), 1000)).isInstanceOf(InvalidShopIdError.class);
     }
 
 //    @Test

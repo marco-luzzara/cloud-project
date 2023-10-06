@@ -57,6 +57,13 @@ resource "aws_iam_policy" "admin_lambda_policy" {
         ],
         Effect   = "Allow",
         Resource = "*",
+      },
+      {
+        Action = [
+          "sns:CreateTopic",
+        ],
+        Effect   = "Allow",
+        Resource = "arn:aws:sns:*:*:*",
       }
     ]
   })

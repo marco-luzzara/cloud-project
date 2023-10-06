@@ -8,12 +8,13 @@ import it.unimi.cloudproject.bl.Shop;
 import it.unimi.cloudproject.bl.valueobjects.Coordinates;
 import it.unimi.cloudproject.data.model.ShopData;
 import it.unimi.cloudproject.data.repositories.ShopRepository;
+import it.unimi.cloudproject.services.errors.InvalidShopIdError;
 import it.unimi.cloudproject.services.errors.InvalidUserIdError;
+import it.unimi.cloudproject.services.errors.UnauthorizedUserForShopError;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -39,16 +40,28 @@ public class ShopService {
     }
 
     public List<ShopInfo> findByName(String name) {
-        return this.shopRepository.findByName(name).stream().map(s ->
-            new ShopInfo(s.getId(), s.getName(),
-                    Optional.ofNullable(s.getShopOwner().getId()).
-                            orElseThrow(() -> new InternalException("The shop owner for shop with id %d has been deleted"
-                                    .formatted(s.getId()), new NullPointerException())),
-            s.getCoordinates().longitude(), s.getCoordinates().latitude())).collect(Collectors.toList());
+        return this.shopRepository.findByName(name).stream().map(this::getShopInfoFromData)
+                .collect(Collectors.toList());
     }
 
-    public void deleteShop(Integer shopId) {
+    public ShopInfo findById(int shopId) {
+        return this.shopRepository.findById(shopId).stream().findFirst().map(this::getShopInfoFromData)
+                .orElseThrow(() -> new InvalidShopIdError(shopId));
+    }
+
+    public void deleteShop(int userId, int shopId) {
+        var shop = this.findById(shopId);
+        if (userId != shop.shopOwnerId())
+            throw new UnauthorizedUserForShopError(userId, shopId);
         this.shopRepository.deleteById(shopId);
+    }
+
+    private ShopInfo getShopInfoFromData(ShopData shopData) {
+        return new ShopInfo(shopData.getId(), shopData.getName(),
+                Optional.ofNullable(shopData.getShopOwner().getId()).
+                        orElseThrow(() -> new InternalException("The shop owner for shop with id %d has been deleted"
+                                .formatted(shopData.getId()), new NullPointerException())),
+                shopData.getCoordinates().longitude(), shopData.getCoordinates().latitude());
     }
 
 //    public List<ShopInfo> getFavoriteShopsOfUser(int userId) {

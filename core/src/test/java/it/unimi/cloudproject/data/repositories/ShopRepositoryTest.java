@@ -46,17 +46,31 @@ public class ShopRepositoryTest {
     }
 
     @Test
-    void givenShop_whenAddIt_thenCanRetrieveItByName() {
+    void givenShop_whenAddIt_thenCanRetrieveIt() {
         var shopOwnerData = UserDataFactory.createUser(this.userRepository);
         var shopOwner = shopOwnerData.toUser();
         var shop = ShopFactory.getShop(shopOwner);
         var shopData = ShopData.fromShop(shop);
         shopData = shopRepository.save(shopData);
 
-        var shopByName = shopRepository.findByName(shopData.getName()).stream().findFirst().orElseThrow();
+        var shopById = shopRepository.findById(shopData.getId()).stream().findFirst().orElseThrow();
 
-        assertThat(shopByName.getId()).isEqualTo(shopData.getId());
-        assertThat(shopByName).isEqualTo(shopData);
+        assertThat(shopById.getId()).isEqualTo(shopData.getId());
+        assertThat(shopById).isEqualTo(shopData);
+    }
+
+    @Test
+    void givenShop_whenFindByNameOrId_thenGetSameShop() {
+        var shopOwnerData = UserDataFactory.createUser(this.userRepository);
+        var shopOwner = shopOwnerData.toUser();
+        var shop = ShopFactory.getShop(shopOwner);
+        var shopData = ShopData.fromShop(shop);
+        shopData = shopRepository.save(shopData);
+
+        var shopByName = shopRepository.findById(shopData.getId()).stream().findFirst().orElseThrow();
+        var shopById = shopRepository.findByName(shopData.getName()).stream().findFirst().orElseThrow();
+
+        assertThat(shopByName).isEqualTo(shopById);
     }
 
     @Test

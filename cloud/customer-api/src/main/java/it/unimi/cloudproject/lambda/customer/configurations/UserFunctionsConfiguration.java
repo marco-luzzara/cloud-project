@@ -1,16 +1,15 @@
 package it.unimi.cloudproject.lambda.customer.configurations;
 
 import it.unimi.cloudproject.apigw.message.model.InvocationWrapper;
-import it.unimi.cloudproject.lambda.customer.dto.requests.user.UserCreationRequest;
-import it.unimi.cloudproject.lambda.customer.dto.requests.user.UserDeletionRequest;
-import it.unimi.cloudproject.lambda.customer.dto.requests.user.UserGetInfoRequest;
-import it.unimi.cloudproject.lambda.customer.dto.requests.user.UserLoginRequest;
+import it.unimi.cloudproject.infrastructure.errors.InternalException;
+import it.unimi.cloudproject.lambda.customer.dto.requests.user.*;
 import it.unimi.cloudproject.lambda.customer.dto.responses.user.LoginResponse;
 import it.unimi.cloudproject.lambda.customer.dto.responses.user.UserCreationResponse;
 import it.unimi.cloudproject.lambda.customer.dto.responses.user.UserGetInfoResponse;
 import it.unimi.cloudproject.lambda.customer.errors.user.CannotDeleteUserFromPoolError;
 import it.unimi.cloudproject.lambda.customer.errors.user.LoginFailedError;
 import it.unimi.cloudproject.lambda.customer.errors.user.RegistrationFailedError;
+import it.unimi.cloudproject.lambda.customer.errors.user.ShopSubscriptionFailedError;
 import it.unimi.cloudproject.services.dto.UserCreationData;
 import it.unimi.cloudproject.services.services.UserService;
 import it.unimi.cloudproject.utilities.AwsSdkUtils;
@@ -19,6 +18,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import software.amazon.awssdk.core.internal.http.loader.DefaultSdkHttpClientBuilder;
 import software.amazon.awssdk.services.cognitoidentityprovider.CognitoIdentityProviderClient;
+import software.amazon.awssdk.services.sns.SnsClient;
+import software.amazon.awssdk.services.sns.model.SubscribeRequest;
 import software.amazon.awssdk.utils.AttributeMap;
 
 import java.util.Map;
@@ -105,12 +106,15 @@ public class UserFunctionsConfiguration {
     @Bean
     public Consumer<InvocationWrapper<UserDeletionRequest>> deleteUser() {
         return (dr) -> {
+            var userPoolId = System.getProperty("aws.cognito.user_pool_id");
+
             try (var cognitoClient = CognitoIdentityProviderClient.builder()
                     .httpClient(new DefaultSdkHttpClientBuilder().buildWithDefaults(AttributeMap.builder()
                             .build()))
                     .build()) {
+                // TODO: DeleteUser action is not available in the Localstack pro version, in the meantime I replace it with adminDeleteUser
                 AwsSdkUtils.runSdkRequestAndAssertResult(() -> cognitoClient
-                        .deleteUser(b -> b.accessToken(dr.headers().get("Authorization"))),
+                        .adminDeleteUser(b -> b.userPoolId(userPoolId).username(dr.body().username())),
                         (e) -> new CannotDeleteUserFromPoolError(dr.body().userId(), e));
             }
             this.userService.deleteUser(dr.body().userId());
@@ -125,8 +129,20 @@ public class UserFunctionsConfiguration {
         };
     }
 
-//    @Bean
-//    public Consumer<InvocationWrapper<ShopSubscriptionRequest>> addShopSubscription() {
-//        return (subscriptionRequest) -> this.userService.addShopToFavorite(subscriptionRequest.body().userId(), subscriptionRequest.body().shopId());
-//    }
+    @Bean
+    public Consumer<InvocationWrapper<ShopSubscriptionRequest>> subscribeToShop() {
+        return (sr) -> {
+            try (var snsClient = SnsClient.create()) {
+                Function<Throwable, InternalException> exceptionFunction = (e) -> new ShopSubscriptionFailedError(sr.body().userId(), sr.body().shopId(), e);
+                var topicArn = AwsSdkUtils.runSdkRequestAndAssertResult(() -> snsClient
+                        .createTopic(b -> b.name(Integer.toString(sr.body().shopId()))),
+                        exceptionFunction).topicArn();
+                AwsSdkUtils.runSdkRequestAndAssertResult(() -> snsClient
+                                .subscribe(b -> b.topicArn(topicArn)
+                                        .protocol("email")
+                                        .endpoint(sr.body().username())),
+                        exceptionFunction);
+            }
+        };
+    }
 }

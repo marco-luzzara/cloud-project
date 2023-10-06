@@ -164,7 +164,8 @@ module "delete_user" {
   http_successful_status_code = "200"
   request_template_for_body = <<-EOT
     {
-      "userId": "$context.authorizer.claims['custom:dbId']"
+      "userId": "$context.authorizer.claims['custom:dbId']",
+      "username": "$context.authorizer.claims['cognito:username']"
     }
     EOT
   spring_cloud_function_definition_header_value = "deleteUser"
@@ -184,7 +185,7 @@ resource "aws_api_gateway_resource" "webapp_users_me_subscriptions_with_shopId_r
   path_part   = "{shopId}"
 }
 
-module "add_user_subscription" {
+module "subscribe_to_shop" {
   source = "../webapp_apigw_integration"
   rest_api_id = aws_api_gateway_rest_api.webapp_rest_api.id
   resource_id = aws_api_gateway_resource.webapp_users_me_subscriptions_with_shopId_resource.id

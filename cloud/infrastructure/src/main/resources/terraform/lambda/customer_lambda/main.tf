@@ -55,11 +55,19 @@ resource "aws_iam_policy" "customer_lambda_policy" {
         Action = [
           "cognito-idp:AdminConfirmSignUp",
           "cognito-idp:SignUp",
-          "cognito-idp:DeleteUser",
+          "cognito-idp:AdminDeleteUser",
           "cognito-idp:AdminAddUserToGroup"
         ],
         Effect   = "Allow",
         Resource = "*",
+      },
+      {
+        Action = [
+          "sns:CreateTopic", // useful to get the topic arn from the topic name
+          "sns:Subscribe"
+        ],
+        Effect   = "Allow",
+        Resource = "arn:aws:sns:*:*:*",
       }
     ]
   })

@@ -10,6 +10,7 @@ dependencies {
 
     implementation 'software.amazon.awssdk:cognitoidentity'
     implementation 'software.amazon.awssdk:cognitoidentityprovider'
+    implementation "software.amazon.awssdk:sns"
 
     testFixturesImplementation 'com.google.code.gson:gson'
     testFixturesImplementation 'org.testcontainers:localstack'

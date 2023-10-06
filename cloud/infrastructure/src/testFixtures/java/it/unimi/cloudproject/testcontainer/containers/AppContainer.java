@@ -52,6 +52,7 @@ public class AppContainer extends LocalStackContainer {
                 Service.API_GATEWAY,
                 Service.S3,
                 Service.CLOUDWATCHLOGS,
+                Service.SNS,
                 LocalStackContainer.EnabledService.named("rds"),
                 LocalStackContainer.EnabledService.named("cognito-idp"));
         withEnv(Map.of(

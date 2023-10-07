@@ -22,6 +22,30 @@ variable "customer_lambda_dist_bucket_key" {
   default = "customer-api.zip"
 }
 
+// ******************************** Shop Lambda Variables
+
+variable "shop_lambda_spring_active_profile" {
+  description = "Spring active profile for the shop lambda"
+  type        = string
+}
+
+variable "shop_lambda_dist_path" {
+  description = "Path of the distribution zip of the shop lambda"
+  type        = string
+}
+
+variable "shop_lambda_dist_bucket" {
+  description = "Bucket for the distribution zip of the shop lambda"
+  type        = string
+  default = "lambda-dist-bucket"
+}
+
+variable "shop_lambda_dist_bucket_key" {
+  description = "Bucket key for the distribution zip of the shop lambda"
+  type        = string
+  default = "shop-api.zip"
+}
+
 // ******************************** Admin Lambda Variables
 
 variable "admin_lambda_spring_active_profile" {

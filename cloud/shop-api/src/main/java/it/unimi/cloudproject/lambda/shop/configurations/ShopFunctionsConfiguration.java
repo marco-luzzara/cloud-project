@@ -4,7 +4,7 @@ import it.unimi.cloudproject.apigw.message.model.InvocationWrapper;
 import it.unimi.cloudproject.infrastructure.errors.InternalException;
 import it.unimi.cloudproject.lambda.shop.dto.requests.DeleteShopRequest;
 import it.unimi.cloudproject.lambda.shop.dto.requests.PublishMessageRequest;
-import it.unimi.cloudproject.lambda.shop.errors.user.CannotPublishMessage;
+import it.unimi.cloudproject.lambda.shop.errors.CannotPublishMessage;
 import it.unimi.cloudproject.services.errors.UnauthorizedUserForShopError;
 import it.unimi.cloudproject.services.services.ShopService;
 import it.unimi.cloudproject.utilities.AwsSdkUtils;
@@ -23,8 +23,18 @@ public class ShopFunctionsConfiguration {
 
     @Bean
     public Consumer<InvocationWrapper<DeleteShopRequest>> deleteShop() {
-        return (ds) -> this.shopService.deleteShop(ds.body().userId(), ds.body().shopId());
-        // TODO: remove also the topic
+        return (ds) -> {
+            this.shopService.deleteShop(ds.body().userId(), ds.body().shopId());
+            try (var snsClient = SnsClient.create()) {
+                Function<Throwable, InternalException> exceptionFunction = (e) -> new CannotPublishMessage(ds.body().shopId(), e);
+                var topicArn = AwsSdkUtils.runSdkRequestAndAssertResult(() -> snsClient
+                                .createTopic(b -> b.name(Integer.toString(ds.body().shopId()))),
+                        exceptionFunction).topicArn();
+                AwsSdkUtils.runSdkRequestAndAssertResult(
+                        () -> snsClient.deleteTopic(b -> b.topicArn(topicArn)),
+                        exceptionFunction);
+            }
+        };
     }
 
     @Bean

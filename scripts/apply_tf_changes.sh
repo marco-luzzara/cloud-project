@@ -59,6 +59,8 @@ main() {
         -auto-approve \
         -var="customer_lambda_dist_bucket=hot-reload" \
         -var="customer_lambda_dist_bucket_key=$(pwd)/../cloud/customer-api/build/hot-reload" \
+        -var="shop_lambda_dist_bucket=hot-reload" \
+        -var="shop_lambda_dist_bucket_key=$(pwd)/../cloud/shop-api/build/hot-reload" \
         -var="admin_lambda_dist_bucket=hot-reload" \
         -var="admin_lambda_dist_bucket_key=$(pwd)/../cloud/admin-api/build/hot-reload"
     print_done

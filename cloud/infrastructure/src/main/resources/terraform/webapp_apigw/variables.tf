@@ -7,6 +7,15 @@ variable "customer_lambda_info" {
   })
 }
 
+variable "shop_lambda_info" {
+  description = "The shop lambda info"
+  type    = object({
+    invoke_arn: string
+    function_name: string
+    lambda_arn: string
+  })
+}
+
 variable "admin_lambda_info" {
   description = "The admin lambda info"
   type    = object({

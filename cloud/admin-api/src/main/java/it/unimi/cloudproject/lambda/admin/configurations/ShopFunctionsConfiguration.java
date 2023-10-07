@@ -1,9 +1,9 @@
 package it.unimi.cloudproject.lambda.admin.configurations;
 
 import it.unimi.cloudproject.apigw.message.model.InvocationWrapper;
-import it.unimi.cloudproject.lambda.admin.dto.requests.shop.ShopCreationRequest;
-import it.unimi.cloudproject.lambda.admin.dto.responses.shop.ShopCreationResponse;
-import it.unimi.cloudproject.lambda.admin.errors.user.CannotCreateShop;
+import it.unimi.cloudproject.lambda.admin.dto.requests.ShopCreationRequest;
+import it.unimi.cloudproject.lambda.admin.dto.responses.ShopCreationResponse;
+import it.unimi.cloudproject.lambda.admin.errors.CannotCreateShop;
 import it.unimi.cloudproject.services.dto.ShopCreation;
 import it.unimi.cloudproject.services.services.ShopService;
 import it.unimi.cloudproject.services.services.UserService;
@@ -11,10 +11,8 @@ import it.unimi.cloudproject.utilities.AwsSdkUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import software.amazon.awssdk.core.internal.http.loader.DefaultSdkHttpClientBuilder;
 import software.amazon.awssdk.services.cognitoidentityprovider.CognitoIdentityProviderClient;
 import software.amazon.awssdk.services.sns.SnsClient;
-import software.amazon.awssdk.utils.AttributeMap;
 
 import java.util.function.Function;
 

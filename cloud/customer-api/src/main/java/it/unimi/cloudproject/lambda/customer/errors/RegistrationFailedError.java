@@ -1,5 +1,6 @@
-package it.unimi.cloudproject.lambda.shop.errors.user;
+package it.unimi.cloudproject.lambda.customer.errors;
 
+import it.unimi.cloudproject.infrastructure.errors.Error;
 import it.unimi.cloudproject.infrastructure.errors.InternalException;
 
 public class RegistrationFailedError extends InternalException {

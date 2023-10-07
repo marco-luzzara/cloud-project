@@ -4,9 +4,9 @@ import com.google.gson.Gson;
 import it.unimi.cloudproject.api.bodyhandlers.JsonBodyHandler;
 import it.unimi.cloudproject.lambda.customer.dto.requests.user.UserCreationRequest;
 import it.unimi.cloudproject.lambda.customer.dto.requests.user.UserLoginRequest;
-import it.unimi.cloudproject.lambda.customer.dto.responses.user.LoginResponse;
-import it.unimi.cloudproject.lambda.customer.dto.responses.user.UserCreationResponse;
-import it.unimi.cloudproject.lambda.customer.dto.responses.user.UserGetInfoResponse;
+import it.unimi.cloudproject.lambda.customer.dto.responses.LoginResponse;
+import it.unimi.cloudproject.lambda.customer.dto.responses.UserCreationResponse;
+import it.unimi.cloudproject.lambda.customer.dto.responses.UserGetInfoResponse;
 import it.unimi.cloudproject.testcontainer.containers.AppContainer;
 
 import java.io.IOException;

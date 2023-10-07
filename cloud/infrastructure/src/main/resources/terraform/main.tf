@@ -57,6 +57,25 @@ module "customer_lambda" {
   }
 }
 
+module "shop_lambda" {
+  source = "./lambda/shop_lambda"
+
+  shop_lambda_dist_bucket = var.shop_lambda_dist_bucket
+  shop_lambda_dist_bucket_key = var.shop_lambda_dist_bucket_key
+  shop_lambda_dist_path = var.shop_lambda_dist_path
+  webapp_db_arn = module.webapp_db.arn
+  is_testing = var.is_testing
+  shop_lambda_system_properties = {
+    cognito_main_user_pool_id = module.authentication.cognito_main_pool_id
+    cognito_main_user_pool_client_id = module.authentication.cognito_main_pool_client_id
+    cognito_main_user_pool_client_secret = module.authentication.cognito_main_pool_client_secret
+    spring_active_profile = var.shop_lambda_spring_active_profile
+    spring_datasource_url = "jdbc:postgresql://${module.webapp_db.rds_endpoint}/${var.webapp_db_config.db_name}"
+    spring_datasource_username = var.webapp_db_credentials.username
+    spring_datasource_password = var.webapp_db_credentials.password
+  }
+}
+
 module "admin_lambda" {
   source = "./lambda/admin_lambda"
 
@@ -83,6 +102,11 @@ module "webapp_apigw" {
     invoke_arn = module.customer_lambda.invoke_arn
     function_name = module.customer_lambda.function_name
     lambda_arn = module.customer_lambda.lambda_arn
+  }
+  shop_lambda_info = {
+    invoke_arn = module.shop_lambda.invoke_arn
+    function_name = module.shop_lambda.function_name
+    lambda_arn = module.shop_lambda.lambda_arn
   }
   admin_lambda_info = {
     invoke_arn = module.admin_lambda.invoke_arn

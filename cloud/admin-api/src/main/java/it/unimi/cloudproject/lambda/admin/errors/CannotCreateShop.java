@@ -1,4 +1,4 @@
-package it.unimi.cloudproject.lambda.admin.errors.user;
+package it.unimi.cloudproject.lambda.admin.errors;
 
 import it.unimi.cloudproject.infrastructure.errors.InternalException;
 

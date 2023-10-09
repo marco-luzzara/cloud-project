@@ -23,8 +23,8 @@ public class TerraformContainer extends GenericContainer<TerraformContainer> {
     private final Path lambdaSubprojectCommonDir = rootProjectDir.resolve("cloud");
     private final List<Path> lambdaSubprojects = List.of(
             lambdaSubprojectCommonDir.resolve("customer-api"),
-            lambdaSubprojectCommonDir.resolve("admin-api")/*,
-            lambdaSubprojectCommonDir.resolve("shop-api"),
+            lambdaSubprojectCommonDir.resolve("admin-api"),
+            lambdaSubprojectCommonDir.resolve("shop-api")/*,
             lambdaSubprojectCommonDir.resolve("apigateway-authorizer")*/);
 
     public TerraformContainer() {
@@ -112,7 +112,7 @@ public class TerraformContainer extends GenericContainer<TerraformContainer> {
      */
     private void copyTerraformFilesToContainer() throws IOException {
         // all .tf files are copied, but only the .tfvars files for the Localstack env are included
-        var terraformFiles = new PathMatchingResourcePatternResolver().getResources("terraform/**/*.tf");
+        var terraformFiles = new PathMatchingResourcePatternResolver().getResources("classpath*:terraform/**/*.tf");
         var terraformVars = new PathMatchingResourcePatternResolver().getResources("classpath*:terraform/**/localstack*.auto.tfvars");
 
         var terraformResources = new ArrayList<Resource>();

@@ -16,12 +16,28 @@ resource "aws_api_gateway_rest_api" "webapp_rest_api" {
   name = "webapp-api"
 }
 
-resource "aws_lambda_permission" "lambda_permission" {
+resource "aws_lambda_permission" "customer_lambda_permission" {
   statement_id  = "AllowApiGatewayInvoke"
   action        = "lambda:InvokeFunction"
   function_name = var.customer_lambda_info.function_name
   principal     = "apigateway.amazonaws.com"
 #  source_arn = "${aws_api_gateway_rest_api.webapp_rest_api.execution_arn}/*/*"
+}
+
+resource "aws_lambda_permission" "shop_lambda_permission" {
+  statement_id  = "AllowApiGatewayInvoke"
+  action        = "lambda:InvokeFunction"
+  function_name = var.shop_lambda_info.function_name
+  principal     = "apigateway.amazonaws.com"
+  #  source_arn = "${aws_api_gateway_rest_api.webapp_rest_api.execution_arn}/*/*"
+}
+
+resource "aws_lambda_permission" "admin_lambda_permission" {
+  statement_id  = "AllowApiGatewayInvoke"
+  action        = "lambda:InvokeFunction"
+  function_name = var.admin_lambda_info.function_name
+  principal     = "apigateway.amazonaws.com"
+  #  source_arn = "${aws_api_gateway_rest_api.webapp_rest_api.execution_arn}/*/*"
 }
 
 resource "aws_api_gateway_authorizer" "user_authorizer" {
@@ -96,6 +112,12 @@ module "get_user" {
     }
     EOT
   spring_cloud_function_definition_header_value = "getUser"
+    http_fail_status_codes = [
+      {
+        status_code = "404"
+        selection_pattern = "User with id \\d+ does not exist"
+      }
+    ]
 }
 
 # ********* DELETE /users/me
@@ -201,7 +223,7 @@ module "delete_shop" {
 resource "aws_api_gateway_resource" "webapp_shops_with_shopId_message_resource" {
   rest_api_id = aws_api_gateway_rest_api.webapp_rest_api.id
   parent_id   = aws_api_gateway_resource.webapp_shops_with_shopId_resource.id
-  path_part   = "message"
+  path_part   = "messages"
 }
 
 module "publish_message" {
@@ -216,7 +238,8 @@ module "publish_message" {
   request_template_for_body = <<-EOT
     {
       "userId": "$context.authorizer.claims['custom:dbId']",
-      "shopId": "$input.params('shopId')"
+      "shopId": "$input.params('shopId')",
+      "message": "$input.path('$.message')"
     }
     EOT
   spring_cloud_function_definition_header_value = "publishMessage"

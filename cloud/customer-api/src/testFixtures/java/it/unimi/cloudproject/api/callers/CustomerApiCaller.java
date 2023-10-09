@@ -1,7 +1,7 @@
 package it.unimi.cloudproject.api.callers;
 
 import com.google.gson.Gson;
-import it.unimi.cloudproject.api.bodyhandlers.JsonBodyHandler;
+import it.unimi.cloudproject.api.bodyhandlers.GeneralBodyHandler;
 import it.unimi.cloudproject.lambda.customer.dto.requests.user.UserCreationRequest;
 import it.unimi.cloudproject.lambda.customer.dto.requests.user.UserLoginRequest;
 import it.unimi.cloudproject.lambda.customer.dto.responses.LoginResponse;
@@ -14,11 +14,12 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
+import java.util.Map;
 
 public class CustomerApiCaller {
     private final AppContainer appContainer;
 
-    private static Gson gson = new Gson();
+    private static final Gson gson = new Gson();
     private static final HttpClient HTTP_CLIENT = HttpClient.newBuilder()
             .followRedirects(HttpClient.Redirect.ALWAYS)
             .build();
@@ -27,7 +28,7 @@ public class CustomerApiCaller {
         this.appContainer = appContainer;
     }
 
-    public HttpResponse<UserCreationResponse> callUserCreateApi(UserCreationRequest userCreationRequest) throws IOException, InterruptedException {
+    public <TResponse> HttpResponse<TResponse> callUserCreateApi(UserCreationRequest userCreationRequest) throws IOException, InterruptedException {
         var strBody = gson.toJson(userCreationRequest, UserCreationRequest.class);
         return HTTP_CLIENT.send(HttpRequest.newBuilder()
                         .POST(HttpRequest.BodyPublishers.ofString(strBody))
@@ -35,10 +36,10 @@ public class CustomerApiCaller {
                         .timeout(Duration.ofSeconds(100))
                         .uri(this.appContainer.buildApiUrl("users"))
                         .build(),
-                new JsonBodyHandler<>(UserCreationResponse.class));
+                new GeneralBodyHandler<>(Map.of(200, () -> GeneralBodyHandler.getJsonBodyHandler(UserCreationResponse.class))));
     }
 
-    public HttpResponse<LoginResponse> callUserLoginApi(UserLoginRequest userLoginRequest) throws IOException, InterruptedException {
+    public <TResponse> HttpResponse<TResponse> callUserLoginApi(UserLoginRequest userLoginRequest) throws IOException, InterruptedException {
         var strBody = gson.toJson(userLoginRequest, UserLoginRequest.class);
         return HTTP_CLIENT.send(HttpRequest.newBuilder()
                         .POST(HttpRequest.BodyPublishers.ofString(strBody))
@@ -46,7 +47,7 @@ public class CustomerApiCaller {
                         .timeout(Duration.ofSeconds(100))
                         .uri(this.appContainer.buildApiUrl("login"))
                         .build(),
-                new JsonBodyHandler<>(LoginResponse.class));
+                new GeneralBodyHandler<>(Map.of(200, () -> GeneralBodyHandler.getJsonBodyHandler(LoginResponse.class))));
     }
 
     public HttpResponse<String> callUserDeleteApi(String token) throws IOException, InterruptedException {
@@ -59,14 +60,26 @@ public class CustomerApiCaller {
                 HttpResponse.BodyHandlers.ofString());
     }
 
-    public HttpResponse<UserGetInfoResponse> callUserGetInfoApi(String token) throws IOException, InterruptedException {
+    public <TResponse> HttpResponse<TResponse> callUserGetInfoApi(String authToken) throws IOException, InterruptedException {
         return HTTP_CLIENT.send(HttpRequest.newBuilder()
                         .GET()
                         .header("Content-Type", "application/json")
                         .timeout(Duration.ofSeconds(100))
-                        .header("Authorization", token)
+                        .header("Authorization", authToken)
                         .uri(this.appContainer.buildApiUrl("users/me"))
                         .build(),
-                new JsonBodyHandler<>(UserGetInfoResponse.class));
+                new GeneralBodyHandler<>(Map.of(200, () -> GeneralBodyHandler.getJsonBodyHandler(UserGetInfoResponse.class),
+                        404, HttpResponse.BodySubscribers::discarding)));
+    }
+
+    public HttpResponse<String> callUserSubscribeToShopApi(String authToken,
+                                                           int shopId) throws IOException, InterruptedException {
+        return HTTP_CLIENT.send(HttpRequest.newBuilder()
+                        .POST(HttpRequest.BodyPublishers.noBody())
+                        .header("Authorization", authToken)
+                        .timeout(Duration.ofSeconds(100))
+                        .uri(this.appContainer.buildApiUrl("users/me/subscriptions/" + shopId))
+                        .build(),
+                HttpResponse.BodyHandlers.ofString());
     }
 }

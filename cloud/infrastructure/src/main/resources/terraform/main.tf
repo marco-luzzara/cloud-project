@@ -95,6 +95,25 @@ module "admin_lambda" {
   }
 }
 
+module "authorizer_lambda" {
+  source = "./lambda/authorizer_lambda"
+
+  authorizer_lambda_dist_bucket = var.authorizer_lambda_dist_bucket
+  authorizer_lambda_dist_bucket_key = var.authorizer_lambda_dist_bucket_key
+  authorizer_lambda_dist_path = var.authorizer_lambda_dist_path
+  webapp_db_arn = module.webapp_db.arn
+  is_testing = var.is_testing
+  authorizer_lambda_system_properties = {
+    cognito_main_user_pool_id = module.authentication.cognito_main_pool_id
+    cognito_main_user_pool_client_id = module.authentication.cognito_main_pool_client_id
+    cognito_main_user_pool_client_secret = module.authentication.cognito_main_pool_client_secret
+    spring_active_profile = var.authorizer_lambda_spring_active_profile
+    spring_datasource_url = "jdbc:postgresql://${module.webapp_db.rds_endpoint}/${var.webapp_db_config.db_name}"
+    spring_datasource_username = var.webapp_db_credentials.username
+    spring_datasource_password = var.webapp_db_credentials.password
+  }
+}
+
 module "webapp_apigw" {
   source = "./webapp_apigw"
 
@@ -112,6 +131,11 @@ module "webapp_apigw" {
     invoke_arn = module.admin_lambda.invoke_arn
     function_name = module.admin_lambda.function_name
     lambda_arn = module.admin_lambda.lambda_arn
+  }
+  authorizer_lambda_info = {
+    invoke_arn = module.authorizer_lambda.invoke_arn
+    function_name = module.authorizer_lambda.function_name
+    lambda_arn = module.authorizer_lambda.lambda_arn
   }
   cognito_user_pool_arn = module.authentication.cognito_main_pool_arn
   #  when = terraform.workspace == "webapp"

@@ -1,16 +1,17 @@
 plugins {
-    id 'cloudproject.java-common-conventions'
+    id 'cloudproject.java-aws-lambda-conventions'
+    id 'jacoco'
 }
 
 dependencies {
-    implementation 'com.amazonaws:aws-lambda-java-core'
-    implementation 'com.amazonaws:aws-lambda-java-events'
-    runtimeOnly 'com.amazonaws:aws-lambda-java-log4j2'
+    implementation project(':core')
+    implementation project(':cloud:infrastructure')
 
-    // logging
-    implementation "org.apache.logging.log4j:log4j-api"
-    implementation "org.apache.logging.log4j:log4j-core"
-    runtimeOnly ('org.apache.logging.log4j:log4j-slf4j-impl') {
-        exclude group: 'org.slf4j', module: 'log4j-to-slf4j'
-    }
+    implementation 'software.amazon.awssdk:cognitoidentity'
+    implementation 'software.amazon.awssdk:cognitoidentityprovider'
+    implementation "software.amazon.awssdk:iam"
+
+    implementation 'com.auth0:java-jwt'
+
+    implementation 'com.google.code.gson:gson'
 }

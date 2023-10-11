@@ -22,6 +22,30 @@ variable "customer_lambda_dist_bucket_key" {
   default = "customer-api.zip"
 }
 
+// ******************************** Customer Lambda Variables
+
+variable "authorizer_lambda_spring_active_profile" {
+  description = "Spring active profile for the authorizer lambda"
+  type        = string
+}
+
+variable "authorizer_lambda_dist_path" {
+  description = "Path of the distribution zip of the authorizer lambda"
+  type        = string
+}
+
+variable "authorizer_lambda_dist_bucket" {
+  description = "Bucket for the distribution zip of the authorizer lambda"
+  type        = string
+  default = "lambda-dist-bucket"
+}
+
+variable "authorizer_lambda_dist_bucket_key" {
+  description = "Bucket key for the distribution zip of the authorizer lambda"
+  type        = string
+  default = "apigateway-authorizer.zip"
+}
+
 // ******************************** Shop Lambda Variables
 
 variable "shop_lambda_spring_active_profile" {

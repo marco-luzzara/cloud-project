@@ -160,6 +160,10 @@ public class AppContainer extends LocalStackContainer {
                 pathPart));
     }
 
+    public URI buildBaseUrl(String urlPart) {
+        return URI.create("%s/%s".formatted(this.getEndpoint(), urlPart));
+    }
+
     public void storeDiagnoseReportIfTracing() throws IOException, InterruptedException {
         if (this.localstackConfig.logLevel().equals("trace")) {
             var reportHostPath = Paths.get(".").toAbsolutePath()

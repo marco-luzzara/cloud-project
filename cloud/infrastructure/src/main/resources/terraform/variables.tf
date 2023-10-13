@@ -1,3 +1,27 @@
+// ******************************** Initializer Lambda Variables
+
+variable "initializer_lambda_spring_active_profile" {
+  description = "Spring active profile for the initializer lambda"
+  type        = string
+}
+
+variable "initializer_lambda_dist_path" {
+  description = "Path of the distribution zip of the initializer lambda"
+  type        = string
+}
+
+variable "initializer_lambda_dist_bucket" {
+  description = "Bucket for the distribution zip of the initializer lambda"
+  type        = string
+  default = "lambda-dist-bucket"
+}
+
+variable "initializer_lambda_dist_bucket_key" {
+  description = "Bucket key for the distribution zip of the initializer lambda"
+  type        = string
+  default = "initializer.zip"
+}
+
 // ******************************** Customer Lambda Variables
 
 variable "customer_lambda_spring_active_profile" {

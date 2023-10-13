@@ -38,6 +38,26 @@ module "webapp_db" {
   webapp_db_credentials = var.webapp_db_credentials
 }
 
+module "initializer_lambda" {
+  source = "./lambda/initializer"
+
+  initializer_lambda_dist_bucket = var.initializer_lambda_dist_bucket
+  initializer_lambda_dist_bucket_key = var.initializer_lambda_dist_bucket_key
+  initializer_lambda_dist_path = var.initializer_lambda_dist_path
+  webapp_db_arn = module.webapp_db.arn
+  initializer_lambda_system_properties = {
+    spring_active_profile = var.initializer_lambda_spring_active_profile
+    spring_datasource_url = "jdbc:postgresql://${module.webapp_db.rds_endpoint}/${var.webapp_db_config.db_name}"
+    spring_datasource_username = var.webapp_db_credentials.username
+    spring_datasource_password = var.webapp_db_credentials.password
+  }
+}
+
+resource "aws_lambda_invocation" "initializer_execution" {
+  function_name = module.initializer_lambda.function_name
+  input = jsonencode({})
+}
+
 module "customer_lambda" {
   source = "./lambda/customer_lambda"
 

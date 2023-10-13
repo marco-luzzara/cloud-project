@@ -1,8 +1,4 @@
 plugins {
-    id 'java'
-}
-
-plugins {
     id 'cloudproject.java-aws-lambda-conventions'
     id 'jacoco'
 }

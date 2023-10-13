@@ -27,4 +27,9 @@ public class GeneralBodyHandler<T> implements HttpResponse.BodyHandler<T> {
         return HttpResponse.BodySubscribers.mapping(HttpResponse.BodySubscribers.ofInputStream(),
                 (is) -> gson.fromJson(new InputStreamReader(is), resultClass));
     }
+
+    public static HttpResponse.BodySubscriber<Map<String, Object>> getJsonBodyHandler() {
+        return HttpResponse.BodySubscribers.mapping(HttpResponse.BodySubscribers.ofInputStream(),
+                (is) -> (Map<String, Object>) gson.fromJson(new InputStreamReader(is), Map.class));
+    }
 }

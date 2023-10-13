@@ -57,6 +57,8 @@ main() {
     docker exec "$TERRAFORM_CONTAINER_NAME" terraform init
     docker exec "$TERRAFORM_CONTAINER_NAME" terraform apply \
         -auto-approve \
+        -var="initializer_lambda_dist_bucket=hot-reload" \
+        -var="initializer_lambda_dist_bucket_key=$(pwd)/../cloud/initializer/build/hot-reload" \
         -var="customer_lambda_dist_bucket=hot-reload" \
         -var="customer_lambda_dist_bucket_key=$(pwd)/../cloud/customer-api/build/hot-reload" \
         -var="shop_lambda_dist_bucket=hot-reload" \

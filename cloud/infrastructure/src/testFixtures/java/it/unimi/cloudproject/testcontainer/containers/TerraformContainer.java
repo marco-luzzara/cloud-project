@@ -22,6 +22,7 @@ public class TerraformContainer extends GenericContainer<TerraformContainer> {
     private final Path rootProjectDir = Path.of(System.getProperty("rootProjectDir"));
     private final Path lambdaSubprojectCommonDir = rootProjectDir.resolve("cloud");
     private final List<Path> lambdaSubprojects = List.of(
+            lambdaSubprojectCommonDir.resolve("initializer"),
             lambdaSubprojectCommonDir.resolve("customer-api"),
             lambdaSubprojectCommonDir.resolve("admin-api"),
             lambdaSubprojectCommonDir.resolve("shop-api")/*,

@@ -7,3 +7,5 @@ include 'code-coverage-report'
 include 'cloud:shop-api'
 include 'cloud:apigateway-authorizer'
 include 'cloud:test-api'
+include 'cloud:initializer'
+

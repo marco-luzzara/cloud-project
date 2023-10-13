@@ -2,7 +2,6 @@ plugins {
     id 'cloudproject.java-common-conventions'
     id 'jacoco'
     id "io.freefair.lombok"
-    id 'org.liquibase.gradle'
 }
 
 dependencies {
@@ -33,15 +32,15 @@ dependencies {
     testCompileOnly "org.projectlombok:lombok"
     testAnnotationProcessor "org.projectlombok:lombok"
 
-    // liquibase
-    liquibaseRuntime "org.liquibase:liquibase-core"
-    liquibaseRuntime 'org.liquibase:liquibase-groovy-dsl'
-    runtimeOnly "org.liquibase:liquibase-core"
-
     // logging
     implementation 'org.apache.logging.log4j:log4j-api'
     implementation 'org.apache.logging.log4j:log4j-core'
     runtimeOnly ('org.apache.logging.log4j:log4j-slf4j-impl') {
         exclude group: 'org.slf4j', module: 'log4j-to-slf4j'
     }
+
+    // liquibase
+    liquibaseRuntime "org.liquibase:liquibase-core"
+    liquibaseRuntime 'org.liquibase:liquibase-groovy-dsl'
+    testRuntimeOnly "org.liquibase:liquibase-core"
 }

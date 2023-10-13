@@ -1,0 +1,11 @@
+plugins {
+    id 'cloudproject.java-aws-lambda-conventions'
+    id 'org.liquibase.gradle'
+}
+
+dependencies {
+    implementation project(":core")
+
+    // liquibase
+    runtimeOnly "org.liquibase:liquibase-core"
+}

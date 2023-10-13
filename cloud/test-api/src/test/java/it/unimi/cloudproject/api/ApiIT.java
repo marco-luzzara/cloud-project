@@ -3,6 +3,7 @@ package it.unimi.cloudproject.api;
 import com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.http.HttpStatus;
 import it.unimi.cloudproject.api.callers.AdminApiCaller;
 import it.unimi.cloudproject.api.callers.CustomerApiCaller;
+import it.unimi.cloudproject.api.callers.LocalstackApiCaller;
 import it.unimi.cloudproject.api.callers.ShopApiCaller;
 import it.unimi.cloudproject.api.callers.dto.ShopCreationBody;
 import it.unimi.cloudproject.api.callers.dto.ShopPublishMessageRequestBody;
@@ -25,6 +26,8 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -42,6 +45,7 @@ public class ApiIT {
     private final CustomerApiCaller customerApiCaller = new CustomerApiCaller(app);
     private final ShopApiCaller shopApiCaller = new ShopApiCaller(app);
     private final AdminApiCaller adminApiCaller = new AdminApiCaller(app);
+    private final LocalstackApiCaller localstackApiCaller = new LocalstackApiCaller(app);
 
 //    private static final String DB_CONTAINER_NAME = "localstack_db";
 
@@ -138,6 +142,11 @@ public class ApiIT {
         var shopPublishMessageResponse = shopApiCaller.callShopPublishMessageApi(
                 new ShopPublishMessageRequestBody("test message"), ownerIdToken, shopId);
         assertThat(shopPublishMessageResponse.statusCode()).isEqualTo(HttpStatus.SC_OK);
+
+        // TODO: improve assertions to find whether the specified message has been sent to the correct user
+        var sesResponse = (Map<String, Object>)localstackApiCaller.callGetEmailsApi(customer.username());
+        var cachedMessages = (List<Object>) sesResponse.get("messages");
+        assertThat(cachedMessages).hasSizeGreaterThanOrEqualTo(1);
 
         // delete shop
         var shopDeleteResponse = shopApiCaller.callShopDeleteApi(ownerIdToken, shopId);

@@ -1,0 +1,257 @@
+openapi: 3.0.0
+info:
+  title: Sample Project API
+  version: 1.0.0
+servers:
+  - url: http://localhost:4566/restapis/$REST_API_ID/test/_user_request_/
+    description: Localhost server
+tags:
+  - name: user
+    description: |
+      users can be of 3 types:
+      - **Customers**: they receive messages from the shop if they are subscribed to their topic
+      - **Shop User**: they are the owner of the shop and decide when a message should be published
+      - **Admin**: they can create new shops and promote customers to shop users. This happen when
+      a customer requests the creation of a new shop, owned by him/her.
+  - name: shop
+paths:
+  /users:
+    post:
+      operationId: createUser
+      tags:
+        - user
+      summary: Create a new user
+      description: Create a new user. This user is a standard customer, but can be promoted to shop user if the admin allows it
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUserBody'
+      responses:
+        '200':
+          description: the user has been created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateUserResponse'
+
+  /login:
+    post:
+      operationId: loginUser
+      tags:
+        - user
+      summary: Login the user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginUserBody'
+      responses:
+        '200':
+          description: The user successfully authenticated and gets the access token/id token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginUserResponse'
+
+  /users/me:
+    get:
+      operationId: getUser
+      tags:
+        - user
+      summary: Get the authenticated user information
+      security:
+        - Oauth2Implicit:
+            - openid
+      responses:
+        '200':
+          description: Returns the user information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetUserResponse'
+
+    delete:
+      operationId: deleteUser
+      tags:
+        - user
+      summary: Delete the authenticated user
+      security:
+        - Oauth2Implicit:
+            - openid
+      responses:
+        '200':
+          description: The user has been deleted
+
+  /users/me/subscriptions/{shopId}:
+    post:
+      operationId: subscribeToShop
+      tags:
+        - user
+      parameters:
+        - $ref: '#/components/parameters/ShopIdParameter'
+      summary: subscribe the authenticated user to a shop topic
+      security:
+        - Oauth2Implicit:
+            - openid
+      responses:
+        '200':
+          description: The user subscribed to the topic
+
+  /shops:
+    post:
+      operationId: createShop
+      tags:
+        - shop
+      summary: create a new shop
+      description: |
+        create a new shop. this operation is authorized only if the authenticated user is an admin. The reason is that
+        the shop identity must be verified in advance.
+      security:
+        - Oauth2Implicit:
+            - openid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateShopBody'
+      responses:
+        '200':
+          description: The shop has been created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateShopResponse'
+
+  /shops/{shopId}:
+    delete:
+      operationId: deleteShop
+      tags:
+        - shop
+      summary: delete the shop
+      description: delete the shop specified, which must be owned by the authenticated user
+      parameters:
+        - $ref: '#/components/parameters/ShopIdParameter'
+      security:
+        - Oauth2Implicit:
+            - openid
+      responses:
+        '200':
+          description: The shop has been deleted
+
+  /shops/{shopId}/messages:
+    post:
+      operationId: publishMessage
+      tags:
+        - shop
+      summary: publish a new message from the shop {shopId}
+      description: publish a new message on behalf of the shop {shopId}. The authenticated user must be owner
+      parameters:
+        - $ref: '#/components/parameters/ShopIdParameter'
+      security:
+        - Oauth2Implicit:
+            - openid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PublishMessageBody'
+      responses:
+        '200':
+          description: the message has been published
+
+components:
+  parameters:
+    ShopIdParameter:
+      schema:
+        type: integer
+      description: the shop id
+      in: path
+      name: shopId
+      required: true
+
+  securitySchemes:
+    Oauth2Implicit:
+      type: oauth2
+      description: This api uses OAuth2 with the implicit grant flow
+      flows:
+        implicit:
+          authorizationUrl: http://example.org
+          scopes:
+            openid: for user authentication
+            email: the email
+            profile: other user information
+
+  schemas:
+    CreateUserBody:
+      type: object
+      properties:
+        username:
+          type: string
+          example: customer1@amazon.com
+        password:
+          type: string
+          example: atLeast8Char
+
+    CreateUserResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+
+
+    LoginUserBody:
+      type: object
+      properties:
+        username:
+          type: string
+          example: customer1@amazon.com
+        password:
+          type: string
+          example: atLeast8Char
+
+    LoginUserResponse:
+      type: object
+      properties:
+        accessToken:
+          type: string
+        idToken:
+          type: string
+
+    GetUserResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+        username:
+          type: string
+          example: customer1@amazon.com
+
+    PublishMessageBody:
+      type: object
+      properties:
+        message:
+          type: string
+
+    CreateShopBody:
+      type: object
+      properties:
+        name:
+          type: string
+          example: customer1@amazon.com
+        shopOwnerId:
+          type: integer
+        longitude:
+          type: number
+          minimum: -180
+          maximum: 180
+        latitude:
+          type: number
+          minimum: -90
+          maximum: 90
+
+    CreateShopResponse:
+      type: object
+      properties:
+        shopId:
+          type: integer

@@ -19,10 +19,6 @@ variable "aws_region" {
 # endpoints must be manually set
 provider "aws" {
   region = var.aws_region
-
-  default_timeouts {
-    create = "2m"
-  }
 }
 
 module "authentication" {
@@ -39,18 +35,24 @@ module "webapp_db" {
 }
 
 module "initializer_lambda" {
-  source = "./lambda/initializer"
+  source = "./api_lambda"
 
-  initializer_lambda_dist_bucket = var.initializer_lambda_dist_bucket
-  initializer_lambda_dist_bucket_key = var.initializer_lambda_dist_bucket_key
-  initializer_lambda_dist_path = var.initializer_lambda_dist_path
+  lambda_dist_bucket = var.initializer_lambda_dist_bucket
+  lambda_dist_bucket_key = var.initializer_lambda_dist_bucket_key
+  lambda_dist_path = var.initializer_lambda_dist_path
   webapp_db_arn = module.webapp_db.arn
-  initializer_lambda_system_properties = {
+  lambda_system_properties = {
+    logging_level = "INFO"
     spring_active_profile = var.initializer_lambda_spring_active_profile
     spring_datasource_url = "jdbc:postgresql://${module.webapp_db.rds_endpoint}/${var.webapp_db_config.db_name}"
     spring_datasource_username = var.webapp_db_credentials.username
     spring_datasource_password = var.webapp_db_credentials.password
   }
+  function_name = "initializer-lambda"
+  is_observability_enabled = false
+  is_testing = var.is_testing
+  main_class = "it.unimi.cloudproject.Initializer"
+  extended_policy_statements = []
 }
 
 resource "aws_lambda_invocation" "initializer_execution" {
@@ -59,60 +61,117 @@ resource "aws_lambda_invocation" "initializer_execution" {
 }
 
 module "customer_lambda" {
-  source = "./lambda/customer_lambda"
+  source = "./api_lambda"
 
-  customer_lambda_dist_bucket = var.customer_lambda_dist_bucket
-  customer_lambda_dist_bucket_key = var.customer_lambda_dist_bucket_key
-  customer_lambda_dist_path = var.customer_lambda_dist_path
+  lambda_dist_bucket = var.customer_lambda_dist_bucket
+  lambda_dist_bucket_key = var.customer_lambda_dist_bucket_key
+  lambda_dist_path = var.customer_lambda_dist_path
   webapp_db_arn = module.webapp_db.arn
   is_testing = var.is_testing
-  customer_lambda_system_properties = {
-    cognito_main_user_pool_id = module.authentication.cognito_main_pool_id
-    cognito_main_user_pool_client_id = module.authentication.cognito_main_pool_client_id
-    cognito_main_user_pool_client_secret = module.authentication.cognito_main_pool_client_secret
+  is_observability_enabled = true
+  lambda_system_properties = {
+    logging_level = "INFO"
     spring_active_profile = var.customer_lambda_spring_active_profile
     spring_datasource_url = "jdbc:postgresql://${module.webapp_db.rds_endpoint}/${var.webapp_db_config.db_name}"
     spring_datasource_username = var.webapp_db_credentials.username
     spring_datasource_password = var.webapp_db_credentials.password
   }
+  lambda_additional_system_properties = <<EOT
+    -Daws.cognito.user_pool_id=${module.authentication.cognito_main_pool_id}
+    -Daws.cognito.user_pool_client_id=${module.authentication.cognito_main_pool_client_id}"
+  EOT
+  function_name = "customer-lambda"
+  main_class = "it.unimi.cloudproject.CustomerApi"
+  extended_policy_statements = [
+    {
+      Action = [
+        "cognito-idp:AdminConfirmSignUp",
+        "cognito-idp:SignUp",
+        "cognito-idp:AdminDeleteUser",
+        "cognito-idp:AdminAddUserToGroup"
+      ]
+      Effect   = "Allow"
+      Resource = ["*"]
+    },
+    {
+      Action = [
+        "sns:CreateTopic", // useful to get the topic arn from the topic name
+        "sns:Subscribe"
+      ]
+      Effect   = "Allow"
+      Resource = ["arn:aws:sns:*:*:*"]
+    }
+  ]
 }
 
 module "shop_lambda" {
-  source = "./lambda/shop_lambda"
+  source = "./api_lambda"
 
-  shop_lambda_dist_bucket = var.shop_lambda_dist_bucket
-  shop_lambda_dist_bucket_key = var.shop_lambda_dist_bucket_key
-  shop_lambda_dist_path = var.shop_lambda_dist_path
+  lambda_dist_bucket = var.shop_lambda_dist_bucket
+  lambda_dist_bucket_key = var.shop_lambda_dist_bucket_key
+  lambda_dist_path = var.shop_lambda_dist_path
   webapp_db_arn = module.webapp_db.arn
   is_testing = var.is_testing
-  shop_lambda_system_properties = {
-    cognito_main_user_pool_id = module.authentication.cognito_main_pool_id
-    cognito_main_user_pool_client_id = module.authentication.cognito_main_pool_client_id
-    cognito_main_user_pool_client_secret = module.authentication.cognito_main_pool_client_secret
+  is_observability_enabled = true
+  lambda_system_properties = {
+    logging_level = "INFO"
     spring_active_profile = var.shop_lambda_spring_active_profile
     spring_datasource_url = "jdbc:postgresql://${module.webapp_db.rds_endpoint}/${var.webapp_db_config.db_name}"
     spring_datasource_username = var.webapp_db_credentials.username
     spring_datasource_password = var.webapp_db_credentials.password
   }
+  function_name = "shop-lambda"
+  main_class = "it.unimi.cloudproject.ShopApi"
+  extended_policy_statements = [
+    {
+      Action = [
+        "sns:CreateTopic",
+        "sns:DeleteTopic",
+        "sns:Publish"
+      ]
+      Effect   = "Allow"
+      Resource = ["arn:aws:sns:*:*:*"]
+    }
+  ]
 }
 
 module "admin_lambda" {
-  source = "./lambda/admin_lambda"
+  source = "./api_lambda"
 
-  admin_lambda_dist_bucket = var.admin_lambda_dist_bucket
-  admin_lambda_dist_bucket_key = var.admin_lambda_dist_bucket_key
-  admin_lambda_dist_path = var.admin_lambda_dist_path
+  lambda_dist_bucket = var.admin_lambda_dist_bucket
+  lambda_dist_bucket_key = var.admin_lambda_dist_bucket_key
+  lambda_dist_path = var.admin_lambda_dist_path
   webapp_db_arn = module.webapp_db.arn
   is_testing = var.is_testing
-  admin_lambda_system_properties = {
-    cognito_main_user_pool_id = module.authentication.cognito_main_pool_id
-    cognito_main_user_pool_client_id = module.authentication.cognito_main_pool_client_id
-    cognito_main_user_pool_client_secret = module.authentication.cognito_main_pool_client_secret
+  is_observability_enabled = true
+  lambda_system_properties = {
+    logging_level = "INFO"
     spring_active_profile = var.admin_lambda_spring_active_profile
     spring_datasource_url = "jdbc:postgresql://${module.webapp_db.rds_endpoint}/${var.webapp_db_config.db_name}"
     spring_datasource_username = var.webapp_db_credentials.username
     spring_datasource_password = var.webapp_db_credentials.password
   }
+  lambda_additional_system_properties = <<EOT
+    -Daws.cognito.user_pool_id=${module.authentication.cognito_main_pool_id}
+  EOT
+  function_name = "admin-lambda"
+  main_class = "it.unimi.cloudproject.AdminApi"
+  extended_policy_statements = [
+    {
+      Action = [
+        "cognito-idp:AdminAddUserToGroup"
+      ]
+      Effect   = "Allow"
+      Resource = ["*"]
+    },
+    {
+      Action = [
+        "sns:CreateTopic"
+      ]
+      Effect   = "Allow"
+      Resource = ["arn:aws:sns:*:*:*"]
+    }
+  ]
 }
 
 module "webapp_apigw" {

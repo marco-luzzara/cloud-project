@@ -9,3 +9,6 @@ initializer_lambda_dist_path = "/app/initializer.zip"
 
 shop_lambda_spring_active_profile = "localstack"
 shop_lambda_dist_path = "/app/shop-api.zip"
+
+authorizer_lambda_spring_active_profile = "localstack"
+authorizer_lambda_dist_path = "/app/apigateway-authorizer.zip"

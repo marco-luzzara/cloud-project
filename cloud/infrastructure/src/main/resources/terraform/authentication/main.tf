@@ -32,29 +32,29 @@ resource "aws_cognito_user_pool" "main_pool" {
   }
 }
 
-#resource "aws_iam_role" "cognito_customer_user_group_role" {
-#  name = "cognito-group-role"
-#  assume_role_policy = jsonencode({
-#    Version = "2012-10-17"
-#    Statement = [
-#      {
-#        Action = "execute-api:Invoke"
-#        Effect   = "Allow"
-#        Resource = "${local.api_resource_prefix}/GET/users/me"
-#      },
-#      {
-#        Action = "execute-api:Invoke"
-#        Effect   = "Deny"
-#        Resource = "${local.api_resource_prefix}/DELETE/users/me"
-#      }
-#    ]
-#  })
-#}
+resource "aws_iam_role" "cognito_customer_user_group_role" {
+  name = "cognito-customer-user-group-role"
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "execute-api:Invoke"
+        Effect   = "Allow"
+        Resource = [
+          "*"
+#          "${local.api_resource_prefix}/GET/users/me",
+#          "${local.api_resource_prefix}/POST/users/me/subscriptions/*",
+#          "${local.api_resource_prefix}/DELETE/users/me"
+        ]
+      }
+    ]
+  })
+}
 
 resource "aws_cognito_user_group" "customer_user_group" {
   name         = "customer-user-group"
   user_pool_id = aws_cognito_user_pool.main_pool.id
-#  role_arn = aws_iam_role.cognito_customer_user_group_role.arn
+  role_arn = aws_iam_role.cognito_customer_user_group_role.arn
 }
 
 #resource "aws_iam_role" "cognito_customer_user_group_role" {
@@ -79,14 +79,49 @@ resource "aws_cognito_user_group" "customer_user_group" {
 #  })
 #}
 
+resource "aws_iam_role" "cognito_shop_user_group_role" {
+  name = "cognito-shop-user-group-role"
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action   = "execute-api:Invoke"
+        Effect   = "Allow"
+        Resource = [
+          "${local.api_resource_prefix}/DELETE/shops/*",
+          "${local.api_resource_prefix}/POST/shops/*/messages"
+        ]
+      }
+    ]
+  })
+}
+
 resource "aws_cognito_user_group" "shop_user_group" {
   name         = "shop-user-group"
   user_pool_id = aws_cognito_user_pool.main_pool.id
+  role_arn     = aws_iam_role.cognito_shop_user_group_role.arn
+}
+
+resource "aws_iam_role" "cognito_admin_user_group_role" {
+  name = "cognito-admin-user-group-role"
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "execute-api:Invoke"
+        Effect   = "Allow"
+        Resource = [
+          "${local.api_resource_prefix}/POST/shops"
+        ]
+      }
+    ]
+  })
 }
 
 resource "aws_cognito_user_group" "admin_user_group" {
   name         = "admin-user-group"
   user_pool_id = aws_cognito_user_pool.main_pool.id
+  role_arn = aws_iam_role.cognito_admin_user_group_role.arn
 }
 
 resource "aws_cognito_user_pool_client" "main_pool_client" {

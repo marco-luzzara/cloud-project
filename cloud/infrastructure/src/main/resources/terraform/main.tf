@@ -181,6 +181,39 @@ module "admin_lambda" {
   ]
 }
 
+module "authorizer_lambda" {
+  source = "./api_lambda"
+
+  lambda_dist_bucket = var.authorizer_lambda_dist_bucket
+  lambda_dist_bucket_key = var.authorizer_lambda_dist_bucket_key
+  lambda_dist_path = var.authorizer_lambda_dist_path
+  webapp_db_arn = module.webapp_db.arn
+  is_testing = var.is_testing
+  is_observability_enabled = true
+  lambda_system_properties = {
+    logging_level = "INFO"
+    spring_active_profile = var.authorizer_lambda_spring_active_profile
+    spring_datasource_url = "jdbc:postgresql://${module.webapp_db.rds_endpoint}/${var.webapp_db_config.db_name}"
+    spring_datasource_username = var.webapp_db_credentials.username
+    spring_datasource_password = var.webapp_db_credentials.password
+  }
+  lambda_additional_system_properties = <<EOT
+    -Daws.cognito.user_pool_id=${module.authentication.cognito_main_pool_id}
+  EOT
+  function_name = "authorizer-lambda"
+  main_class = "it.unimi.cloudproject.ApiGatewayAuthorizer"
+  extended_policy_statements = [
+    {
+      Action = [
+        "cognito-idp:AdminListGroupsForUser",
+        "iam:GetRole"
+      ]
+      Effect   = "Allow"
+      Resource = "*"
+    }
+  ]
+}
+
 module "webapp_apigw" {
   source = "./webapp_apigw"
 
@@ -198,6 +231,11 @@ module "webapp_apigw" {
     invoke_arn = module.admin_lambda.invoke_arn
     function_name = module.admin_lambda.function_name
     lambda_arn = module.admin_lambda.lambda_arn
+  }
+  authorizer_lambda_info = {
+    invoke_arn = module.authorizer_lambda.invoke_arn
+    function_name = module.authorizer_lambda.function_name
+    lambda_arn = module.authorizer_lambda.lambda_arn
   }
   cognito_user_pool_arn = module.authentication.cognito_main_pool_arn
   #  when = terraform.workspace == "webapp"

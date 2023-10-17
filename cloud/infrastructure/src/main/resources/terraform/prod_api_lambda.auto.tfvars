@@ -9,3 +9,6 @@ customer_lambda_dist_path = "cloud/customer-api/build/dist/customer-api.zip"
 
 shop_lambda_spring_active_profile = "production"
 shop_lambda_dist_path = "cloud/shop-api/build/dist/shop-api.zip"
+
+authorizer_lambda_spring_active_profile = "production"
+authorizer_lambda_dist_path = "cloud/apigateway-authorizer/build/dist/apigateway-authorizer.zip"

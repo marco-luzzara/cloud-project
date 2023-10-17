@@ -16,6 +16,14 @@ resource "aws_api_gateway_rest_api" "webapp_rest_api" {
   name = "webapp-api"
 }
 
+resource "aws_lambda_permission" "authorizer_lambda_permission" {
+  statement_id  = "AllowApiGatewayInvoke"
+  action        = "lambda:InvokeFunction"
+  function_name = var.authorizer_lambda_info.function_name
+  principal     = "apigateway.amazonaws.com"
+  #  source_arn = "${aws_api_gateway_rest_api.webapp_rest_api.execution_arn}/*/*"
+}
+
 resource "aws_lambda_permission" "customer_lambda_permission" {
   statement_id  = "AllowApiGatewayInvoke"
   action        = "lambda:InvokeFunction"
@@ -40,11 +48,11 @@ resource "aws_lambda_permission" "admin_lambda_permission" {
   #  source_arn = "${aws_api_gateway_rest_api.webapp_rest_api.execution_arn}/*/*"
 }
 
-resource "aws_api_gateway_authorizer" "user_authorizer" {
-  name                   = "user-authorizer"
-  rest_api_id             = aws_api_gateway_rest_api.webapp_rest_api.id
-  type                   = "COGNITO_USER_POOLS"
-  provider_arns           = [var.cognito_user_pool_arn]
+resource "aws_api_gateway_authorizer" "custom_authorizer" {
+  name                   = "custom-authorizer"
+  rest_api_id            = aws_api_gateway_rest_api.webapp_rest_api.id
+  type                   = "REQUEST"
+  authorizer_uri         = var.authorizer_lambda_info.invoke_arn
   identity_source        = "method.request.header.Authorization"
 }
 
@@ -102,8 +110,8 @@ module "get_user" {
   rest_api_id = aws_api_gateway_rest_api.webapp_rest_api.id
   resource_id = aws_api_gateway_resource.webapp_users_me_resource.id
   http_method = "GET"
-  authorization = "COGNITO_USER_POOLS"
-  authorizer_id = aws_api_gateway_authorizer.user_authorizer.id
+  authorization = "CUSTOM"
+  authorizer_id = aws_api_gateway_authorizer.custom_authorizer.id
   lambda_invocation_arn = var.customer_lambda_info.invoke_arn
   http_successful_status_code = "200"
   request_template_for_body = <<-EOT
@@ -127,8 +135,8 @@ module "delete_user" {
   rest_api_id = aws_api_gateway_rest_api.webapp_rest_api.id
   resource_id = aws_api_gateway_resource.webapp_users_me_resource.id
   http_method = "DELETE"
-  authorization = "COGNITO_USER_POOLS"
-  authorizer_id = aws_api_gateway_authorizer.user_authorizer.id
+  authorization = "CUSTOM"
+  authorizer_id = aws_api_gateway_authorizer.custom_authorizer.id
   lambda_invocation_arn = var.customer_lambda_info.invoke_arn
   http_successful_status_code = "200"
   request_template_for_body = <<-EOT
@@ -159,8 +167,8 @@ module "subscribe_to_shop" {
   rest_api_id = aws_api_gateway_rest_api.webapp_rest_api.id
   resource_id = aws_api_gateway_resource.webapp_users_me_subscriptions_with_shopId_resource.id
   http_method = "POST"
-  authorization = "COGNITO_USER_POOLS"
-  authorizer_id = aws_api_gateway_authorizer.user_authorizer.id
+  authorization = "CUSTOM"
+  authorizer_id = aws_api_gateway_authorizer.custom_authorizer.id
   lambda_invocation_arn = var.customer_lambda_info.invoke_arn
   http_successful_status_code = "200"
   request_template_for_body = <<-EOT
@@ -199,8 +207,8 @@ module "delete_shop" {
   rest_api_id = aws_api_gateway_rest_api.webapp_rest_api.id
   resource_id = aws_api_gateway_resource.webapp_shops_with_shopId_resource.id
   http_method = "DELETE"
-  authorization = "COGNITO_USER_POOLS"
-  authorizer_id = aws_api_gateway_authorizer.user_authorizer.id
+  authorization = "CUSTOM"
+  authorizer_id = aws_api_gateway_authorizer.custom_authorizer.id
   lambda_invocation_arn = var.shop_lambda_info.invoke_arn
   http_successful_status_code = "200"
   request_template_for_body = <<-EOT
@@ -231,8 +239,8 @@ module "publish_message" {
   rest_api_id = aws_api_gateway_rest_api.webapp_rest_api.id
   resource_id = aws_api_gateway_resource.webapp_shops_with_shopId_message_resource.id
   http_method = "POST"
-  authorization = "COGNITO_USER_POOLS"
-  authorizer_id = aws_api_gateway_authorizer.user_authorizer.id
+  authorization = "CUSTOM"
+  authorizer_id = aws_api_gateway_authorizer.custom_authorizer.id
   lambda_invocation_arn = var.shop_lambda_info.invoke_arn
   http_successful_status_code = "200"
   request_template_for_body = <<-EOT
@@ -254,8 +262,8 @@ module "create_shop" {
   rest_api_id = aws_api_gateway_rest_api.webapp_rest_api.id
   resource_id = aws_api_gateway_resource.webapp_shops_resource.id
   http_method = "POST"
-  authorization = "COGNITO_USER_POOLS"
-  authorizer_id = aws_api_gateway_authorizer.user_authorizer.id
+  authorization = "CUSTOM"
+  authorizer_id = aws_api_gateway_authorizer.custom_authorizer.id
   lambda_invocation_arn = var.admin_lambda_info.invoke_arn
   http_successful_status_code = "200"
   request_template_for_body = "$input.json('$')"

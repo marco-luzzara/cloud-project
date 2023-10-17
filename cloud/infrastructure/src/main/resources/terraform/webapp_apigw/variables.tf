@@ -1,3 +1,12 @@
+variable "authorizer_lambda_info" {
+  description = "The authorizer lambda info"
+  type    = object({
+    invoke_arn: string
+    function_name: string
+    lambda_arn: string
+  })
+}
+
 variable "customer_lambda_info" {
   description = "The customer lambda info"
   type    = object({

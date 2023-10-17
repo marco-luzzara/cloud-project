@@ -65,6 +65,7 @@ dependencies {
 
         // gson
         testImplementation "com.google.code.gson:gson:${GSON_VERSION}"
+        implementation "com.google.code.gson:gson:${GSON_VERSION}"
         testFixturesImplementation "com.google.code.gson:gson:${GSON_VERSION}"
 
         // logging
@@ -74,6 +75,9 @@ dependencies {
 
         // tracing
         implementation("software.amazon.opentelemetry:aws-opentelemetry-agent:1.30.0")
+
+        // auth
+        implementation 'com.auth0:java-jwt:4.4.0'
     }
 }
 

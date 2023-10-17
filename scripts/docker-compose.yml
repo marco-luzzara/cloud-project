@@ -37,18 +37,18 @@ services:
     networks:
       - localstack_network
 
-  prometheus:
-    container_name: prometheus
-    image: prom/prometheus:v2.47.2
-    depends_on:
-      localstack:
-        condition: service_healthy
-    volumes:
-      - "../observability/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml"
-    ports:
-      - "9090:9090"
-    networks:
-      - localstack_network
+#  prometheus:
+#    container_name: prometheus
+#    image: prom/prometheus:v2.47.2
+#    depends_on:
+#      localstack:
+#        condition: service_healthy
+#    volumes:
+#      - "../observability/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml"
+#    ports:
+#      - "9090:9090"
+#    networks:
+#      - localstack_network
 
 
 networks:

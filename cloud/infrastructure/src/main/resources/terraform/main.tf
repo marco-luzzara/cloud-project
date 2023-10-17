@@ -21,6 +21,13 @@ provider "aws" {
   region = var.aws_region
 }
 
+module "observability" {
+  source = "./observability"
+
+  is_testing = var.is_testing
+  localstack_network = var.localstack_network
+}
+
 module "authentication" {
   source = "./authentication"
 

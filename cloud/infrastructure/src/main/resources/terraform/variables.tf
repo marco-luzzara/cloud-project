@@ -112,6 +112,12 @@ variable "webapp_db_config" {
   })
 }
 
+variable "localstack_network" {
+  description = "Localstack needs to know the network id in order to run ECS. This variable exists only for testing purposes"
+  type = string
+  default = ""
+}
+
 variable "webapp_db_credentials" {
   description = "The webapp db credentials"
   type        = object({

@@ -14,6 +14,7 @@ provider "aws" {
     cloudwatch     = "%3$s"
     dynamodb       = "%3$s"
     ec2            = "%3$s"
+    ecs            = "%3$s"
     es             = "%3$s"
     elasticache    = "%3$s"
     firehose       = "%3$s"

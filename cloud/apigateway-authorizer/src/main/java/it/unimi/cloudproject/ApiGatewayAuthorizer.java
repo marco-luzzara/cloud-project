@@ -1,6 +1,7 @@
 package it.unimi.cloudproject;
 
 import com.amazonaws.services.lambda.runtime.events.APIGatewayCustomAuthorizerEvent;
+import com.amazonaws.services.lambda.runtime.events.IamPolicyResponse;
 import com.amazonaws.services.lambda.runtime.events.IamPolicyResponseV1;
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
@@ -18,6 +19,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 
+import java.util.Map;
 import java.util.function.Function;
 
 // TODO: https://docs.spring.io/spring-cloud-function/docs/current/reference/html/aws.html
@@ -39,7 +41,7 @@ public class ApiGatewayAuthorizer {
     private static final Gson gson = new GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.UPPER_CAMEL_CASE).create();
 
 		@Bean
-		public Function<APIGatewayCustomAuthorizerEvent, IamPolicyResponseV1> authorize() {
+		public Function<APIGatewayCustomAuthorizerEvent, IamPolicyResponse> authorize() {
 				return (event) -> {
             var userPoolId = System.getProperty("aws.cognito.user_pool_id");
 
@@ -60,10 +62,11 @@ public class ApiGatewayAuthorizer {
                         () -> iamClient.getRole(b -> b.roleName(groupRoleName)),
                         CannotAuthorizeRequest::new).role().assumeRolePolicyDocument();
 
-                IamPolicyResponseV1.PolicyDocument policyDocument = gson.fromJson(inlinePolicy, IamPolicyResponseV1.PolicyDocument.class);
+                IamPolicyResponse.PolicyDocument policyDocument = gson.fromJson(inlinePolicy, IamPolicyResponse.PolicyDocument.class);
 
                 System.out.println("policyDocument = " + policyDocument.getVersion());
-                return IamPolicyResponseV1.builder()
+                return IamPolicyResponse.builder()
+												.withContext(Map.of())
                         .withPolicyDocument(policyDocument)
                         .withPrincipalId(principalId).build();
 						}

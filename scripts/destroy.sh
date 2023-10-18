@@ -18,6 +18,11 @@ cd "$(dirname "$0")"
 
 main() {
     ./stop_local.sh
+
+    for container in $(docker network inspect localstack_network --format='{{range .Containers}}{{.Name}}{{"\n"}}{{end}}'); do
+        docker rm -f "$container"
+    done
+
     chown -R 1000 ./volumes
     rm -rf ./volumes
 }

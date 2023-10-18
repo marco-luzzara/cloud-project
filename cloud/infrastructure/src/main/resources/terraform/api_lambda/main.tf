@@ -76,15 +76,19 @@ resource "aws_lambda_function" "api_lambda" {
     variables = {
       LAMBDA_DOCKER_DNS = "127.0.0.1"
       OTEL_RESOURCE_ATTRIBUTES = "service.name=${var.function_name},service.namespace=cloud-project"
+      OTEL_TRACES_EXPORTER = "logging"
+      OTEL_METRICS_EXPORTER = "logging"
+      OTEL_LOGS_EXPORTER = "logging"
       JAVA_TOOL_OPTIONS = <<EOT
         -DMAIN_CLASS=${var.main_class}
         -Dlogging.level.org.springframework=${var.lambda_system_properties.logging_level}
+        -Dotel.javaagent.debug=true
         ${var.lambda_additional_system_properties}
+        ${var.is_observability_enabled ? "-javaagent:/var/task/lib/aws-opentelemetry-agent-1.30.0.jar" : ""}
         -Dspring.profiles.active=${var.lambda_system_properties.spring_active_profile}
         -Dspring.datasource.url=${var.lambda_system_properties.spring_datasource_url}
         -Dspring.datasource.username=${var.lambda_system_properties.spring_datasource_username}
         -Dspring.datasource.password=${var.lambda_system_properties.spring_datasource_password}
-        ${var.is_observability_enabled ? "-javaagent:/var/task/lib/aws-opentelemetry-agent-1.30.0.jar" : ""}
         ${var.is_testing ? "-javaagent:/var/task/lib/AwsSdkV2DisableCertificateValidation-1.0.jar" : ""}
       EOT
     }

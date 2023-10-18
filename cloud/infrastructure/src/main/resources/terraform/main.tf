@@ -26,6 +26,8 @@ module "observability" {
 
   is_testing = var.is_testing
   localstack_network = var.localstack_network
+  prometheus_config_host_path = var.prometheus_config_host_path
+  prometheus_exporter_config_host_path = var.prometheus_exporter_config_host_path
 }
 
 module "authentication" {
@@ -85,7 +87,7 @@ module "customer_lambda" {
   }
   lambda_additional_system_properties = <<EOT
     -Daws.cognito.user_pool_id=${module.authentication.cognito_main_pool_id}
-    -Daws.cognito.user_pool_client_id=${module.authentication.cognito_main_pool_client_id}"
+    -Daws.cognito.user_pool_client_id=${module.authentication.cognito_main_pool_client_id}
   EOT
   function_name = "customer-lambda"
   main_class = "it.unimi.cloudproject.CustomerApi"
@@ -209,7 +211,7 @@ module "authorizer_lambda" {
         "iam:GetRole"
       ]
       Effect   = "Allow"
-      Resource = "*"
+      Resource = ["*"]
     }
   ]
 }

@@ -31,7 +31,20 @@ main() {
     export LOCALSTACK_API_KEY
     export LOCALSTACK_PORT
     export PERSISTENCE
-    docker-compose down
+
+    set +o errexit
+
+    if docker network ls | grep --quiet localstack_network
+    then
+        CONTAINERS_TO_REMOVE="$(docker network inspect localstack_network --format='{{range .Containers}}{{.Name}}{{"\n"}}{{end}}')"
+        for container in $CONTAINERS_TO_REMOVE; do
+            docker stop "$container"
+        done
+
+        docker-compose down
+
+        echo "$CONTAINERS_TO_REMOVE" | while read -r container; do { docker container rm "$container" || echo "Container $container already removed"; } ; done
+    fi
 }
 
 main "$@"

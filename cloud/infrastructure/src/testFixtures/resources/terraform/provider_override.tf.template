@@ -34,5 +34,6 @@ provider "aws" {
     sts            = "%3$s"
     cognitoidentity = "%3$s"
     cognitoidp     = "%3$s"
+    xray           = "%3$s"
   }
 }

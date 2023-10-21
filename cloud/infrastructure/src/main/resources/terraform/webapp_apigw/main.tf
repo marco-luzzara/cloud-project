@@ -116,7 +116,7 @@ module "get_user" {
   http_successful_status_code = "200"
   request_template_for_body = <<-EOT
     {
-      "userId": "$context.authorizer.claims['custom:dbId']"
+      "userId": "$context.authorizer.dbId"
     }
     EOT
   spring_cloud_function_definition_header_value = "getUser"
@@ -141,8 +141,8 @@ module "delete_user" {
   http_successful_status_code = "200"
   request_template_for_body = <<-EOT
     {
-      "userId": "$context.authorizer.claims['custom:dbId']",
-      "username": "$context.authorizer.claims['cognito:username']"
+      "userId": "$context.authorizer.dbId",
+      "username": "$context.authorizer.username"
     }
     EOT
   spring_cloud_function_definition_header_value = "deleteUser"
@@ -173,8 +173,8 @@ module "subscribe_to_shop" {
   http_successful_status_code = "200"
   request_template_for_body = <<-EOT
     {
-      "username": "$context.authorizer.claims['cognito:username']",
-      "userId": "$context.authorizer.claims['custom:dbId']",
+      "username": "$context.authorizer.username",
+      "userId": "$context.authorizer.dbId",
       "shopId": "$input.params('shopId')"
     }
     EOT
@@ -213,7 +213,7 @@ module "delete_shop" {
   http_successful_status_code = "200"
   request_template_for_body = <<-EOT
     {
-      "userId": "$context.authorizer.claims['custom:dbId']",
+      "userId": "$context.authorizer.dbId",
       "shopId": "$input.params('shopId')"
     }
     EOT
@@ -245,7 +245,7 @@ module "publish_message" {
   http_successful_status_code = "200"
   request_template_for_body = <<-EOT
     {
-      "userId": "$context.authorizer.claims['custom:dbId']",
+      "userId": "$context.authorizer.dbId",
       "shopId": "$input.params('shopId')",
       "message": "$input.path('$.message')"
     }

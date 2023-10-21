@@ -15,7 +15,6 @@ dependencies {
 	runtimeOnly ('org.apache.logging.log4j:log4j-slf4j-impl') {
 		exclude group: 'org.slf4j', module: 'log4j-to-slf4j'
 	}
-	implementation("software.amazon.opentelemetry:aws-opentelemetry-agent")
 
 	// spring
 	implementation "org.springframework.boot:spring-boot-starter"

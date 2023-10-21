@@ -73,9 +73,6 @@ dependencies {
         implementation "org.apache.logging.log4j:log4j-core:${LOG4J_VERSION}"
         runtimeOnly ("org.apache.logging.log4j:log4j-slf4j-impl:${LOG4J_VERSION}")
 
-        // tracing
-        implementation("software.amazon.opentelemetry:aws-opentelemetry-agent:1.30.0")
-
         // auth
         implementation 'com.auth0:java-jwt:4.4.0'
     }

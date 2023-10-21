@@ -21,13 +21,6 @@ provider "aws" {
   region = var.aws_region
 }
 
-module "observability" {
-  source = "./observability"
-
-  is_testing = var.is_testing
-  localstack_network = var.localstack_network
-}
-
 module "authentication" {
   source = "./authentication"
 
@@ -85,7 +78,7 @@ module "customer_lambda" {
   }
   lambda_additional_system_properties = <<EOT
     -Daws.cognito.user_pool_id=${module.authentication.cognito_main_pool_id}
-    -Daws.cognito.user_pool_client_id=${module.authentication.cognito_main_pool_client_id}"
+    -Daws.cognito.user_pool_client_id=${module.authentication.cognito_main_pool_client_id}
   EOT
   function_name = "customer-lambda"
   main_class = "it.unimi.cloudproject.CustomerApi"
@@ -206,10 +199,11 @@ module "authorizer_lambda" {
     {
       Action = [
         "cognito-idp:AdminListGroupsForUser",
-        "iam:GetRole"
+        "iam:GetRolePolicy",
+        "iam:ListRolePolicies"
       ]
       Effect   = "Allow"
-      Resource = "*"
+      Resource = ["*"]
     }
   ]
 }

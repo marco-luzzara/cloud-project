@@ -34,21 +34,38 @@ resource "aws_cognito_user_pool" "main_pool" {
 
 resource "aws_iam_role" "cognito_customer_user_group_role" {
   name = "cognito-customer-user-group-role"
+
   assume_role_policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Principal = {
+          Federated = "cognito-identity.amazonaws.com"
+        }
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy" "cognito_customer_user_group_policy" {
+  name = "cognito-customer-user-group-policy"
+  policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
       {
         Action = "execute-api:Invoke"
         Effect   = "Allow"
         Resource = [
-          "*"
-#          "${local.api_resource_prefix}/GET/users/me",
-#          "${local.api_resource_prefix}/POST/users/me/subscriptions/*",
-#          "${local.api_resource_prefix}/DELETE/users/me"
+          "${local.api_resource_prefix}/GET/users/me",
+          "${local.api_resource_prefix}/POST/users/me/subscriptions/*",
+          "${local.api_resource_prefix}/DELETE/users/me"
         ]
       }
     ]
   })
+  role = aws_iam_role.cognito_customer_user_group_role.name
 }
 
 resource "aws_cognito_user_group" "customer_user_group" {
@@ -57,35 +74,30 @@ resource "aws_cognito_user_group" "customer_user_group" {
   role_arn = aws_iam_role.cognito_customer_user_group_role.arn
 }
 
-#resource "aws_iam_role" "cognito_customer_user_group_role" {
-#  name = "cognito-group-role"
-#
-#  assume_role_policy = jsonencode({
-#    Version = "2012-10-17",
-#    Statement = [
-#      {
-#        Action = "sts:AssumeRoleWithWebIdentity",
-#        Effect = "Allow",
-#        Principal = {
-#          Federated = "cognito-identity.amazonaws.com"
-#        },
-#        Condition = {
-#          StringEquals = {
-#            "cognito-identity.amazonaws.com:aud" = aws_cognito_user_pool.example.id
-#          }
-#        }
-#      }
-#    ]
-#  })
-#}
-
 resource "aws_iam_role" "cognito_shop_user_group_role" {
   name = "cognito-shop-user-group-role"
+
   assume_role_policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Principal = {
+          Federated = "cognito-identity.amazonaws.com"
+        }
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy" "cognito_shop_user_group_policy" {
+  name = "cognito-shop-user-group-policy"
+  policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
       {
-        Action   = "execute-api:Invoke"
+        Action = "execute-api:Invoke"
         Effect   = "Allow"
         Resource = [
           "${local.api_resource_prefix}/DELETE/shops/*",
@@ -94,6 +106,7 @@ resource "aws_iam_role" "cognito_shop_user_group_role" {
       }
     ]
   })
+  role = aws_iam_role.cognito_shop_user_group_role.name
 }
 
 resource "aws_cognito_user_group" "shop_user_group" {
@@ -104,7 +117,24 @@ resource "aws_cognito_user_group" "shop_user_group" {
 
 resource "aws_iam_role" "cognito_admin_user_group_role" {
   name = "cognito-admin-user-group-role"
+
   assume_role_policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Principal = {
+          Federated = "cognito-identity.amazonaws.com"
+        }
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy" "cognito_admin_user_group_policy" {
+  name = "cognito-admin-user-group-policy"
+  policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
       {
@@ -116,6 +146,7 @@ resource "aws_iam_role" "cognito_admin_user_group_role" {
       }
     ]
   })
+  role = aws_iam_role.cognito_admin_user_group_role.name
 }
 
 resource "aws_cognito_user_group" "admin_user_group" {

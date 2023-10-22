@@ -6,10 +6,7 @@ import it.unimi.cloudproject.lambda.customer.dto.requests.user.*;
 import it.unimi.cloudproject.lambda.customer.dto.responses.LoginResponse;
 import it.unimi.cloudproject.lambda.customer.dto.responses.UserCreationResponse;
 import it.unimi.cloudproject.lambda.customer.dto.responses.UserGetInfoResponse;
-import it.unimi.cloudproject.lambda.customer.errors.CannotDeleteUserFromPoolError;
-import it.unimi.cloudproject.lambda.customer.errors.LoginFailedError;
-import it.unimi.cloudproject.lambda.customer.errors.RegistrationFailedError;
-import it.unimi.cloudproject.lambda.customer.errors.ShopSubscriptionFailedError;
+import it.unimi.cloudproject.lambda.customer.errors.*;
 import it.unimi.cloudproject.services.dto.UserCreationData;
 import it.unimi.cloudproject.services.services.ShopService;
 import it.unimi.cloudproject.services.services.UserService;
@@ -19,6 +16,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import software.amazon.awssdk.core.internal.http.loader.DefaultSdkHttpClientBuilder;
 import software.amazon.awssdk.services.cognitoidentityprovider.CognitoIdentityProviderClient;
+import software.amazon.awssdk.services.cognitoidentityprovider.model.NotAuthorizedException;
 import software.amazon.awssdk.services.sns.SnsClient;
 import software.amazon.awssdk.utils.AttributeMap;
 
@@ -102,6 +100,9 @@ public class UserFunctionsConfiguration {
                 return new LoginResponse(
                         authResponse.authenticationResult().accessToken(),
                         authResponse.authenticationResult().idToken());
+            }
+            catch (NotAuthorizedException exc) {
+                throw new WrongCredentialsError(loginRequest.body().username());
             }
         };
     }

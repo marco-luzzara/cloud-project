@@ -9,7 +9,6 @@ import it.unimi.cloudproject.data.repositories.UserRepository;
 import it.unimi.cloudproject.factories.bl.ShopFactory;
 import it.unimi.cloudproject.services.errors.InvalidShopIdError;
 import it.unimi.cloudproject.services.errors.InvalidUserIdError;
-import it.unimi.cloudproject.services.errors.UnauthorizedUserForShopError;
 import it.unimi.cloudproject.services.services.ShopService;
 import it.unimi.cloudproject.testutils.db.DbFactory;
 import it.unimi.cloudproject.testutils.spring.DynamicPropertiesInjector;

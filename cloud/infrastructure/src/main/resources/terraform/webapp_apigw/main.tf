@@ -103,6 +103,12 @@ module "user_login" {
   http_successful_status_code = "200"
   request_template_for_body = "$input.json('$')"
   spring_cloud_function_definition_header_value = "loginUser"
+  http_fail_status_codes = [
+    {
+      status_code = "401"
+      selection_pattern = "The password for the user .* is wrong"
+    }
+  ]
 }
 
 # ********* GET /users/me

@@ -1,4 +1,4 @@
-package it.unimi.cloudproject.services.errors;
+package it.unimi.cloudproject.lambda.authorizer.errors;
 
 import it.unimi.cloudproject.infrastructure.errors.Error;
 

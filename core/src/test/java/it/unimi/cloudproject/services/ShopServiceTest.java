@@ -81,19 +81,9 @@ public class ShopServiceTest {
         var shopCreationDto = ShopDtoFactory.createShopCreation(shopOwner);
         var shopId = shopService.addShop(shopCreationDto);
 
-        shopService.deleteShop(shopOwner.getId(), shopId);
+        shopService.deleteShop(shopId);
 
         assertThat(shopService.findByName(shopCreationDto.name())).isEmpty();
-    }
-
-    @Test
-    void givenAShop_whenDeletedByNotItsOwner_thenThrow() {
-        var shopOwner = UserDataFactory.createUser(this.userRepository);
-        var otherUser = UserDataFactory.createUser(this.userRepository);
-        var shopCreationDto = ShopDtoFactory.createShopCreation(shopOwner);
-        var shopId = shopService.addShop(shopCreationDto);
-
-        assertThatThrownBy(() -> shopService.deleteShop(otherUser.getId(), shopId)).isInstanceOf(UnauthorizedUserForShopError.class);
     }
 
     @Test
@@ -102,7 +92,7 @@ public class ShopServiceTest {
         var shopCreationDto = ShopDtoFactory.createShopCreation(shopOwner);
         var shopId = shopService.addShop(shopCreationDto);
 
-        assertThatThrownBy(() -> shopService.deleteShop(shopOwner.getId(), 1000)).isInstanceOf(InvalidShopIdError.class);
+        assertThatThrownBy(() -> shopService.deleteShop(1000)).isInstanceOf(InvalidShopIdError.class);
     }
 
 //    @Test

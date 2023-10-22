@@ -11,6 +11,7 @@ import it.unimi.cloudproject.lambda.customer.errors.LoginFailedError;
 import it.unimi.cloudproject.lambda.customer.errors.RegistrationFailedError;
 import it.unimi.cloudproject.lambda.customer.errors.ShopSubscriptionFailedError;
 import it.unimi.cloudproject.services.dto.UserCreationData;
+import it.unimi.cloudproject.services.services.ShopService;
 import it.unimi.cloudproject.services.services.UserService;
 import it.unimi.cloudproject.utilities.AwsSdkUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +30,9 @@ import java.util.function.Function;
 public class UserFunctionsConfiguration {
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private ShopService shopService;
 
     @Bean
     public Function<InvocationWrapper<UserCreationRequest>, UserCreationResponse> createUser() {
@@ -107,6 +111,7 @@ public class UserFunctionsConfiguration {
         return (dr) -> {
             var userPoolId = System.getProperty("aws.cognito.user_pool_id");
 
+            this.userService.deleteUser(dr.body().userId());
             try (var cognitoClient = CognitoIdentityProviderClient.builder()
                     .httpClient(new DefaultSdkHttpClientBuilder().buildWithDefaults(AttributeMap.builder()
                             .build()))
@@ -116,7 +121,6 @@ public class UserFunctionsConfiguration {
                         .adminDeleteUser(b -> b.userPoolId(userPoolId).username(dr.body().username())),
                         (e) -> new CannotDeleteUserFromPoolError(dr.body().userId(), e));
             }
-            this.userService.deleteUser(dr.body().userId());
         };
     }
 
@@ -131,6 +135,7 @@ public class UserFunctionsConfiguration {
     @Bean
     public Consumer<InvocationWrapper<ShopSubscriptionRequest>> subscribeToShop() {
         return (sr) -> {
+            shopService.findById(sr.body().shopId()); // throws if shop does not exist
             try (var snsClient = SnsClient.create()) {
                 Function<Throwable, InternalException> exceptionFunction = (e) -> new ShopSubscriptionFailedError(sr.body().userId(), sr.body().shopId(), e);
                 var topicArn = AwsSdkUtils.runSdkRequestAndAssertResult(() -> snsClient

@@ -1,16 +1,15 @@
 package it.unimi.cloudproject.services.services;
 
-import it.unimi.cloudproject.data.repositories.UserRepository;
-import it.unimi.cloudproject.infrastructure.errors.InternalException;
-import it.unimi.cloudproject.services.dto.ShopCreation;
-import it.unimi.cloudproject.services.dto.ShopInfo;
 import it.unimi.cloudproject.bl.Shop;
 import it.unimi.cloudproject.bl.valueobjects.Coordinates;
 import it.unimi.cloudproject.data.model.ShopData;
 import it.unimi.cloudproject.data.repositories.ShopRepository;
+import it.unimi.cloudproject.data.repositories.UserRepository;
+import it.unimi.cloudproject.infrastructure.errors.InternalException;
+import it.unimi.cloudproject.services.dto.ShopCreation;
+import it.unimi.cloudproject.services.dto.ShopInfo;
 import it.unimi.cloudproject.services.errors.InvalidShopIdError;
 import it.unimi.cloudproject.services.errors.InvalidUserIdError;
-import it.unimi.cloudproject.services.errors.UnauthorizedUserForShopError;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -49,10 +48,8 @@ public class ShopService {
                 .orElseThrow(() -> new InvalidShopIdError(shopId));
     }
 
-    public void deleteShop(int userId, int shopId) {
-        var shop = this.findById(shopId);
-        if (userId != shop.shopOwnerId())
-            throw new UnauthorizedUserForShopError(userId, shopId);
+    public void deleteShop(int shopId) {
+        this.findById(shopId); // if the shop with shopId does not exist then error is thrown
         this.shopRepository.deleteById(shopId);
     }
 

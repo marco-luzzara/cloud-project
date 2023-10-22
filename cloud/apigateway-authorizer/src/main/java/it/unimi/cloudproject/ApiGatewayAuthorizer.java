@@ -7,6 +7,7 @@ import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import it.unimi.cloudproject.lambda.authorizer.errors.CannotAuthorizeRequest;
+import it.unimi.cloudproject.lambda.authorizer.errors.UnauthorizedUserForShopError;
 import it.unimi.cloudproject.utilities.AwsSdkUtils;
 import software.amazon.awssdk.services.cognitoidentityprovider.CognitoIdentityProviderClient;
 import software.amazon.awssdk.services.iam.IamClient;
@@ -54,6 +55,9 @@ public class ApiGatewayAuthorizer {
 						// .getAuthorizationToken() is not supported in Localstack, so I have to extract the token
 						var authToken = event.getHeaders().get("Authorization").substring("Bearer ".length());
 						var jwt = JWT.decode(authToken);
+
+            checkForCustomAuthorization(event, jwt);
+
             var username = jwt.getClaim("cognito:username").asString();
             var principalId = jwt.getSubject();
 
@@ -87,6 +91,20 @@ public class ApiGatewayAuthorizer {
 						}
 				};
 		}
+
+    private void checkForCustomAuthorization(APIGatewayCustomAuthorizerEvent event, DecodedJWT jwt) {
+        if (!event.getMethodArn().matches(".*(?:/DELETE/shops/\\d+|/POST/shops/\\d+/messages)"))
+            return;
+
+        var dbIdClaim = jwt.getClaim("custom:dbId");
+        var userId = Integer.parseInt(dbIdClaim.asString());
+        var shopId = Integer.parseInt(event.getPathParameters().get("shopId"));
+
+        var shopInfo = this.shopService.findById(shopId);
+
+        if (shopInfo.shopOwnerId() != userId)
+            throw new UnauthorizedUserForShopError(userId, shopId);
+    }
 
     private IamPolicyResponse.PolicyDocument getMergedPolicyDocuments(List<IamPolicyResponse.PolicyDocument> policyDocuments) {
         if (policyDocuments.isEmpty())

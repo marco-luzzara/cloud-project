@@ -5,7 +5,6 @@ import it.unimi.cloudproject.infrastructure.errors.InternalException;
 import it.unimi.cloudproject.lambda.shop.dto.requests.DeleteShopRequest;
 import it.unimi.cloudproject.lambda.shop.dto.requests.PublishMessageRequest;
 import it.unimi.cloudproject.lambda.shop.errors.CannotPublishMessage;
-import it.unimi.cloudproject.services.errors.UnauthorizedUserForShopError;
 import it.unimi.cloudproject.services.services.ShopService;
 import it.unimi.cloudproject.utilities.AwsSdkUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +23,7 @@ public class ShopFunctionsConfiguration {
     @Bean
     public Consumer<InvocationWrapper<DeleteShopRequest>> deleteShop() {
         return (ds) -> {
-            this.shopService.deleteShop(ds.body().userId(), ds.body().shopId());
+            this.shopService.deleteShop(ds.body().shopId());
             try (var snsClient = SnsClient.create()) {
                 Function<Throwable, InternalException> exceptionFunction = (e) -> new CannotPublishMessage(ds.body().shopId(), e);
                 var topicArn = AwsSdkUtils.runSdkRequestAndAssertResult(() -> snsClient
@@ -40,10 +39,7 @@ public class ShopFunctionsConfiguration {
     @Bean
     public Consumer<InvocationWrapper<PublishMessageRequest>> publishMessage() {
         return (pm) -> {
-            var shopInfo = this.shopService.findById(pm.body().shopId());
-            // TODO: if custom authorizer is necessary, then I can move this check there
-            if (shopInfo.shopOwnerId() != pm.body().userId())
-                throw new UnauthorizedUserForShopError(pm.body().userId(), pm.body().shopId());
+            this.shopService.findById(pm.body().shopId());
             try (var snsClient = SnsClient.create()) {
                 Function<Throwable, InternalException> exceptionFunction = (e) -> new CannotPublishMessage(pm.body().shopId(), e);
                 var topicArn = AwsSdkUtils.runSdkRequestAndAssertResult(() -> snsClient

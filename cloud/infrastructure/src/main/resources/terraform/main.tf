@@ -225,7 +225,8 @@ module "authorizer_lambda" {
     {
       Action = [
         "cognito-idp:AdminListGroupsForUser",
-        "iam:GetRole"
+        "iam:GetRolePolicy",
+        "iam:ListRolePolicies"
       ]
       Effect   = "Allow"
       Resource = ["*"]

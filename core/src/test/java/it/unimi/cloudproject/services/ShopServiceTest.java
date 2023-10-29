@@ -9,7 +9,6 @@ import it.unimi.cloudproject.data.repositories.UserRepository;
 import it.unimi.cloudproject.factories.bl.ShopFactory;
 import it.unimi.cloudproject.services.errors.InvalidShopIdError;
 import it.unimi.cloudproject.services.errors.InvalidUserIdError;
-import it.unimi.cloudproject.services.errors.UnauthorizedUserForShopError;
 import it.unimi.cloudproject.services.services.ShopService;
 import it.unimi.cloudproject.testutils.db.DbFactory;
 import it.unimi.cloudproject.testutils.spring.DynamicPropertiesInjector;
@@ -81,19 +80,9 @@ public class ShopServiceTest {
         var shopCreationDto = ShopDtoFactory.createShopCreation(shopOwner);
         var shopId = shopService.addShop(shopCreationDto);
 
-        shopService.deleteShop(shopOwner.getId(), shopId);
+        shopService.deleteShop(shopId);
 
         assertThat(shopService.findByName(shopCreationDto.name())).isEmpty();
-    }
-
-    @Test
-    void givenAShop_whenDeletedByNotItsOwner_thenThrow() {
-        var shopOwner = UserDataFactory.createUser(this.userRepository);
-        var otherUser = UserDataFactory.createUser(this.userRepository);
-        var shopCreationDto = ShopDtoFactory.createShopCreation(shopOwner);
-        var shopId = shopService.addShop(shopCreationDto);
-
-        assertThatThrownBy(() -> shopService.deleteShop(otherUser.getId(), shopId)).isInstanceOf(UnauthorizedUserForShopError.class);
     }
 
     @Test
@@ -102,7 +91,7 @@ public class ShopServiceTest {
         var shopCreationDto = ShopDtoFactory.createShopCreation(shopOwner);
         var shopId = shopService.addShop(shopCreationDto);
 
-        assertThatThrownBy(() -> shopService.deleteShop(shopOwner.getId(), 1000)).isInstanceOf(InvalidShopIdError.class);
+        assertThatThrownBy(() -> shopService.deleteShop(1000)).isInstanceOf(InvalidShopIdError.class);
     }
 
 //    @Test

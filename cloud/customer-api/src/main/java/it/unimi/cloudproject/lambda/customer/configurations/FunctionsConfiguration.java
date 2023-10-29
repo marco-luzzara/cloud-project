@@ -2,7 +2,6 @@ package it.unimi.cloudproject.lambda.customer.configurations;
 
 import io.opentelemetry.api.OpenTelemetry;
 import io.opentelemetry.api.trace.Tracer;
-import io.opentelemetry.context.Scope;
 import it.unimi.cloudproject.CustomerApi;
 import it.unimi.cloudproject.apigw.message.model.InvocationWrapper;
 import it.unimi.cloudproject.infrastructure.errors.InternalException;
@@ -10,11 +9,9 @@ import it.unimi.cloudproject.lambda.customer.dto.requests.user.*;
 import it.unimi.cloudproject.lambda.customer.dto.responses.LoginResponse;
 import it.unimi.cloudproject.lambda.customer.dto.responses.UserCreationResponse;
 import it.unimi.cloudproject.lambda.customer.dto.responses.UserGetInfoResponse;
-import it.unimi.cloudproject.lambda.customer.errors.CannotDeleteUserFromPoolError;
-import it.unimi.cloudproject.lambda.customer.errors.LoginFailedError;
-import it.unimi.cloudproject.lambda.customer.errors.RegistrationFailedError;
-import it.unimi.cloudproject.lambda.customer.errors.ShopSubscriptionFailedError;
+import it.unimi.cloudproject.lambda.customer.errors.*;
 import it.unimi.cloudproject.services.dto.UserCreationData;
+import it.unimi.cloudproject.services.services.ShopService;
 import it.unimi.cloudproject.services.services.UserService;
 import it.unimi.cloudproject.utilities.AwsSdkUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +21,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.Message;
 import software.amazon.awssdk.core.internal.http.loader.DefaultSdkHttpClientBuilder;
 import software.amazon.awssdk.services.cognitoidentityprovider.CognitoIdentityProviderClient;
+import software.amazon.awssdk.services.cognitoidentityprovider.model.NotAuthorizedException;
 import software.amazon.awssdk.services.sns.SnsClient;
 import software.amazon.awssdk.utils.AttributeMap;
 
@@ -57,6 +55,8 @@ public class FunctionsConfiguration {
             }
         };
     }
+
+    private ShopService shopService;
 
     @Bean
     public Function<InvocationWrapper<UserCreationRequest>, UserCreationResponse> createUser() {
@@ -137,6 +137,9 @@ public class FunctionsConfiguration {
                         authResponse.authenticationResult().accessToken(),
                         authResponse.authenticationResult().idToken());
             }
+            catch (NotAuthorizedException exc) {
+                throw new WrongCredentialsError(loginRequest.body().username());
+            }
         };
     }
 
@@ -145,6 +148,7 @@ public class FunctionsConfiguration {
         return (dr) -> {
             var userPoolId = System.getProperty("aws.cognito.user_pool_id");
 
+            this.userService.deleteUser(dr.body().userId());
             try (var cognitoClient = CognitoIdentityProviderClient.builder()
                     .httpClient(new DefaultSdkHttpClientBuilder().buildWithDefaults(AttributeMap.builder()
                             .build()))
@@ -154,7 +158,6 @@ public class FunctionsConfiguration {
                         .adminDeleteUser(b -> b.userPoolId(userPoolId).username(dr.body().username())),
                         (e) -> new CannotDeleteUserFromPoolError(dr.body().userId(), e));
             }
-            this.userService.deleteUser(dr.body().userId());
         };
     }
 
@@ -169,6 +172,7 @@ public class FunctionsConfiguration {
     @Bean
     public Consumer<InvocationWrapper<ShopSubscriptionRequest>> subscribeToShop() {
         return (sr) -> {
+            shopService.findById(sr.body().shopId()); // throws if shop does not exist
             try (var snsClient = SnsClient.create()) {
                 Function<Throwable, InternalException> exceptionFunction = (e) -> new ShopSubscriptionFailedError(sr.body().userId(), sr.body().shopId(), e);
                 var topicArn = AwsSdkUtils.runSdkRequestAndAssertResult(() -> snsClient

@@ -50,7 +50,7 @@ public class ShopFunctionsConfiguration {
                 return new ShopCreationResponse(shopId);
             }
             catch (Exception exc) {
-                this.shopService.deleteShop(sc.body().shopOwnerId(), shopId);
+                this.shopService.deleteShop(shopId);
                 throw exc;
             }
         };

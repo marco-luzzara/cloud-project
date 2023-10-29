@@ -1,11 +1,11 @@
 locals {
-  otel_java_agent_layer_info = {
-    // the java agent does not support the RequestStreamHandler, so i have to use the wrapper
-    // see https://docs.aws.amazon.com/lambda/latest/dg/java-tracing.html#java-adot
-    name = "arn:aws:lambda:${var.aws_region}:901920570463:layer:aws-otel-java-wrapper-amd64-ver-1-30-0"
-    version = "1"
-  }
-  otel_java_agent_layer_arn = "${local.otel_java_agent_layer_info.name}:${local.otel_java_agent_layer_info.version}"
+#  otel_java_agent_layer_info = {
+#    // the java agent does not support the RequestStreamHandler, so i have to use the wrapper
+#    // see https://docs.aws.amazon.com/lambda/latest/dg/java-tracing.html#java-adot
+#    name = "arn:aws:lambda:${var.aws_region}:901920570463:layer:aws-otel-java-wrapper-amd64-ver-1-30-0"
+#    version = "1"
+#  }
+#  otel_java_agent_layer_arn = "${local.otel_java_agent_layer_info.name}:${local.otel_java_agent_layer_info.version}"
 }
 
 terraform {
@@ -47,13 +47,13 @@ module "webapp_db" {
   webapp_db_credentials = var.webapp_db_credentials
 }
 
-resource "aws_lambda_layer_version_permission" "lambda_layer_permission" {
-  layer_name     = local.otel_java_agent_layer_info.name
-  version_number = local.otel_java_agent_layer_info.version
-  principal      = "886468871268" // see https://docs.localstack.cloud/user-guide/aws/lambda/#referencing-lambda-layers-from-aws
-  action         = "lambda:GetLayerVersion"
-  statement_id   = "openTelemetryLayerAccess"
-}
+#resource "aws_lambda_layer_version_permission" "lambda_layer_permission" {
+#  layer_name     = local.otel_java_agent_layer_info.name
+#  version_number = local.otel_java_agent_layer_info.version
+#  principal      = "886468871268" // see https://docs.localstack.cloud/user-guide/aws/lambda/#referencing-lambda-layers-from-aws
+#  action         = "lambda:GetLayerVersion"
+#  statement_id   = "openTelemetryLayerAccess"
+#}
 
 module "initializer_lambda" {
   source = "./api_lambda"
@@ -69,7 +69,7 @@ module "initializer_lambda" {
     spring_datasource_username = var.webapp_db_credentials.username
     spring_datasource_password = var.webapp_db_credentials.password
   }
-  additional_layers = [local.otel_java_agent_layer_arn]
+#  additional_layers = [local.otel_java_agent_layer_arn]
   function_name = "initializer-lambda"
   is_observability_enabled = false
   is_testing = var.is_testing
@@ -98,7 +98,7 @@ module "customer_lambda" {
     spring_datasource_username = var.webapp_db_credentials.username
     spring_datasource_password = var.webapp_db_credentials.password
   }
-  additional_layers = [local.otel_java_agent_layer_arn]
+#  additional_layers = [local.otel_java_agent_layer_arn]
   lambda_additional_system_properties = <<EOT
     -Daws.cognito.user_pool_id=${module.authentication.cognito_main_pool_id}
     -Daws.cognito.user_pool_client_id=${module.authentication.cognito_main_pool_client_id}
@@ -143,7 +143,7 @@ module "shop_lambda" {
     spring_datasource_username = var.webapp_db_credentials.username
     spring_datasource_password = var.webapp_db_credentials.password
   }
-  additional_layers = [local.otel_java_agent_layer_arn]
+#  additional_layers = [local.otel_java_agent_layer_arn]
   function_name = "shop-lambda"
   main_class = "it.unimi.cloudproject.ShopApi"
   extended_policy_statements = [
@@ -175,7 +175,7 @@ module "admin_lambda" {
     spring_datasource_username = var.webapp_db_credentials.username
     spring_datasource_password = var.webapp_db_credentials.password
   }
-  additional_layers = [local.otel_java_agent_layer_arn]
+#  additional_layers = [local.otel_java_agent_layer_arn]
   lambda_additional_system_properties = <<EOT
     -Daws.cognito.user_pool_id=${module.authentication.cognito_main_pool_id}
   EOT
@@ -215,7 +215,7 @@ module "authorizer_lambda" {
     spring_datasource_username = var.webapp_db_credentials.username
     spring_datasource_password = var.webapp_db_credentials.password
   }
-  additional_layers = [local.otel_java_agent_layer_arn]
+#  additional_layers = [local.otel_java_agent_layer_arn]
   lambda_additional_system_properties = <<EOT
     -Daws.cognito.user_pool_id=${module.authentication.cognito_main_pool_id}
   EOT

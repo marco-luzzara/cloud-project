@@ -72,10 +72,9 @@ resource "aws_iam_role" "ecs_prometheus_execution_role" {
   })
 }
 
-resource "aws_iam_policy" "prometheus_policy" {
-  name = "prometheus-policy"
-  description = "IAM policy for prometheus ECS service"
-
+resource "aws_iam_role_policy" "ecs_prometheus_execution_role_attachment" {
+  name = "ecs-prometheus-execution-role"
+  role      = aws_iam_role.ecs_prometheus_execution_role.name
   policy = jsonencode({
     Version   = "2012-10-17",
     Statement = [
@@ -92,11 +91,6 @@ resource "aws_iam_policy" "prometheus_policy" {
       }
     ]
   })
-}
-
-resource "aws_iam_role_policy_attachment" "ecs_prometheus_execution_role_attachment" {
-  role      = aws_iam_role.ecs_prometheus_execution_role.name
-  policy_arn = aws_iam_policy.prometheus_policy.arn
 }
 
 resource "aws_ecs_cluster" "prometheus_cluster" {

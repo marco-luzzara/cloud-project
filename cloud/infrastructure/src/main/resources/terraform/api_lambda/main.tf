@@ -3,15 +3,6 @@ locals {
     Version   = "2012-10-17",
     Statement = concat([
       {
-        Action   = [
-          "lambda:CreateFunction",
-          "iam:PassRole",
-          "lambda:AddLayerVersionPermission"
-        ],
-        Effect   = "Allow",
-        Resource = "*" // aws_iam_role.lambda_role.arn
-      },
-      {
         Action = [
           "rds-db:connect"
         ],

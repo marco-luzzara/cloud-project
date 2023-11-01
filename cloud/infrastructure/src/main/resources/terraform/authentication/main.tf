@@ -5,6 +5,18 @@ locals {
   aws_account_id    = data.aws_caller_identity.current.account_id
   aws_region        = data.aws_region.current.name
   api_resource_prefix = "arn:aws:execute-api:${local.aws_region}:${local.aws_account_id}:*/*"
+  group_role_trust_policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Principal = {
+          Federated = "cognito-identity.amazonaws.com"
+        }
+      }
+    ]
+  })
 }
 
 resource "aws_cognito_user_pool" "main_pool" {
@@ -35,18 +47,7 @@ resource "aws_cognito_user_pool" "main_pool" {
 resource "aws_iam_role" "cognito_customer_user_group_role" {
   name = "cognito-customer-user-group-role"
 
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17",
-    Statement = [
-      {
-        Action = "sts:AssumeRole"
-        Effect = "Allow"
-        Principal = {
-          Federated = "cognito-identity.amazonaws.com"
-        }
-      }
-    ]
-  })
+  assume_role_policy = local.group_role_trust_policy
 }
 
 resource "aws_iam_role_policy" "cognito_customer_user_group_policy" {
@@ -77,18 +78,7 @@ resource "aws_cognito_user_group" "customer_user_group" {
 resource "aws_iam_role" "cognito_shop_user_group_role" {
   name = "cognito-shop-user-group-role"
 
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17",
-    Statement = [
-      {
-        Action = "sts:AssumeRole"
-        Effect = "Allow"
-        Principal = {
-          Federated = "cognito-identity.amazonaws.com"
-        }
-      }
-    ]
-  })
+  assume_role_policy = local.group_role_trust_policy
 }
 
 resource "aws_iam_role_policy" "cognito_shop_user_group_policy" {
@@ -118,18 +108,7 @@ resource "aws_cognito_user_group" "shop_user_group" {
 resource "aws_iam_role" "cognito_admin_user_group_role" {
   name = "cognito-admin-user-group-role"
 
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17",
-    Statement = [
-      {
-        Action = "sts:AssumeRole"
-        Effect = "Allow"
-        Principal = {
-          Federated = "cognito-identity.amazonaws.com"
-        }
-      }
-    ]
-  })
+  assume_role_policy = local.group_role_trust_policy
 }
 
 resource "aws_iam_role_policy" "cognito_admin_user_group_policy" {

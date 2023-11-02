@@ -17,6 +17,7 @@ dependencies {
 	implementation("io.opentelemetry:opentelemetry-semconv:1.22.0-alpha")
 	implementation("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
 	implementation("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure-spi")
+	implementation 'software.amazon.opentelemetry:aws-opentelemetry-agent'
 
 	// logging
 	implementation "org.apache.logging.log4j:log4j-api"
@@ -49,6 +50,7 @@ task buildZip(type: Zip) {
 		from "${rootProject.rootDir}/cloud/infrastructure/src/testFixtures/resources/localstack/AwsSdkV2DisableCertificateValidation-1.0.jar"
 		from(configurations.runtimeClasspath)
 	}
+	from("${rootProject.rootDir}/cloud/infrastructure/src/main/resources/opentelemetry/collector.yml").into(".")
 	archiveFileName = "${project.name}.zip"
 	destinationDirectory = file(DIST_FOLDER)
 }

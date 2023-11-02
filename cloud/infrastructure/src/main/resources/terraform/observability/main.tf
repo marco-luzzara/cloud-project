@@ -93,8 +93,8 @@ resource "aws_iam_role_policy" "ecs_prometheus_execution_role_attachment" {
   })
 }
 
-resource "aws_ecs_cluster" "prometheus_cluster" {
-  name = "prometheus-cluster"
+resource "aws_ecs_cluster" "observability_cluster" {
+  name = "observability-cluster"
 }
 
 resource "aws_ecs_task_definition" "prometheus" {
@@ -166,7 +166,7 @@ resource "aws_ecs_task_definition" "prometheus" {
 
 resource "aws_ecs_service" "prometheus-service" {
   name            = "prometheus-service"
-  cluster         = aws_ecs_cluster.prometheus_cluster.id
+  cluster         = aws_ecs_cluster.observability_cluster.id
   task_definition = aws_ecs_task_definition.prometheus.arn
   launch_type     = "FARGATE"
 

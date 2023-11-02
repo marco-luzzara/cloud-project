@@ -38,13 +38,16 @@ main() {
     then
         CONTAINERS_TO_REMOVE="$(docker network inspect localstack_network --format='{{range .Containers}}{{.Name}}{{"\n"}}{{end}}')"
         for container in $CONTAINERS_TO_REMOVE; do
-            docker stop "$container"
+            if [[ "$container" != "$LOCALSTACK_CONTAINER_NAME" ]] && [[ "$container" != "$TERRAFORM_CONTAINER_NAME" ]]
+            then
+                docker container rm -f "$container"
+            fi
         done
 
         docker-compose down
-
-        echo "$CONTAINERS_TO_REMOVE" | while read -r container; do { docker container rm "$container" || echo "Container $container already removed"; } ; done
     fi
+
+
 }
 
 main "$@"

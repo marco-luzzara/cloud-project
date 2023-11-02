@@ -15,7 +15,6 @@ services:
       - DOCKER_HOST=unix:///var/run/docker.sock
       - SERVICES=lambda,s3,apigateway,logs,rds,cognito-idp,sns
       - LAMBDA_DOCKER_NETWORK=localstack_network
-      - MAIN_DOCKER_NETWORK=localstack_network
 #      - ENFORCE_IAM=1
       - IAM_SOFT_MODE=1
       - DEBUG=1

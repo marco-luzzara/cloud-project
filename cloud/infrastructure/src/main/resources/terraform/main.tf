@@ -1,10 +1,17 @@
 locals {
+  // the lambda layer does not work because of unsupported telemetry API for the runtime
 #  otel_java_agent_layer_info = {
 #    // the java agent does not support the RequestStreamHandler, so i have to use the wrapper
 #    // see https://docs.aws.amazon.com/lambda/latest/dg/java-tracing.html#java-adot
 #    name = "arn:aws:lambda:${var.aws_region}:901920570463:layer:aws-otel-java-wrapper-amd64-ver-1-30-0"
 #    version = "1"
 #  }
+  otel_collector_layer_info = {
+    // the java agent does not support the RequestStreamHandler, so i have to use the wrapper
+    // see https://docs.aws.amazon.com/lambda/latest/dg/java-tracing.html#java-adot
+    name = "arn:aws:lambda:${var.aws_region}:901920570463:layer:aws-otel-java-wrapper-amd64-ver-1-30-0"
+    version = "1"
+  }
 #  otel_java_agent_layer_arn = "${local.otel_java_agent_layer_info.name}:${local.otel_java_agent_layer_info.version}"
 }
 
@@ -25,14 +32,14 @@ provider "aws" {
   region = var.aws_region
 }
 
-module "observability" {
-  source = "./observability"
-
-  is_testing = var.is_testing
-  localstack_network = var.localstack_network
-  prometheus_config_host_path = var.prometheus_config_host_path
-  prometheus_exporter_config_host_path = var.prometheus_exporter_config_host_path
-}
+#module "observability" {
+#  source = "./observability"
+#
+#  is_testing = var.is_testing
+#  localstack_network = var.localstack_network
+#  prometheus_config_host_path = var.prometheus_config_host_path
+#  prometheus_exporter_config_host_path = var.prometheus_exporter_config_host_path
+#}
 
 module "authentication" {
   source = "./authentication"
@@ -52,7 +59,7 @@ module "webapp_db" {
 #  version_number = local.otel_java_agent_layer_info.version
 #  principal      = "886468871268" // see https://docs.localstack.cloud/user-guide/aws/lambda/#referencing-lambda-layers-from-aws
 #  action         = "lambda:GetLayerVersion"
-#  statement_id   = "openTelemetryLayerAccess"
+#  statement_id   = "openTelemetryLayerAccess1"
 #}
 
 module "initializer_lambda" {

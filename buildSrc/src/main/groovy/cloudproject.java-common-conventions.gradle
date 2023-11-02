@@ -76,6 +76,9 @@ dependencies {
 
         // auth
         implementation 'com.auth0:java-jwt:4.4.0'
+
+        // monitoring
+        implementation 'software.amazon.opentelemetry:aws-opentelemetry-agent:1.31.0'
     }
 }
 

@@ -14,6 +14,7 @@ dependencies {
 	implementation("io.opentelemetry:opentelemetry-sdk")
 	implementation("io.opentelemetry:opentelemetry-sdk-metrics")
 	implementation("io.opentelemetry:opentelemetry-exporter-logging")
+	implementation("io.opentelemetry:opentelemetry-exporter-otlp")
 	implementation("io.opentelemetry:opentelemetry-semconv:1.22.0-alpha")
 	implementation("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
 	implementation("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure-spi")

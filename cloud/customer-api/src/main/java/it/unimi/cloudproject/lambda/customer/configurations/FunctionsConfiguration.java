@@ -32,17 +32,8 @@ import java.util.function.Function;
 
 @Configuration
 public class FunctionsConfiguration {
-    private final Tracer tracer;
-    private final OpenTelemetry openTelemetry;
-
     @Autowired
     private UserService userService;
-
-    @Autowired
-    FunctionsConfiguration(OpenTelemetry openTelemetry) {
-        this.openTelemetry = openTelemetry;
-        this.tracer = openTelemetry.getTracer(CustomerApi.class.getName(), "1.0.0");
-    }
 
     @Bean
     public MessageRoutingCallback customRouter() {
@@ -61,51 +52,40 @@ public class FunctionsConfiguration {
     @Bean
     public Function<InvocationWrapper<UserCreationRequest>, UserCreationResponse> createUser() {
         return (cr) -> {
-            var span = tracer.spanBuilder("createUser").startSpan();
+            var clientId = System.getProperty("aws.cognito.user_pool_client_id");
+            var userPoolId = System.getProperty("aws.cognito.user_pool_id");
 
-            // Make the span the current span
-            try (var scope = span.makeCurrent()) {
-                var clientId = System.getProperty("aws.cognito.user_pool_client_id");
-                var userPoolId = System.getProperty("aws.cognito.user_pool_id");
+            final int userId = this.userService.addUser(new UserCreationData(cr.body().username()));
+            try (var cognitoClient = CognitoIdentityProviderClient.builder()
+                    .httpClient(new DefaultSdkHttpClientBuilder().buildWithDefaults(AttributeMap.builder()
+                            .build()))
+                    .build()) {
 
-                final int userId = this.userService.addUser(new UserCreationData(cr.body().username()));
-                try (var cognitoClient = CognitoIdentityProviderClient.builder()
-                        .httpClient(new DefaultSdkHttpClientBuilder().buildWithDefaults(AttributeMap.builder()
-                                .build()))
-                        .build()) {
+                AwsSdkUtils.runSdkRequestAndAssertResult(
+                        () -> cognitoClient.signUp(signUpBuilder -> signUpBuilder
+                                .clientId(clientId)
+                                .username(cr.body().username())
+                                .password(cr.body().password())
+                                .userAttributes(attrTypeBuilder -> attrTypeBuilder.name("custom:dbId").value(String.valueOf(userId)))),
+                        (e) -> new RegistrationFailedError(userId, e));
 
-                    AwsSdkUtils.runSdkRequestAndAssertResult(
-                            () -> cognitoClient.signUp(signUpBuilder -> signUpBuilder
-                                    .clientId(clientId)
-                                    .username(cr.body().username())
-                                    .password(cr.body().password())
-                                    .userAttributes(attrTypeBuilder -> attrTypeBuilder.name("custom:dbId").value(String.valueOf(userId)))),
-                            (e) -> new RegistrationFailedError(userId, e));
+                AwsSdkUtils.runSdkRequestAndAssertResult(
+                        () -> cognitoClient.adminConfirmSignUp(b -> b
+                                .username(cr.body().username())
+                                .userPoolId(userPoolId)),
+                        (e) -> new RegistrationFailedError(userId, e));
 
-                    AwsSdkUtils.runSdkRequestAndAssertResult(
-                            () -> cognitoClient.adminConfirmSignUp(b -> b
-                                    .username(cr.body().username())
-                                    .userPoolId(userPoolId)),
-                            (e) -> new RegistrationFailedError(userId, e));
+                AwsSdkUtils.runSdkRequestAndAssertResult(
+                        () -> cognitoClient.adminAddUserToGroup(b -> b
+                                .username(cr.body().username())
+                                .userPoolId(userPoolId)
+                                .groupName("customer-user-group")),
+                        (e) -> new RegistrationFailedError(userId, e));
 
-                    AwsSdkUtils.runSdkRequestAndAssertResult(
-                            () -> cognitoClient.adminAddUserToGroup(b -> b
-                                    .username(cr.body().username())
-                                    .userPoolId(userPoolId)
-                                    .groupName("customer-user-group")),
-                            (e) -> new RegistrationFailedError(userId, e));
-
-                    return new UserCreationResponse(userId);
-                } catch (Exception exc) {
-                    this.userService.deleteUser(userId);
-                    throw exc;
-                }
-            }
-            catch(Throwable t) {
-                span.recordException(t);
-                throw t;
-            } finally {
-                span.end();
+                return new UserCreationResponse(userId);
+            } catch (Exception exc) {
+                this.userService.deleteUser(userId);
+                throw exc;
             }
         };
     }

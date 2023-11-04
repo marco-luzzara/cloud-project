@@ -83,16 +83,15 @@ resource "aws_lambda_function" "api_lambda" {
   environment {
     variables = {
       LAMBDA_DOCKER_DNS = "127.0.0.1"
-      AWS_XRAY_TRACING_ENABLED = "False"
+#      AWS_XRAY_TRACING_ENABLED = "False"
       OTEL_RESOURCE_ATTRIBUTES = "service.name=${var.function_name},service.namespace=cloud-project"
-#      OTEL_TRACES_EXPORTER = "otlp"
-#      OTEL_EXPORTER_OTLP_ENDPOINT = "http://localhost:4566"
+      OTEL_EXPORTER_OTLP_ENDPOINT = "http://otel-collector:4317"
       OTEL_SERVICE_NAME = var.function_name
-      OTEL_TRACES_EXPORTER = "logging"
-      OTEL_METRICS_EXPORTER = "logging"
+      OTEL_TRACES_EXPORTER = "otlp"
+      OTEL_METRICS_EXPORTER = "otlp"
       OTEL_LOGS_EXPORTER = "logging"
 #      AWS_LAMBDA_EXEC_WRAPPER = "/opt/otel-stream-handler"
-      OPENTELEMETRY_COLLECTOR_CONFIG_FILE = "/var/task/collector.yml"
+#      OPENTELEMETRY_COLLECTOR_CONFIG_FILE = "/var/task/collector.yml"
       JAVA_TOOL_OPTIONS = <<EOT
         -DMAIN_CLASS=${var.main_class}
         -Dlogging.level.org.springframework=${var.lambda_system_properties.logging_level}

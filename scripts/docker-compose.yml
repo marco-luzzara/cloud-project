@@ -29,26 +29,45 @@ services:
     image: hashicorp/terraform:1.5.7
     working_dir: /app
     entrypoint: sh -c "sleep inf"
-    depends_on:
-      localstack:
-        condition: service_healthy
     volumes:
       - "./volumes/${TERRAFORM_VOLUME_DIR:-terraform}:/app"
     networks:
       - localstack_network
 
-#  prometheus:
-#    container_name: prometheus
-#    image: prom/prometheus:v2.47.2
-#    depends_on:
-#      localstack:
-#        condition: service_healthy
-#    volumes:
-#      - "../observability/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml"
-#    ports:
-#      - "9090:9090"
-#    networks:
-#      - localstack_network
+  otel-collector:
+    container_name: otel-collector
+    image: otel/opentelemetry-collector-contrib:0.88.0
+    volumes:
+      - "../observability/otel-collector/collector.yml:/etc/otelcol/config.yaml"
+    networks:
+      - localstack_network
+
+  prometheus:
+    container_name: prometheus
+    image: prom/prometheus:v2.47.2
+    volumes:
+      - "../observability/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml"
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--web.console.libraries=/usr/share/prometheus/console_libraries"
+      - "--web.console.templates=/usr/share/prometheus/consoles"
+      - "--web.enable-remote-write-receiver"
+    ports:
+      - "9090:9090"
+    networks:
+      - localstack_network
+
+  grafana:
+    image: grafana/grafana:10.2.0
+    container_name: grafana
+    user: "0"
+    volumes:
+      - "./volumes/grafana:/var/lib/grafana"
+    ports:
+      - '3000:3000'
+    networks:
+      - localstack_network
 
 
 networks:

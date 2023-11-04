@@ -3,6 +3,6 @@ global:
   evaluation_interval: 10s
 
 scrape_configs:
-  - job_name: 'cloudwatch-exporter'
+  - job_name: 'cloud-project-collector'
     static_configs:
-      - targets: ['prometheusexporter:9106']
+      - targets: ['otel-collector:4317']

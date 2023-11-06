@@ -11,6 +11,11 @@ exporters:
   prometheus:
     endpoint: "0.0.0.0:8889"
 
+  otlp:
+    endpoint: "jaeger:4317"
+    tls:
+      insecure: true
+
 processors:
   batch:
 
@@ -22,7 +27,8 @@ service:
   pipelines:
     traces:
       receivers: [otlp]
-      exporters: [debug]
+      processors: [batch]
+      exporters: [debug, otlp]
     metrics:
       receivers: [otlp]
       processors: [batch]

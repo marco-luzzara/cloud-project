@@ -25,11 +25,6 @@ print_done() {
 }
 
 main() {
-    # TODO: variables should be passed from the caller
-    TERRAFORM_CONTAINER_NAME="terraform_for_localstack"
-    LOCALSTACK_CONTAINER_NAME="localstackmain"
-    LOCALSTACK_PORT=4566
-
     TEMPDIR=$(mktemp -d)
     echo "Created tempdir: $TEMPDIR"
     trap 'rm -rf $TEMPDIR' ERR

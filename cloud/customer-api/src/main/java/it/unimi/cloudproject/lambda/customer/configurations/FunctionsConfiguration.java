@@ -1,8 +1,7 @@
 package it.unimi.cloudproject.lambda.customer.configurations;
 
-import io.opentelemetry.api.OpenTelemetry;
-import io.opentelemetry.api.trace.Tracer;
-import it.unimi.cloudproject.CustomerApi;
+import io.opentelemetry.api.metrics.LongCounter;
+import io.opentelemetry.api.metrics.Meter;
 import it.unimi.cloudproject.apigw.message.model.InvocationWrapper;
 import it.unimi.cloudproject.infrastructure.errors.InternalException;
 import it.unimi.cloudproject.lambda.customer.dto.requests.user.*;
@@ -32,8 +31,18 @@ import java.util.function.Function;
 
 @Configuration
 public class FunctionsConfiguration {
+    private final LongCounter loginCounterCalled;
     @Autowired
     private UserService userService;
+
+    @Autowired
+    FunctionsConfiguration(Meter meter) {
+        this.loginCounterCalled = meter
+                .counterBuilder("api_user_login_called")
+                .setDescription("How many times the /login api has been called?")
+                .setUnit("1")
+                .build();
+    }
 
     @Bean
     public MessageRoutingCallback customRouter() {
@@ -93,6 +102,7 @@ public class FunctionsConfiguration {
     @Bean
     public Function<InvocationWrapper<UserLoginRequest>, LoginResponse> loginUser() {
         return (loginRequest) -> {
+            this.loginCounterCalled.add(1);
             var clientId = System.getProperty("aws.cognito.user_pool_client_id");
             var userPoolId = System.getProperty("aws.cognito.user_pool_id");
 

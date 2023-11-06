@@ -16,8 +16,8 @@ dependencies {
 	implementation("io.opentelemetry:opentelemetry-exporter-logging")
 	implementation("io.opentelemetry:opentelemetry-exporter-otlp")
 	implementation("io.opentelemetry:opentelemetry-semconv:1.22.0-alpha")
-	implementation("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
-	implementation("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure-spi")
+//	implementation("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
+//	implementation("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure-spi")
 	implementation 'software.amazon.opentelemetry:aws-opentelemetry-agent'
 
 	// logging
@@ -46,6 +46,7 @@ dependencies {
 var DIST_FOLDER = "${project.buildDir}/dist"
 
 task buildZip(type: Zip) {
+	group "build"
 	into('lib') {
 		from(jar)
 		from "${rootProject.rootDir}/cloud/infrastructure/src/testFixtures/resources/localstack/AwsSdkV2DisableCertificateValidation-1.0.jar"
@@ -57,6 +58,7 @@ task buildZip(type: Zip) {
 }
 
 task buildHotReloadFolder(type: Copy) {
+	group "build"
 	from zipTree("$DIST_FOLDER/${project.name}.zip")
 	into "${project.buildDir}/hot-reload"
 

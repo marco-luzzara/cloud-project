@@ -50,7 +50,6 @@ main() {
     print_done
 
     print_step_message "Copying Prometheus config files"
-    docker cp ../observability/prometheus/cloudwatch_exporter_config.yml "$TERRAFORM_CONTAINER_NAME:/app"
     docker cp ../observability/prometheus/prometheus.yml "$TERRAFORM_CONTAINER_NAME:/app"
     print_done
 

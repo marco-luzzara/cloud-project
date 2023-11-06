@@ -2,22 +2,28 @@ receivers:
   otlp:
     protocols:
       grpc:
-        endpoint: "0.0.0.0:4317"
-      http:
-        endpoint: "0.0.0.0:4318"
+#        endpoint: "0.0.0.0:4317"
+#      http:
+#        endpoint: "0.0.0.0:4318"
 
 exporters:
-  logging:
-  prometheusremotewrite:
-    endpoint: 'http://prometheus:9090/api/v1/write'
-#    tls:
-#      insecure: true
+  debug:
+  prometheus:
+    endpoint: "0.0.0.0:8889"
+
+processors:
+  batch:
+
+extensions:
+  health_check:
 
 service:
+  extensions: [health_check]
   pipelines:
     traces:
       receivers: [otlp]
-      exporters: [logging]
+      exporters: [debug]
     metrics:
       receivers: [otlp]
-      exporters: [logging, prometheusremotewrite]
+      processors: [batch]
+      exporters: [debug, prometheus]

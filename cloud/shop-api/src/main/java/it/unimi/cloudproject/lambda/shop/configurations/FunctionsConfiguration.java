@@ -8,17 +8,31 @@ import it.unimi.cloudproject.lambda.shop.errors.CannotPublishMessage;
 import it.unimi.cloudproject.services.services.ShopService;
 import it.unimi.cloudproject.utilities.AwsSdkUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.function.context.MessageRoutingCallback;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.messaging.Message;
 import software.amazon.awssdk.services.sns.SnsClient;
 
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
 @Configuration
-public class ShopFunctionsConfiguration {
+public class FunctionsConfiguration {
     @Autowired
     private ShopService shopService;
+
+    @Bean
+    public MessageRoutingCallback customRouter() {
+        return new MessageRoutingCallback() {
+            @Override
+            public String routingResult(Message<?> message) {
+//                var lambdaContext = (Context) message.getHeaders().get(AWSLambdaUtils.AWS_CONTEXT);
+                return Optional.ofNullable((String) message.getHeaders().get("X-Spring-Cloud-Function-Definition")).orElseThrow();
+            }
+        };
+    }
 
     @Bean
     public Consumer<InvocationWrapper<DeleteShopRequest>> deleteShop() {

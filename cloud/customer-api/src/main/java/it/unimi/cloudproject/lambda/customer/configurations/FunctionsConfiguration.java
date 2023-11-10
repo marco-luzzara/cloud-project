@@ -2,6 +2,7 @@ package it.unimi.cloudproject.lambda.customer.configurations;
 
 import io.opentelemetry.api.metrics.LongCounter;
 import io.opentelemetry.api.metrics.Meter;
+import io.opentelemetry.instrumentation.annotations.WithSpan;
 import it.unimi.cloudproject.apigw.message.model.InvocationWrapper;
 import it.unimi.cloudproject.infrastructure.errors.InternalException;
 import it.unimi.cloudproject.lambda.customer.dto.requests.user.*;
@@ -50,7 +51,6 @@ public class FunctionsConfiguration {
             @Override
             public String routingResult(Message<?> message) {
 //                var lambdaContext = (Context) message.getHeaders().get(AWSLambdaUtils.AWS_CONTEXT);
-//                logger.info("Inspecting message headers - " + message.getHeaders());
                 return Optional.ofNullable((String) message.getHeaders().get("X-Spring-Cloud-Function-Definition")).orElseThrow();
             }
         };
@@ -58,6 +58,7 @@ public class FunctionsConfiguration {
 
     private ShopService shopService;
 
+    @WithSpan
     @Bean
     public Function<InvocationWrapper<UserCreationRequest>, UserCreationResponse> createUser() {
         return (cr) -> {
@@ -99,6 +100,7 @@ public class FunctionsConfiguration {
         };
     }
 
+    @WithSpan
     @Bean
     public Function<InvocationWrapper<UserLoginRequest>, LoginResponse> loginUser() {
         return (loginRequest) -> {
@@ -133,6 +135,7 @@ public class FunctionsConfiguration {
         };
     }
 
+    @WithSpan
     @Bean
     public Consumer<InvocationWrapper<UserDeletionRequest>> deleteUser() {
         return (dr) -> {
@@ -151,6 +154,7 @@ public class FunctionsConfiguration {
         };
     }
 
+    @WithSpan
     @Bean
     public Function<InvocationWrapper<UserGetInfoRequest>, UserGetInfoResponse> getUser() {
         return userGetRequest -> {
@@ -159,6 +163,7 @@ public class FunctionsConfiguration {
         };
     }
 
+    @WithSpan
     @Bean
     public Consumer<InvocationWrapper<ShopSubscriptionRequest>> subscribeToShop() {
         return (sr) -> {

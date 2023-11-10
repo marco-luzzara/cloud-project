@@ -20,10 +20,11 @@ def LIQUIBASE_VERSION = '4.23.0'
 def LOG4J_VERSION = '2.17.1'
 def TESTCONTAINERS_VERSION = '1.18.3'
 def GSON_VERSION = '2.10.1'
+def OPENTELEMETRY_VERSION = '1.31.0'
 
 dependencies {
     implementation platform("software.amazon.awssdk:bom:2.20.150")
-    implementation platform('io.opentelemetry:opentelemetry-bom:1.31.0')
+    implementation platform("io.opentelemetry:opentelemetry-bom:${OPENTELEMETRY_VERSION}")
     testImplementation platform('org.junit:junit-bom:5.9.1')
     testImplementation platform("org.testcontainers:testcontainers-bom:${TESTCONTAINERS_VERSION}")
     testFixturesImplementation platform("org.testcontainers:testcontainers-bom:${TESTCONTAINERS_VERSION}")
@@ -78,7 +79,8 @@ dependencies {
         implementation 'com.auth0:java-jwt:4.4.0'
 
         // monitoring
-        implementation 'software.amazon.opentelemetry:aws-opentelemetry-agent:1.31.0'
+        implementation "software.amazon.opentelemetry:aws-opentelemetry-agent:${OPENTELEMETRY_VERSION}"
+        implementation "io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:${OPENTELEMETRY_VERSION}"
     }
 }
 

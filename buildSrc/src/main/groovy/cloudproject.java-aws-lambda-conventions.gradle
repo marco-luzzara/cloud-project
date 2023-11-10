@@ -16,6 +16,7 @@ dependencies {
 	implementation("io.opentelemetry:opentelemetry-exporter-logging")
 	implementation("io.opentelemetry:opentelemetry-exporter-otlp")
 	implementation("io.opentelemetry:opentelemetry-semconv:1.22.0-alpha")
+	implementation 'io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations'
 //	implementation("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
 //	implementation("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure-spi")
 	implementation 'software.amazon.opentelemetry:aws-opentelemetry-agent'

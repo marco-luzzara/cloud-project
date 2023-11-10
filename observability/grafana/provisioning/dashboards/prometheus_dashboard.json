@@ -1,0 +1,41 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "Prometheus Overview",
+    "tags": ["prometheus", "overview"],
+    "timezone": "browser",
+    "editable": true,
+    "rows": [
+      {
+        "title": "Prometheus Stats",
+        "height": "300px",
+        "panels": [
+          {
+            "title": "HTTP Requests",
+            "type": "graph",
+            "datasource": "Prometheus",
+            "targets": [
+              {
+                "expr": "api_user_login_called_total",
+                "legendFormat": "{{method}} - {{status}}",
+                "refId": "A"
+              }
+            ],
+            "yaxes": [
+              {
+                "format": "ops"
+              },
+              {
+                "format": "short"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "schemaVersion": 22,
+    "version": 1
+  },
+  "folderId": null,
+  "overwrite": false
+}

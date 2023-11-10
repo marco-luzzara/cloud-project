@@ -12,6 +12,12 @@ dependencies {
     implementation "org.springframework.boot:spring-boot-starter-jdbc"
     testImplementation "org.springframework.boot:spring-boot-starter-test"
 
+    // monitoring
+    implementation("io.opentelemetry:opentelemetry-api")
+    implementation("io.opentelemetry:opentelemetry-sdk")
+    implementation("io.opentelemetry:opentelemetry-sdk-metrics")
+    implementation("io.opentelemetry:opentelemetry-semconv:1.22.0-alpha")
+
     // junit and assertions
     testImplementation "org.junit.jupiter:junit-jupiter-api"
     testImplementation "org.assertj:assertj-core"

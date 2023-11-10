@@ -44,9 +44,9 @@ main() {
     docker exec "$TERRAFORM_CONTAINER_NAME" sh -c "tar -xzf tfvars_tree.tar.gz && rm tfvars_tree.tar.gz"
     print_done
 
-    print_step_message "Copying Prometheus config files"
-    docker cp ../observability/prometheus/prometheus.yml "$TERRAFORM_CONTAINER_NAME:/app"
-    print_done
+#    print_step_message "Copying Prometheus config files"
+#    docker cp ../observability/prometheus/prometheus.yml "$TERRAFORM_CONTAINER_NAME:/app"
+#    print_done
 
     # I don't need to copy the zip distribution in the terraform and localstack
     # containers because lambda hot-reloading is enabled

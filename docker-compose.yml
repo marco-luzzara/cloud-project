@@ -71,8 +71,11 @@ services:
     image: grafana/grafana:10.2.0
     container_name: grafana
     user: "0"
+    environment:
+      - GF_PATHS_PROVISIONING=/etc/grafana/provisioning
     volumes:
       - "./volumes/grafana:/var/lib/grafana"
+      - "./observability/grafana/provisioning:/etc/grafana/provisioning"
     ports:
       - '3000:3000'
     networks:

@@ -58,127 +58,139 @@ public class FunctionsConfiguration {
 
     private ShopService shopService;
 
-    @WithSpan
     @Bean
     public Function<InvocationWrapper<UserCreationRequest>, UserCreationResponse> createUser() {
-        return (cr) -> {
-            var clientId = System.getProperty("aws.cognito.user_pool_client_id");
-            var userPoolId = System.getProperty("aws.cognito.user_pool_id");
-
-            final int userId = this.userService.addUser(new UserCreationData(cr.body().username()));
-            try (var cognitoClient = CognitoIdentityProviderClient.builder()
-                    .httpClient(new DefaultSdkHttpClientBuilder().buildWithDefaults(AttributeMap.builder()
-                            .build()))
-                    .build()) {
-
-                AwsSdkUtils.runSdkRequestAndAssertResult(
-                        () -> cognitoClient.signUp(signUpBuilder -> signUpBuilder
-                                .clientId(clientId)
-                                .username(cr.body().username())
-                                .password(cr.body().password())
-                                .userAttributes(attrTypeBuilder -> attrTypeBuilder.name("custom:dbId").value(String.valueOf(userId)))),
-                        (e) -> new RegistrationFailedError(userId, e));
-
-                AwsSdkUtils.runSdkRequestAndAssertResult(
-                        () -> cognitoClient.adminConfirmSignUp(b -> b
-                                .username(cr.body().username())
-                                .userPoolId(userPoolId)),
-                        (e) -> new RegistrationFailedError(userId, e));
-
-                AwsSdkUtils.runSdkRequestAndAssertResult(
-                        () -> cognitoClient.adminAddUserToGroup(b -> b
-                                .username(cr.body().username())
-                                .userPoolId(userPoolId)
-                                .groupName("customer-user-group")),
-                        (e) -> new RegistrationFailedError(userId, e));
-
-                return new UserCreationResponse(userId);
-            } catch (Exception exc) {
-                this.userService.deleteUser(userId);
-                throw exc;
-            }
-        };
+        return (cr) -> createUserImpl(cr.body());
     }
 
     @WithSpan
+    private UserCreationResponse createUserImpl(UserCreationRequest cr) {
+        var clientId = System.getProperty("aws.cognito.user_pool_client_id");
+        var userPoolId = System.getProperty("aws.cognito.user_pool_id");
+
+        final int userId = this.userService.addUser(new UserCreationData(cr.username()));
+        try (var cognitoClient = CognitoIdentityProviderClient.builder()
+                .httpClient(new DefaultSdkHttpClientBuilder().buildWithDefaults(AttributeMap.builder()
+                        .build()))
+                .build()) {
+
+            AwsSdkUtils.runSdkRequestAndAssertResult(
+                    () -> cognitoClient.signUp(signUpBuilder -> signUpBuilder
+                            .clientId(clientId)
+                            .username(cr.username())
+                            .password(cr.password())
+                            .userAttributes(attrTypeBuilder -> attrTypeBuilder.name("custom:dbId").value(String.valueOf(userId)))),
+                    (e) -> new RegistrationFailedError(userId, e));
+
+            AwsSdkUtils.runSdkRequestAndAssertResult(
+                    () -> cognitoClient.adminConfirmSignUp(b -> b
+                            .username(cr.username())
+                            .userPoolId(userPoolId)),
+                    (e) -> new RegistrationFailedError(userId, e));
+
+            AwsSdkUtils.runSdkRequestAndAssertResult(
+                    () -> cognitoClient.adminAddUserToGroup(b -> b
+                            .username(cr.username())
+                            .userPoolId(userPoolId)
+                            .groupName("customer-user-group")),
+                    (e) -> new RegistrationFailedError(userId, e));
+
+            return new UserCreationResponse(userId);
+        } catch (Exception exc) {
+            this.userService.deleteUser(userId);
+            throw exc;
+        }
+    }
+
     @Bean
     public Function<InvocationWrapper<UserLoginRequest>, LoginResponse> loginUser() {
-        return (loginRequest) -> {
-            this.loginCounterCalled.add(1);
-            var clientId = System.getProperty("aws.cognito.user_pool_client_id");
-            var userPoolId = System.getProperty("aws.cognito.user_pool_id");
-
-            try (var cognitoClient = CognitoIdentityProviderClient.builder()
-                    .httpClient(new DefaultSdkHttpClientBuilder().buildWithDefaults(AttributeMap.builder()
-                            .build()))
-                    .build()) {
-
-                var authResponse = AwsSdkUtils.runSdkRequestAndAssertResult(
-                        () -> cognitoClient.initiateAuth(b -> b
-                                .clientId(clientId)
-                                .authFlow("USER_PASSWORD_AUTH")
-                                .authParameters(
-                                        Map.of(
-                                                "USERNAME", loginRequest.body().username(),
-                                                "PASSWORD", loginRequest.body().password()
-                                        )
-                                )),
-                        (e) -> new LoginFailedError(loginRequest.body().username(), e));
-
-                return new LoginResponse(
-                        authResponse.authenticationResult().accessToken(),
-                        authResponse.authenticationResult().idToken());
-            }
-            catch (NotAuthorizedException exc) {
-                throw new WrongCredentialsError(loginRequest.body().username());
-            }
-        };
+        return (loginRequest) -> loginUserImpl(loginRequest.body());
     }
 
     @WithSpan
+    private LoginResponse loginUserImpl(UserLoginRequest loginRequest) {
+        this.loginCounterCalled.add(1);
+        var clientId = System.getProperty("aws.cognito.user_pool_client_id");
+        var userPoolId = System.getProperty("aws.cognito.user_pool_id");
+
+        try (var cognitoClient = CognitoIdentityProviderClient.builder()
+                .httpClient(new DefaultSdkHttpClientBuilder().buildWithDefaults(AttributeMap.builder()
+                        .build()))
+                .build()) {
+
+            var authResponse = AwsSdkUtils.runSdkRequestAndAssertResult(
+                    () -> cognitoClient.initiateAuth(b -> b
+                            .clientId(clientId)
+                            .authFlow("USER_PASSWORD_AUTH")
+                            .authParameters(
+                                    Map.of(
+                                            "USERNAME", loginRequest.username(),
+                                            "PASSWORD", loginRequest.password()
+                                    )
+                            )),
+                    (e) -> new LoginFailedError(loginRequest.username(), e));
+
+            return new LoginResponse(
+                    authResponse.authenticationResult().accessToken(),
+                    authResponse.authenticationResult().idToken());
+        }
+        catch (NotAuthorizedException exc) {
+            throw new WrongCredentialsError(loginRequest.username());
+        }
+    }
+
     @Bean
     public Consumer<InvocationWrapper<UserDeletionRequest>> deleteUser() {
-        return (dr) -> {
-            var userPoolId = System.getProperty("aws.cognito.user_pool_id");
-
-            this.userService.deleteUser(dr.body().userId());
-            try (var cognitoClient = CognitoIdentityProviderClient.builder()
-                    .httpClient(new DefaultSdkHttpClientBuilder().buildWithDefaults(AttributeMap.builder()
-                            .build()))
-                    .build()) {
-                // TODO: DeleteUser action is not available in the Localstack pro version, in the meantime I replace it with adminDeleteUser
-                AwsSdkUtils.runSdkRequestAndAssertResult(() -> cognitoClient
-                        .adminDeleteUser(b -> b.userPoolId(userPoolId).username(dr.body().username())),
-                        (e) -> new CannotDeleteUserFromPoolError(dr.body().userId(), e));
-            }
-        };
+        return (dr) -> deleteUserImpl(dr.body());
     }
 
     @WithSpan
+    private void deleteUserImpl(UserDeletionRequest dr) {
+        var userPoolId = System.getProperty("aws.cognito.user_pool_id");
+
+        this.userService.deleteUser(dr.userId());
+        try (var cognitoClient = CognitoIdentityProviderClient.builder()
+                .httpClient(new DefaultSdkHttpClientBuilder().buildWithDefaults(AttributeMap.builder()
+                        .build()))
+                .build()) {
+            // TODO: DeleteUser action is not available in the Localstack pro version, in the meantime I replace it with adminDeleteUser
+            AwsSdkUtils.runSdkRequestAndAssertResult(() -> cognitoClient
+                    .adminDeleteUser(b -> b.userPoolId(userPoolId).username(dr.username())),
+                    (e) -> new CannotDeleteUserFromPoolError(dr.userId(), e));
+        }
+    }
+
     @Bean
     public Function<InvocationWrapper<UserGetInfoRequest>, UserGetInfoResponse> getUser() {
-        return userGetRequest -> {
-            var userInfo = this.userService.getUser(userGetRequest.body().userId());
-            return new UserGetInfoResponse(userInfo.id(), userInfo.username());
-        };
+        return userGetRequest -> getUserImpl(userGetRequest.body());
     }
 
     @WithSpan
+    private UserGetInfoResponse getUserImpl(UserGetInfoRequest userGetRequest) {
+        var userInfo = this.userService.getUser(userGetRequest.userId());
+        return new UserGetInfoResponse(userInfo.id(), userInfo.username());
+    }
+
     @Bean
     public Consumer<InvocationWrapper<ShopSubscriptionRequest>> subscribeToShop() {
         return (sr) -> {
-            shopService.findById(sr.body().shopId()); // throws if shop does not exist
-            try (var snsClient = SnsClient.create()) {
-                Function<Throwable, InternalException> exceptionFunction = (e) -> new ShopSubscriptionFailedError(sr.body().userId(), sr.body().shopId(), e);
-                var topicArn = AwsSdkUtils.runSdkRequestAndAssertResult(() -> snsClient
-                        .createTopic(b -> b.name(Integer.toString(sr.body().shopId()))),
-                        exceptionFunction).topicArn();
-                AwsSdkUtils.runSdkRequestAndAssertResult(() -> snsClient
-                                .subscribe(b -> b.topicArn(topicArn)
-                                        .protocol("email")
-                                        .endpoint(sr.body().username())),
-                        exceptionFunction);
-            }
+            subscribeToShopImpl(sr.body());
         };
+    }
+
+    @WithSpan
+    private void subscribeToShopImpl(ShopSubscriptionRequest sr) {
+        shopService.findById(sr.shopId()); // throws if shop does not exist
+        try (var snsClient = SnsClient.create()) {
+            Function<Throwable, InternalException> exceptionFunction = (e) -> new ShopSubscriptionFailedError(sr.userId(), sr.shopId(), e);
+            var topicArn = AwsSdkUtils.runSdkRequestAndAssertResult(() -> snsClient
+                    .createTopic(b -> b.name(Integer.toString(sr.shopId()))),
+                    exceptionFunction).topicArn();
+            AwsSdkUtils.runSdkRequestAndAssertResult(() -> snsClient
+                            .subscribe(b -> b.topicArn(topicArn)
+                                    .protocol("email")
+                                    .endpoint(sr.username())),
+                    exceptionFunction);
+        }
     }
 }

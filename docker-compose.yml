@@ -1,7 +1,7 @@
 services:
   localstack:
     container_name: "${LOCALSTACK_CONTAINER_NAME-localstackmain}"
-    image: localstack/localstack-pro:latest
+    image: localstack/localstack-pro:2.3.2
     ports:
       - "127.0.0.1:${LOCALSTACK_PORT:-4566}:4566"            # LocalStack Gateway
       - "127.0.0.1:4510-4559:4510-4559"  # external services port range
@@ -13,7 +13,7 @@ services:
       - PERSISTENCE=${LOCALSTACK_PERSISTENCE:-1}
       - LOCALSTACK_API_KEY=${LOCALSTACK_API_KEY:?Create the env variable LOCALSTACK_API_KEY and fill it with the api key}
       - DOCKER_HOST=unix:///var/run/docker.sock
-      - SERVICES=lambda,s3,apigateway,logs,rds,cognito-idp,sns
+      - SERVICES=lambda,s3,apigateway,logs,rds,cognito-idp,sns,secretsmanager,iam,ec2,ses
       - LAMBDA_DOCKER_NETWORK=${LOCALSTACK_NETWORK_NAME-localstack_network}
       - ENFORCE_IAM=1
 #      - IAM_SOFT_MODE=1

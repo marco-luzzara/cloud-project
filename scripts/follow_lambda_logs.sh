@@ -20,7 +20,7 @@ cd "$(dirname "$0")"
 main() {
     while true
     do
-        container_id="$(docker ps --filter "ancestor=public.ecr.aws/lambda/java:17" --format "{{.ID}}")"
+        container_id="$(docker ps --filter "ancestor=public.ecr.aws/lambda/java:17" --format "{{.ID}}" | head -1)"
         if [[ -n "$container_id" ]]
         then
             docker logs --follow "$container_id"

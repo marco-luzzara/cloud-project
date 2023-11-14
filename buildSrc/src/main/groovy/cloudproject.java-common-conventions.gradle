@@ -71,9 +71,9 @@ dependencies {
         testFixturesImplementation "com.google.code.gson:gson:${GSON_VERSION}"
 
         // logging
-        implementation "org.apache.logging.log4j:log4j-api:${LOG4J_VERSION}"
-        implementation "org.apache.logging.log4j:log4j-core:${LOG4J_VERSION}"
-        runtimeOnly ("org.apache.logging.log4j:log4j-slf4j-impl:${LOG4J_VERSION}")
+//        implementation "org.apache.logging.log4j:log4j-api:${LOG4J_VERSION}"
+//        implementation "org.apache.logging.log4j:log4j-core:${LOG4J_VERSION}"
+//        runtimeOnly("org.apache.logging.log4j:log4j-slf4j18-impl:${LOG4J_VERSION}")
 
         // auth
         implementation 'com.auth0:java-jwt:4.4.0'
@@ -81,6 +81,7 @@ dependencies {
         // monitoring
         implementation "software.amazon.opentelemetry:aws-opentelemetry-agent:${OPENTELEMETRY_VERSION}"
         implementation "io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:${OPENTELEMETRY_VERSION}"
+        implementation "io.opentelemetry.instrumentation:opentelemetry-logback-appender-1.0:${OPENTELEMETRY_VERSION}-alpha"
     }
 }
 

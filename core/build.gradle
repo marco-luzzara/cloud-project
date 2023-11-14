@@ -18,6 +18,7 @@ dependencies {
     implementation("io.opentelemetry:opentelemetry-sdk-metrics")
     implementation("io.opentelemetry:opentelemetry-semconv:1.22.0-alpha")
     implementation 'io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations'
+    implementation 'io.opentelemetry.instrumentation:opentelemetry-logback-appender-1.0'
 
     // junit and assertions
     testImplementation "org.junit.jupiter:junit-jupiter-api"
@@ -40,11 +41,11 @@ dependencies {
     testAnnotationProcessor "org.projectlombok:lombok"
 
     // logging
-    implementation 'org.apache.logging.log4j:log4j-api'
-    implementation 'org.apache.logging.log4j:log4j-core'
-    runtimeOnly ('org.apache.logging.log4j:log4j-slf4j-impl') {
-        exclude group: 'org.slf4j', module: 'log4j-to-slf4j'
-    }
+//    implementation 'org.apache.logging.log4j:log4j-api'
+//    implementation 'org.apache.logging.log4j:log4j-core'
+//    runtimeOnly ('org.apache.logging.log4j:log4j-slf4j-impl') {
+//        exclude group: 'org.slf4j', module: 'log4j-to-slf4j'
+//    }
 
     // liquibase
     liquibaseRuntime "org.liquibase:liquibase-core"

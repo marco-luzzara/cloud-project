@@ -18,6 +18,7 @@ dependencies {
     implementation("io.opentelemetry:opentelemetry-sdk-metrics")
     implementation("io.opentelemetry:opentelemetry-semconv:1.22.0-alpha")
     implementation 'io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations'
+    implementation 'io.opentelemetry.instrumentation:opentelemetry-logback-appender-1.0'
 
     testFixturesImplementation "org.springframework.boot:spring-boot-starter"
 

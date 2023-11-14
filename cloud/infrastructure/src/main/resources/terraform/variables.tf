@@ -172,14 +172,8 @@ variable "admin_user_credentials" {
   sensitive = true
 }
 
-// ********************** Observability
-
-variable "prometheus_config_host_path" {
-  description = "The host path for the prometheus config file"
-  type = string
-}
-
-variable "prometheus_exporter_config_host_path" {
-  description = "The host path for the prometheus exporter (for Cloudwatch) config file"
-  type = string
+variable "is_observability_enabled" {
+  description = "Flag to enable the observability using the OpenTelemetry collector"
+  type = bool
+  default = true
 }

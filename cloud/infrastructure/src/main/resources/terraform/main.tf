@@ -97,7 +97,7 @@ module "customer_lambda" {
   lambda_dist_path = var.customer_lambda_dist_path
   webapp_db_arn = module.webapp_db.arn
   is_testing = var.is_testing
-  is_observability_enabled = true
+  is_observability_enabled = var.is_observability_enabled
   lambda_system_properties = {
     logging_level = "INFO"
     spring_active_profile = var.customer_lambda_spring_active_profile
@@ -105,7 +105,6 @@ module "customer_lambda" {
     spring_datasource_username = var.webapp_db_credentials.username
     spring_datasource_password = var.webapp_db_credentials.password
   }
-#  additional_layers = [local.otel_java_agent_layer_arn]
   lambda_additional_system_properties = <<EOT
     -Daws.cognito.user_pool_id=${module.authentication.cognito_main_pool_id}
     -Daws.cognito.user_pool_client_id=${module.authentication.cognito_main_pool_client_id}
@@ -142,7 +141,7 @@ module "shop_lambda" {
   lambda_dist_path = var.shop_lambda_dist_path
   webapp_db_arn = module.webapp_db.arn
   is_testing = var.is_testing
-  is_observability_enabled = true
+  is_observability_enabled = var.is_observability_enabled
   lambda_system_properties = {
     logging_level = "INFO"
     spring_active_profile = var.shop_lambda_spring_active_profile
@@ -174,7 +173,7 @@ module "admin_lambda" {
   lambda_dist_path = var.admin_lambda_dist_path
   webapp_db_arn = module.webapp_db.arn
   is_testing = var.is_testing
-  is_observability_enabled = true
+  is_observability_enabled = var.is_observability_enabled
   lambda_system_properties = {
     logging_level = "INFO"
     spring_active_profile = var.admin_lambda_spring_active_profile
@@ -214,7 +213,7 @@ module "authorizer_lambda" {
   lambda_dist_path = var.authorizer_lambda_dist_path
   webapp_db_arn = module.webapp_db.arn
   is_testing = var.is_testing
-  is_observability_enabled = true
+  is_observability_enabled = var.is_observability_enabled
   lambda_system_properties = {
     logging_level = "INFO"
     spring_active_profile = var.authorizer_lambda_spring_active_profile

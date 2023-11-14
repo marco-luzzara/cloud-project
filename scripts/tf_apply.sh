@@ -56,8 +56,6 @@ main() {
     docker exec "$TERRAFORM_CONTAINER_NAME" terraform init
     docker exec "$TERRAFORM_CONTAINER_NAME" terraform apply \
         -auto-approve \
-        -var="prometheus_exporter_config_host_path=$(pwd)/../observability/prometheus/cloudwatch_exporter_config.yml" \
-        -var="prometheus_config_host_path=$(pwd)/../observability/prometheus/prometheus.yml" \
         -var="localstack_network=$(docker network inspect localstack_network --format "{{ .Id }}")" \
         -var="initializer_lambda_dist_bucket=hot-reload" \
         -var="initializer_lambda_dist_bucket_key=$(pwd)/../cloud/initializer/build/hot-reload" \

@@ -17,19 +17,21 @@ export LOCALSTACK_PORT
 export LOCALSTACK_PERSISTENCE
 export LOCALSTACK_NETWORK_NAME
 
-.PHONY: start stop restart tf_apply destroy follow_lambda_logs get_rest_api_id
+.PHONY: build start stop restart tf_apply destroy follow_lambda_logs get_rest_api_id
 
-start: stop
-	gradle buildHotReloadFolder
+start: stop build
 	docker-compose up -d
 	trap '$(MAKE) stop' ERR && $(MAKE) tf_apply
+
+build:
+	gradle buildHotReloadFolder
 
 stop:
 	./scripts/stop.sh
 
 restart: stop start
 
-tf_apply:
+tf_apply: build
 	./scripts/tf_apply.sh
 
 destroy: stop

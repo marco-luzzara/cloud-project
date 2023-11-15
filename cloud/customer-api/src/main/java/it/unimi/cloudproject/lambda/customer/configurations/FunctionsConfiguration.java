@@ -2,8 +2,11 @@ package it.unimi.cloudproject.lambda.customer.configurations;
 
 import io.opentelemetry.api.metrics.LongCounter;
 import io.opentelemetry.api.metrics.Meter;
+import io.opentelemetry.instrumentation.annotations.AddingSpanAttributes;
+import io.opentelemetry.instrumentation.annotations.SpanAttribute;
 import io.opentelemetry.instrumentation.annotations.WithSpan;
 import it.unimi.cloudproject.apigw.message.model.InvocationWrapper;
+import it.unimi.cloudproject.infrastructure.annotations.WithMeasuredExecutionTime;
 import it.unimi.cloudproject.infrastructure.errors.InternalException;
 import it.unimi.cloudproject.lambda.customer.dto.requests.user.*;
 import it.unimi.cloudproject.lambda.customer.dto.responses.LoginResponse;
@@ -32,18 +35,8 @@ import java.util.function.Function;
 
 @Configuration
 public class FunctionsConfiguration {
-    private final LongCounter loginCounterCalled;
     @Autowired
     private UserService userService;
-
-    @Autowired
-    FunctionsConfiguration(Meter meter) {
-        this.loginCounterCalled = meter
-                .counterBuilder("api_user_login_called")
-                .setDescription("How many times the /login api has been called?")
-                .setUnit("1")
-                .build();
-    }
 
     @Bean
     public MessageRoutingCallback customRouter() {
@@ -104,12 +97,17 @@ public class FunctionsConfiguration {
 
     @Bean
     public Function<InvocationWrapper<UserLoginRequest>, LoginResponse> loginUser() {
-        return (loginRequest) -> loginUserImpl(loginRequest.body());
+        return (loginRequest) -> loginUserImplWrapper(loginRequest.body());
     }
 
     @WithSpan
-    private LoginResponse loginUserImpl(UserLoginRequest loginRequest) {
-        this.loginCounterCalled.add(1);
+    private LoginResponse loginUserImplWrapper(UserLoginRequest loginRequest) {
+        return loginUserImpl(loginRequest, loginRequest.toString());
+    }
+
+    @WithMeasuredExecutionTime
+    @AddingSpanAttributes
+    private LoginResponse loginUserImpl(UserLoginRequest loginRequest, @SpanAttribute("input") String _requestInputDontUse) {
         var clientId = System.getProperty("aws.cognito.user_pool_client_id");
         var userPoolId = System.getProperty("aws.cognito.user_pool_id");
 

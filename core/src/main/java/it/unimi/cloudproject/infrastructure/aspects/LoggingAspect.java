@@ -5,14 +5,12 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
 
-@Component
 @Aspect
 public class LoggingAspect {
-    @Pointcut("within(it.unimi.cloudproject.application.services.*)")
+    @Pointcut("execution(public * it.unimi.cloudproject.services.services.*.*(..))")
     public void logPointcutForServices() {}
 
     @Around("logPointcutForServices()")

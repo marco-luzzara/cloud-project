@@ -1,5 +1,6 @@
 package it.unimi.cloudproject.services.services;
 
+import it.unimi.cloudproject.infrastructure.annotations.WithMeasuredExecutionTime;
 import it.unimi.cloudproject.services.dto.UserCreationData;
 import it.unimi.cloudproject.services.dto.UserInfo;
 import it.unimi.cloudproject.services.errors.InvalidShopIdError;
@@ -20,8 +21,6 @@ import java.util.Optional;
 public class UserService {
     @Autowired
     private UserRepository userRepository;
-//    @Autowired
-//    private ShopRepository shopRepository;
 
     public int addUser(UserCreationData userCreationData) {
         var user = new User(null, userCreationData.username());

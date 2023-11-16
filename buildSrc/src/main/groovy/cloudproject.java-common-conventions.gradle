@@ -4,6 +4,7 @@ plugins {
     id "io.freefair.lombok"
     id 'org.liquibase.gradle'
     id 'java-test-fixtures'
+    id 'io.freefair.aspectj.post-compile-weaving'
 }
 
 group = 'it.unimi.cloudproject'
@@ -33,7 +34,7 @@ dependencies {
         // spring
         implementation "org.springframework.boot:spring-boot-starter:${SPRING_VERSION}"
         testFixturesImplementation "org.springframework.boot:spring-boot-starter:${SPRING_VERSION}"
-        implementation "org.springframework.boot:spring-boot-starter-aop:${SPRING_VERSION}"
+//        implementation "org.springframework.boot:spring-boot-starter-aop:${SPRING_VERSION}"
         //	implementation 'org.springframework:spring-web:6.0.11'
         implementation "org.springframework.data:spring-data-jdbc:${SPRING_VERSION}"
         implementation "org.springframework.boot:spring-boot-starter-jdbc:${SPRING_VERSION}"
@@ -74,6 +75,9 @@ dependencies {
 //        implementation "org.apache.logging.log4j:log4j-api:${LOG4J_VERSION}"
 //        implementation "org.apache.logging.log4j:log4j-core:${LOG4J_VERSION}"
 //        runtimeOnly("org.apache.logging.log4j:log4j-slf4j18-impl:${LOG4J_VERSION}")
+
+        // aspectj
+        implementation "org.aspectj:aspectjrt:1.9.20.1"
 
         // auth
         implementation 'com.auth0:java-jwt:4.4.0'

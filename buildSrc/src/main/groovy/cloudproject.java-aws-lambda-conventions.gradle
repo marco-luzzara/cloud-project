@@ -43,6 +43,8 @@ dependencies {
 	// testcontainer
 	testImplementation 'org.testcontainers:localstack'
 	testImplementation "org.testcontainers:junit-jupiter"
+
+	aspect project(':core')
 }
 
 var DIST_FOLDER = "${project.buildDir}/dist"
@@ -54,7 +56,6 @@ task buildZip(type: Zip) {
 		from "${rootProject.rootDir}/cloud/infrastructure/src/testFixtures/resources/localstack/AwsSdkV2DisableCertificateValidation-1.0.jar"
 		from(configurations.runtimeClasspath)
 	}
-	from("${rootProject.rootDir}/cloud/infrastructure/src/main/resources/opentelemetry/collector.yml").into(".")
 	archiveFileName = "${project.name}.zip"
 	destinationDirectory = file(DIST_FOLDER)
 }

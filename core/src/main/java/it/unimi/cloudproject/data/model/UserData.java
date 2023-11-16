@@ -26,21 +26,10 @@ public class UserData {
     @With
     private final Integer id;
     private final String username;
-//    @MappedCollection(idColumn = "user_id")
-//    private final Set<UserShopData> favoriteShops;
 
     public static UserData of(String username) {
         return new UserData(null, username);
     }
-
-//    public User toUser(ShopRepository shopRepository) {
-//        return new User(this.getId(), this.getUsername(), this.getFavoriteShops().stream()
-//                .map(us -> shopRepository.findById(Optional.ofNullable(us.getShopId().getId()).orElseThrow(() -> new IllegalStateException("the user %d does have a NULL shop associated".formatted(this.getId()))))
-//                        .orElseThrow(() -> new IllegalStateException("shop with id %d does not exist".formatted(us.getShopId().getId()))))
-//                .map(ShopData::toShop)
-//                .collect(Collectors.toSet())
-//        );
-//    }
 
     public User toUser() {
         return new User(this.getId(), this.getUsername());
@@ -49,17 +38,6 @@ public class UserData {
     public static UserData fromUser(User user) {
         return new UserData(user.id(), user.username());
     }
-//    public static UserData fromUser(User user) {
-//        // not saved yet
-//        if (Objects.isNull(user.id()))
-//            return UserData.of(user.username());
-//        else
-//            return new UserData(user.id(), user.username(), user.favoriteShops().stream()
-//                    .map(s -> new UserShopData(AggregateReference.to(user.id()),
-//                            AggregateReference.to(s.id())))
-//                    .collect(Collectors.toSet()));
-//    }
-
 
     @Generated
     @Override

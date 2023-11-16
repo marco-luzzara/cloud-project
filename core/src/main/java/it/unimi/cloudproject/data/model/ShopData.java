@@ -27,8 +27,6 @@ public class ShopData {
     private final AggregateReference<UserData, Integer> shopOwner;
     @Embedded(onEmpty = Embedded.OnEmpty.USE_NULL)
     private final Coordinates coordinates;
-//    @MappedCollection(idColumn = "SHOP_ID")
-//    private Set<UserShopData> subscribedUsers;
 
     static ShopData of(String name, UserData shopOwner, Coordinates coordinates) {
         return new ShopData(null, name, AggregateReference.to(shopOwner.getId()), coordinates);
@@ -37,17 +35,6 @@ public class ShopData {
     public static ShopData fromShop(Shop shop) {
         return new ShopData(shop.id(), shop.name(), AggregateReference.to(shop.shopOwner().id()), shop.coordinates());
     }
-
-//    public Shop toShop(UserRepository userRepository) {
-//        var shopOwnerId = Optional.ofNullable(this.getShopOwner().getId())
-//                .orElseThrow(() -> new IllegalStateException("Shop with id %d has no owner".formatted(this.getId())));
-//        return new Shop(this.getId(),
-//                this.getName(),
-//                userRepository.findById(shopOwnerId)
-//                        .orElseThrow(() -> new IllegalStateException("User with id %d does not exist".formatted(shopOwnerId))).,
-//                this.getCoordinates());
-//    }
-
 
     @Generated
     @Override

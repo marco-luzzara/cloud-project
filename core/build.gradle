@@ -2,12 +2,13 @@ plugins {
     id 'cloudproject.java-common-conventions'
     id 'jacoco'
     id "io.freefair.lombok"
+    id 'io.freefair.aspectj.post-compile-weaving'
 }
 
 dependencies {
     // spring
     implementation "org.springframework.boot:spring-boot-starter"
-    implementation "org.springframework.boot:spring-boot-starter-aop"
+//    implementation "org.springframework.boot:spring-boot-starter-aop"
     implementation "org.springframework.data:spring-data-jdbc"
     implementation "org.springframework.boot:spring-boot-starter-jdbc"
     testImplementation "org.springframework.boot:spring-boot-starter-test"
@@ -39,6 +40,9 @@ dependencies {
     annotationProcessor "org.projectlombok:lombok"
     testCompileOnly "org.projectlombok:lombok"
     testAnnotationProcessor "org.projectlombok:lombok"
+
+    // aspectj
+    implementation 'org.aspectj:aspectjrt'
 
     // logging
 //    implementation 'org.apache.logging.log4j:log4j-api'

@@ -10,26 +10,7 @@ public record User(Integer id, String username) {
     public User {
         if (username == null || username.isEmpty())
             throw new ValidationError.EmptyNameForUserError();
-
-//        if (favoriteShops == null || favoriteShops.stream().anyMatch(Objects::isNull))
-//            throw new IllegalArgumentException("favoriteShops cannot be null");
     }
-
-//    public void addFavoriteShop(Shop shop) {
-//        if (Objects.isNull(shop))
-//            throw new IllegalArgumentException("shop cannot be null");
-//
-//        var beforeAddSize = this.favoriteShops.size();
-//        this.favoriteShops.add(shop);
-//
-//        if (this.favoriteShops.size() == beforeAddSize)
-//            throw new ValidationError.DuplicateShopForUserError(this, shop);
-//    }
-
-//    @Override
-//    public Set<Shop> favoriteShops() {
-//        return Set.copyOf(this.favoriteShops);
-//    }
 
     @Generated
     @Override

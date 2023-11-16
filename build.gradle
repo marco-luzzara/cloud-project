@@ -1,4 +1,5 @@
 plugins {
 	id "io.freefair.lombok" version "8.1.0" apply false
 	id 'org.liquibase.gradle' version '2.0.4' apply false
+	id 'io.freefair.aspectj.post-compile-weaving' version '8.4' apply false
 }

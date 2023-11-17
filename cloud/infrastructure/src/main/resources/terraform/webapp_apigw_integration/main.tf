@@ -73,4 +73,5 @@ resource "aws_api_gateway_integration_response" "api_integration_response_fail" 
   http_method = aws_api_gateway_integration.api_integration.http_method
   status_code = each.value.status_code
   selection_pattern = each.value.selection_pattern
+  response_templates = each.value.response_template
 }

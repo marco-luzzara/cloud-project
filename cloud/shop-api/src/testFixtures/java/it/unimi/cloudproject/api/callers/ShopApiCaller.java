@@ -26,7 +26,7 @@ public class ShopApiCaller {
         return HTTP_CLIENT.send(HttpRequest.newBuilder()
                         .DELETE()
                         .timeout(Duration.ofSeconds(100))
-                        .header("Authorization", authToken)
+                        .header("Authorization", "Bearer " + authToken)
                         .uri(this.appContainer.buildApiUrl("shops/" + shopId))
                         .build(),
                 HttpResponse.BodyHandlers.ofString());
@@ -39,7 +39,7 @@ public class ShopApiCaller {
         return HTTP_CLIENT.send(HttpRequest.newBuilder()
                         .POST(HttpRequest.BodyPublishers.ofString(strBody))
                         .header("Content-Type", "application/json")
-                        .header("Authorization", authToken)
+                        .header("Authorization", "Bearer " + authToken)
                         .timeout(Duration.ofSeconds(100))
                         .uri(this.appContainer.buildApiUrl("shops/%d/messages".formatted(shopId)))
                         .build(),

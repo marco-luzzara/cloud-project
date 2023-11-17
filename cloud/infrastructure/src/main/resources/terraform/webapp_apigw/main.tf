@@ -10,6 +10,15 @@ locals {
       "body" : %s
     }
     EOT
+  // TODO: does not work with Localstack, the response template should map the errorMessage from the context
+  // but it does not happen
+  response_mapping_template = {
+    "application/json" = <<-EOT
+    {
+      "errorMessage": "$context.authorizer.errorMessage"
+    }
+    EOT
+  }
 }
 
 resource "aws_api_gateway_rest_api" "webapp_rest_api" {
@@ -135,8 +144,8 @@ module "get_user" {
   spring_cloud_function_definition_header_value = "getUser"
   http_fail_status_codes = [
     {
-      status_code = "404"
-      selection_pattern = "User with id \\d+ does not exist"
+      status_code = "403"
+      response_template = local.response_mapping_template
     }
   ]
 }

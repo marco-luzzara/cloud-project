@@ -30,7 +30,7 @@ public class AdminApiCaller {
         return HTTP_CLIENT.send(HttpRequest.newBuilder()
                         .POST(HttpRequest.BodyPublishers.ofString(strBody))
                         .header("Content-Type", "application/json")
-                        .header("Authorization", authToken)
+                        .header("Authorization", "Bearer " + authToken)
                         .timeout(Duration.ofSeconds(100))
                         .uri(this.appContainer.buildApiUrl("shops"))
                         .build(),

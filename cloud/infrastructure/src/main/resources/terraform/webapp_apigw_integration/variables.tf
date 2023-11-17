@@ -40,7 +40,8 @@ variable "http_fail_status_codes" {
   description = "http status codes for the failed cases, paired with the selection pattern to used to match them"
   type    = list(object({
     status_code = string
-    selection_pattern = string
+    selection_pattern = optional(string)
+    response_template = optional(map(string))
   }))
   default = []
 }

@@ -62,10 +62,16 @@ module "webapp_db" {
 #  statement_id   = "openTelemetryLayerAccess1"
 #}
 
+resource "aws_s3_bucket" "lambda_bucket" {
+  count = var.lambda_dist_bucket == "hot-reload" ? 0 : 1
+
+  bucket = var.lambda_dist_bucket
+}
+
 module "initializer_lambda" {
   source = "./api_lambda"
 
-  lambda_dist_bucket = var.initializer_lambda_dist_bucket
+  lambda_dist_bucket = var.lambda_dist_bucket == "hot-reload" ? var.lambda_dist_bucket : aws_s3_bucket.lambda_bucket[0].bucket
   lambda_dist_bucket_key = var.initializer_lambda_dist_bucket_key
   lambda_dist_path = var.initializer_lambda_dist_path
   webapp_db_arn = module.webapp_db.arn
@@ -92,7 +98,7 @@ resource "aws_lambda_invocation" "initializer_execution" {
 module "customer_lambda" {
   source = "./api_lambda"
 
-  lambda_dist_bucket = var.customer_lambda_dist_bucket
+  lambda_dist_bucket = var.lambda_dist_bucket == "hot-reload" ? var.lambda_dist_bucket : aws_s3_bucket.lambda_bucket[0].bucket
   lambda_dist_bucket_key = var.customer_lambda_dist_bucket_key
   lambda_dist_path = var.customer_lambda_dist_path
   webapp_db_arn = module.webapp_db.arn
@@ -136,7 +142,7 @@ module "customer_lambda" {
 module "shop_lambda" {
   source = "./api_lambda"
 
-  lambda_dist_bucket = var.shop_lambda_dist_bucket
+  lambda_dist_bucket = var.lambda_dist_bucket == "hot-reload" ? var.lambda_dist_bucket : aws_s3_bucket.lambda_bucket[0].bucket
   lambda_dist_bucket_key = var.shop_lambda_dist_bucket_key
   lambda_dist_path = var.shop_lambda_dist_path
   webapp_db_arn = module.webapp_db.arn
@@ -168,7 +174,7 @@ module "shop_lambda" {
 module "admin_lambda" {
   source = "./api_lambda"
 
-  lambda_dist_bucket = var.admin_lambda_dist_bucket
+  lambda_dist_bucket = var.lambda_dist_bucket == "hot-reload" ? var.lambda_dist_bucket : aws_s3_bucket.lambda_bucket[0].bucket
   lambda_dist_bucket_key = var.admin_lambda_dist_bucket_key
   lambda_dist_path = var.admin_lambda_dist_path
   webapp_db_arn = module.webapp_db.arn
@@ -208,7 +214,7 @@ module "admin_lambda" {
 module "authorizer_lambda" {
   source = "./api_lambda"
 
-  lambda_dist_bucket = var.authorizer_lambda_dist_bucket
+  lambda_dist_bucket = var.lambda_dist_bucket == "hot-reload" ? var.lambda_dist_bucket : aws_s3_bucket.lambda_bucket[0].bucket
   lambda_dist_bucket_key = var.authorizer_lambda_dist_bucket_key
   lambda_dist_path = var.authorizer_lambda_dist_path
   webapp_db_arn = module.webapp_db.arn

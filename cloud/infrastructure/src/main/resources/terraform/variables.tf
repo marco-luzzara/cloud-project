@@ -4,6 +4,12 @@ variable "aws_region" {
   default = "us-east-1"
 }
 
+variable "lambda_dist_bucket" {
+  description = "Bucket for the distribution zip of the lambda functions"
+  type        = string
+  default = "lambda-dist-bucket"
+}
+
 // ******************************** Initializer Lambda Variables
 
 variable "initializer_lambda_spring_active_profile" {
@@ -14,12 +20,6 @@ variable "initializer_lambda_spring_active_profile" {
 variable "initializer_lambda_dist_path" {
   description = "Path of the distribution zip of the initializer lambda"
   type        = string
-}
-
-variable "initializer_lambda_dist_bucket" {
-  description = "Bucket for the distribution zip of the initializer lambda"
-  type        = string
-  default = "lambda-dist-bucket"
 }
 
 variable "initializer_lambda_dist_bucket_key" {
@@ -40,12 +40,6 @@ variable "customer_lambda_dist_path" {
   type        = string
 }
 
-variable "customer_lambda_dist_bucket" {
-  description = "Bucket for the distribution zip of the customer lambda"
-  type        = string
-  default = "lambda-dist-bucket"
-}
-
 variable "customer_lambda_dist_bucket_key" {
   description = "Bucket key for the distribution zip of the customer lambda"
   type        = string
@@ -62,12 +56,6 @@ variable "authorizer_lambda_spring_active_profile" {
 variable "authorizer_lambda_dist_path" {
   description = "Path of the distribution zip of the authorizer lambda"
   type        = string
-}
-
-variable "authorizer_lambda_dist_bucket" {
-  description = "Bucket for the distribution zip of the authorizer lambda"
-  type        = string
-  default = "lambda-dist-bucket"
 }
 
 variable "authorizer_lambda_dist_bucket_key" {
@@ -88,12 +76,6 @@ variable "shop_lambda_dist_path" {
   type        = string
 }
 
-variable "shop_lambda_dist_bucket" {
-  description = "Bucket for the distribution zip of the shop lambda"
-  type        = string
-  default = "lambda-dist-bucket"
-}
-
 variable "shop_lambda_dist_bucket_key" {
   description = "Bucket key for the distribution zip of the shop lambda"
   type        = string
@@ -110,12 +92,6 @@ variable "admin_lambda_spring_active_profile" {
 variable "admin_lambda_dist_path" {
   description = "Path of the distribution zip of the admin lambda"
   type        = string
-}
-
-variable "admin_lambda_dist_bucket" {
-  description = "Bucket for the distribution zip of the admin lambda"
-  type        = string
-  default = "lambda-dist-bucket"
 }
 
 variable "admin_lambda_dist_bucket_key" {

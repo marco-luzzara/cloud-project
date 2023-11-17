@@ -30,16 +30,10 @@ locals {
   }
 }
 
-resource "aws_s3_bucket" "lambda_bucket" {
-  count = var.lambda_dist_bucket == "hot-reload" ? 0 : 1
-
-  bucket = var.lambda_dist_bucket
-}
-
 resource "aws_s3_object" "lambda_distribution_zip" {
   count = var.lambda_dist_bucket == "hot-reload" ? 0 : 1
 
-  bucket = aws_s3_bucket.lambda_bucket[count.index].bucket
+  bucket = var.lambda_dist_bucket
   key    = var.lambda_dist_bucket_key
   source = var.lambda_dist_path
 }

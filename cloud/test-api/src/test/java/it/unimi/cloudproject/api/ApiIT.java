@@ -102,7 +102,7 @@ public class ApiIT {
 
         // get user info
         var getUserInfoAfterDeleteResponse = customerApiCaller.callUserGetInfoApi(idToken);
-        assertThat(getUserInfoAfterDeleteResponse.statusCode()).isEqualTo(HttpStatus.SC_NOT_FOUND);
+        assertThat(getUserInfoAfterDeleteResponse.statusCode()).isEqualTo(HttpStatus.SC_FORBIDDEN);
     }
 
     @Test
@@ -143,10 +143,15 @@ public class ApiIT {
                 new ShopPublishMessageRequestBody("test message"), ownerIdToken, shopId);
         assertThat(shopPublishMessageResponse.statusCode()).isEqualTo(HttpStatus.SC_OK);
 
-        // TODO: improve assertions to find whether the specified message has been sent to the correct user
-        var sesResponse = (Map<String, Object>)localstackApiCaller.callGetEmailsApi(customer.username());
-        var cachedMessages = (List<Object>) sesResponse.get("messages");
-        assertThat(cachedMessages).hasSizeGreaterThanOrEqualTo(1);
+        // wait for the sns messages to be queriable
+        Thread.sleep(5000);
+
+        var sesResponseBody = localstackApiCaller.<Map<String, Object>>callGetEmailsApi(customer.username()).body();
+        var messages = (List<Object>) sesResponseBody.get("messages");
+        assertThat(messages).hasSizeGreaterThanOrEqualTo(1);
+        var body = ((Map<String, Object>) messages.get(0)).get("Body");
+        var textMessage = ((Map<String, Object>) body).get("text_part");
+        assertThat(textMessage).isEqualTo("test message");
 
         // delete shop
         var shopDeleteResponse = shopApiCaller.callShopDeleteApi(ownerIdToken, shopId);

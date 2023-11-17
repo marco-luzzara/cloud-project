@@ -54,7 +54,7 @@ public class CustomerApiCaller {
         return HTTP_CLIENT.send(HttpRequest.newBuilder()
                         .DELETE()
                         .timeout(Duration.ofSeconds(100))
-                        .header("Authorization", token)
+                        .header("Authorization", "Bearer " + token)
                         .uri(this.appContainer.buildApiUrl("users/me"))
                         .build(),
                 HttpResponse.BodyHandlers.ofString());
@@ -65,18 +65,18 @@ public class CustomerApiCaller {
                         .GET()
                         .header("Content-Type", "application/json")
                         .timeout(Duration.ofSeconds(100))
-                        .header("Authorization", authToken)
+                        .header("Authorization", "Bearer " + authToken)
                         .uri(this.appContainer.buildApiUrl("users/me"))
                         .build(),
                 new GeneralBodyHandler<>(Map.of(200, () -> GeneralBodyHandler.getJsonBodyHandler(UserGetInfoResponse.class),
-                        404, HttpResponse.BodySubscribers::discarding)));
+                        403, HttpResponse.BodySubscribers::discarding)));
     }
 
     public HttpResponse<String> callUserSubscribeToShopApi(String authToken,
                                                            int shopId) throws IOException, InterruptedException {
         return HTTP_CLIENT.send(HttpRequest.newBuilder()
                         .POST(HttpRequest.BodyPublishers.noBody())
-                        .header("Authorization", authToken)
+                        .header("Authorization", "Bearer " + authToken)
                         .timeout(Duration.ofSeconds(100))
                         .uri(this.appContainer.buildApiUrl("users/me/subscriptions/" + shopId))
                         .build(),

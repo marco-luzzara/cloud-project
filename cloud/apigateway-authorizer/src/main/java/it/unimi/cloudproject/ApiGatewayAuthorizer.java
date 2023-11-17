@@ -9,6 +9,8 @@ import com.google.gson.GsonBuilder;
 import it.unimi.cloudproject.lambda.authorizer.errors.CannotAuthorizeRequest;
 import it.unimi.cloudproject.lambda.authorizer.errors.UnauthorizedUserForShopError;
 import it.unimi.cloudproject.utilities.AwsSdkUtils;
+import it.unimi.cloudproject.utilities.ExceptionUtils;
+import software.amazon.awssdk.core.internal.http.pipeline.stages.utils.ExceptionReportingUtils;
 import software.amazon.awssdk.services.cognitoidentityprovider.CognitoIdentityProviderClient;
 import software.amazon.awssdk.services.iam.IamClient;
 import com.auth0.jwt.JWT;
@@ -21,6 +23,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import software.amazon.awssdk.services.iam.model.ListRolePoliciesRequest;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -52,46 +56,80 @@ public class ApiGatewayAuthorizer {
 				return (event) -> {
             var userPoolId = System.getProperty("aws.cognito.user_pool_id");
 
-						// .getAuthorizationToken() is not supported in Localstack, so I have to extract the token
-						var authToken = event.getHeaders().get("Authorization").substring("Bearer ".length());
-						var jwt = JWT.decode(authToken);
-
-            checkForCustomAuthorization(event, jwt);
-
-            var username = jwt.getClaim("cognito:username").asString();
+            // .getAuthorizationToken() is not supported in Localstack, so I have to extract the token
+            var authToken = event.getHeaders().get("Authorization").substring("Bearer ".length());
+            var jwt = JWT.decode(authToken);
             var principalId = jwt.getSubject();
 
-            try (var iamClient = IamClient.builder().build(); var cognitoClient = CognitoIdentityProviderClient.create()) {
-                var groups = AwsSdkUtils.runSdkRequestAndAssertResult(
-                        () -> cognitoClient.adminListGroupsForUser(b -> b.username(username).userPoolId(userPoolId)),
-                        CannotAuthorizeRequest::new).groups();
+            try {
+//                checkForExistingUser(jwt);
+                checkForCustomAuthorization(event, jwt);
 
-                List<IamPolicyResponse.PolicyDocument> policyDocuments = new ArrayList<>();
-                for (var group : groups) {
-                    var groupRoleArn = group.roleArn();
-                    var groupRoleName = groupRoleArn.substring(groupRoleArn.lastIndexOf("/") + 1);
+                var username = jwt.getClaim("cognito:username").asString();
 
-                    var policyNames = AwsSdkUtils.runSdkRequestAndAssertResult(
-                            () -> iamClient.listRolePolicies(ListRolePoliciesRequest.builder()
-                                    .roleName(groupRoleName)
-                                    .build()),
-                            CannotAuthorizeRequest::new).policyNames();
-                    for (var policyName : policyNames) {
-                        var inlinePolicy = AwsSdkUtils.runSdkRequestAndAssertResult(
-                                () -> iamClient.getRolePolicy(b -> b.roleName(groupRoleName).policyName(policyName)),
-                                CannotAuthorizeRequest::new).policyDocument();
-                        policyDocuments.add(gson.fromJson(inlinePolicy, IamPolicyResponse.PolicyDocument.class));
+                try (var iamClient = IamClient.builder().build(); var cognitoClient = CognitoIdentityProviderClient.create()) {
+                    var groups = AwsSdkUtils.runSdkRequestAndAssertResult(
+                            () -> cognitoClient.adminListGroupsForUser(b -> b.username(username).userPoolId(userPoolId)),
+                            CannotAuthorizeRequest::new).groups();
+
+                    List<IamPolicyResponse.PolicyDocument> policyDocuments = new ArrayList<>();
+                    for (var group : groups) {
+                        var groupRoleArn = group.roleArn();
+                        var groupRoleName = groupRoleArn.substring(groupRoleArn.lastIndexOf("/") + 1);
+
+                        var policyNames = AwsSdkUtils.runSdkRequestAndAssertResult(
+                                () -> iamClient.listRolePolicies(ListRolePoliciesRequest.builder()
+                                        .roleName(groupRoleName)
+                                        .build()),
+                                CannotAuthorizeRequest::new).policyNames();
+                        for (var policyName : policyNames) {
+                            var inlinePolicy = AwsSdkUtils.runSdkRequestAndAssertResult(
+                                    () -> iamClient.getRolePolicy(b -> b.roleName(groupRoleName).policyName(policyName)),
+                                    CannotAuthorizeRequest::new).policyDocument();
+                            policyDocuments.add(gson.fromJson(inlinePolicy, IamPolicyResponse.PolicyDocument.class));
+                        }
                     }
-                }
 
+                    return IamPolicyResponse.builder()
+                            .withContext(getContextMap(jwt))
+                            .withPolicyDocument(getMergedPolicyDocuments(policyDocuments))
+                            .withPrincipalId(principalId).build();
+                }
+            }
+            catch (Exception exc) {
+//                throw exc;
                 return IamPolicyResponse.builder()
-												.withContext(getContextMap(jwt))
-                        .withPolicyDocument(getMergedPolicyDocuments(policyDocuments))
+                        .withContext(Map.of(
+                                "errorMessage", exc.getMessage(),
+                                "stackTrace", ExceptionUtils.getStackTraceAsString(exc)))
+                        .withPolicyDocument(IamPolicyResponse.PolicyDocument.builder()
+                                .withVersion("2012-10-17")
+                                .withStatement(List.of(
+                                        IamPolicyResponse.Statement.builder()
+                                                .withAction("execute-api:Invoke")
+                                                .withResource(List.of(event.getMethodArn()))
+                                                .withEffect("Deny")
+                                                .build()
+                                ))
+                                .build())
                         .withPrincipalId(principalId).build();
-						}
+            }
 				};
 		}
 
+//    private void checkForExistingUser(DecodedJWT jwt) {
+//        var dbIdClaim = jwt.getClaim("custom:dbId");
+//        var userId = Integer.parseInt(dbIdClaim.asString());
+//
+//        this.userService.getUser(userId);
+//    }
+
+    /**
+     * Does some additional checks on the shopId specified. It makes sure that the request is called
+     * sent by the owner of the shop
+     * @param event
+     * @param jwt
+     */
     private void checkForCustomAuthorization(APIGatewayCustomAuthorizerEvent event, DecodedJWT jwt) {
         if (!event.getMethodArn().matches(".*(?:/DELETE/shops/\\d+|/POST/shops/\\d+/messages)"))
             return;

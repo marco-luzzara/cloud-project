@@ -52,7 +52,7 @@ public class TerraformContainer extends GenericContainer<TerraformContainer> {
         try {
             createTfOverrideFileForLocalstackProvider(tfVariables);
 
-            var applyCmdExecution = this.execInContainer("sh", "-c", "terraform apply -auto-approve");
+            var applyCmdExecution = this.execInContainer("sh", "-c", "terraform apply -auto-approve -var=\"is_observability_enabled=false\"");
             AssertionHelper.assertContainerCmdSuccessful(applyCmdExecution);
 
             this.populateOutputVarFromTerraform();

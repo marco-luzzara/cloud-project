@@ -20,7 +20,7 @@ public class AppContainer extends LocalStackContainer {
     public final String NETWORK_ALIAS = "localstack";
     private static final System.Logger LOGGER = System.getLogger(AppContainer.class.getName());
     public final Network NETWORK = Network.SHARED;
-    private static final DockerImageName localstackImage = DockerImageName.parse("localstack/localstack-pro:latest");
+    private static final DockerImageName localstackImage = DockerImageName.parse("localstack/localstack-pro:2.3.2");
 
     private String restApiId;
     private String deploymentStageName;
@@ -53,11 +53,14 @@ public class AppContainer extends LocalStackContainer {
                 Service.S3,
                 Service.CLOUDWATCHLOGS,
                 Service.SNS,
+                Service.IAM,
+                Service.SECRETSMANAGER,
+                Service.EC2,
+                Service.SES,
                 LocalStackContainer.EnabledService.named("rds"),
                 LocalStackContainer.EnabledService.named("cognito-idp"));
         withEnv(Map.of(
                 "LAMBDA_DOCKER_NETWORK", ((Network.NetworkImpl) NETWORK).getName(),
-                "MAIN_DOCKER_NETWORK", ((Network.NetworkImpl) NETWORK).getName(),
                 "LOCALSTACK_API_KEY", apiKey,
                 "LS_LOG", this.localstackConfig.logLevel,
                 "ENFORCE_IAM", "1"

@@ -6,9 +6,37 @@ This is a sample project that shows how to use some AWS services to create a sim
 
 ## App Description
 
-The app involves customers and shops. A customer wants to be notified when a shop he/she is subscribed has a new product to show.
+The app involves customers and shops. A customer wants to be notified when a shop he/she is subscribed to has a new product to show.
 
-Customers are users that sign up using AWS Cognito, and can manage their profile information using REST API, callable through an AWS API Gateway. The API Gateway is configured for a Lambda Integration for each API called. In this case, for simplicity, I have used the [mono-lambda pattern](https://aaronstuyvenberg.com/posts/monolambda-vs-individual-function-api). It is particularly convenient because the application is built using the Spring Boot Framework, which takes care of request handling.
+A customer can subscribe to a shop using its email and it will receive an email whenever the shop publish a new message.
+
+The shop is created by an Admin, that is previously contacted by a user, who requests to be the owner of the shop. An admin, can now approve the request and send messages on behalf of the shop. The communication between a user and and admin is supposed to happen by email, for instance, so it is not handled through the provided APIs.
+
+Finally, users can delete their account and shop owners can delete the shops as well.
+
+---
+
+## User Authentication and Authorization
+
+Users sign up and log in using AWS Cognito. When users are created, they are added to the customer user group. There are 3 user group in the user pool, and these groups correspond to the 3 possible roles in the application: customers, shops, admins. There is currently one admin that is automatically seeded in the user pool (and in the admin group). Every other user assumes the role of customer when signs up, but can gain the "shop" role if the admin creates a shop with him/her as the owner.
+
+User groups are important to define the authorizations a certain user has when calls an API. Everytime a user logs in, he/she receives a OAuth2 token, that has to use in order to call the APIs that requires authentication. Among the claims in the token (both the `accessToken` or `idToken` are valid) the user group is automatically inserted by AWS Cognito. The authorizer, which is a Lambda Function, compares the requested API Arn with the ones that the associated user groups can access to and establish whether to allow or deny the request. A shop owner belongs to both the `customer` group and the `shop` group.
+
+There is another claim in an access token: `dbId`. This claim maps the Cognito user to the corresponding user in the Database. In order to store the basic information about customers and shop, an instance of RDS is used. I have chosen a SQL db because there are just 2 tables and no complex relationships.
+
+---
+
+## APIs
+
+The APIs are described using the Open Api Specification, open the `open-api.yml` file to see them. APIs are implemented in 3 Lambda functions, as many as the possible roles: admin, customer and shop. It is not a [mono-lambda APIs approach](https://aaronstuyvenberg.com/posts/monolambda-vs-individual-function-api) but neither a single-function APIs approach: it is a tradeoff that allows me to easily control the role authorization
+
+TODO: api gateway
+
+---
+
+
+
+The API Gateway is configured for a Lambda Integration for each API called. In this case, for simplicity, I have used the [mono-lambda pattern](https://aaronstuyvenberg.com/posts/monolambda-vs-individual-function-api). It is particularly convenient because the application is built using the Spring Boot Framework, which takes care of request handling.
 
 Shops can sign up with special permission, because they can publish notifications, contrary to normal users. For the notifications, I am using the AWS Simple Notification Service (SNS), and the notification is delivered through email, specified by the user at registration time.
 

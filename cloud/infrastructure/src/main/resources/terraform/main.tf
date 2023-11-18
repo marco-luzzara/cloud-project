@@ -219,7 +219,8 @@ module "authorizer_lambda" {
   lambda_dist_path = var.authorizer_lambda_dist_path
   webapp_db_arn = module.webapp_db.arn
   is_testing = var.is_testing
-  is_observability_enabled = var.is_observability_enabled
+  // disabled here because the X-Ray Daemon seems to not work prop
+  is_observability_enabled = false // var.is_observability_enabled
   lambda_system_properties = {
     logging_level = "INFO"
     spring_active_profile = var.authorizer_lambda_spring_active_profile

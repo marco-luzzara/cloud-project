@@ -17,3 +17,13 @@ datasources:
     access: proxy
     url: http://jaeger:16686
     editable: true
+
+  - name: CloudWatch
+    type: cloudwatch
+    jsonData:
+      authType: keys
+      defaultRegion: us-east-1
+      endpoint: http://localstackmain:4566
+    secureJsonData:
+      accessKey: 'accesskey'
+      secretKey: 'secretkey'

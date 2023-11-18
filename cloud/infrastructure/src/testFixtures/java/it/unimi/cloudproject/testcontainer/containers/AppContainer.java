@@ -20,7 +20,7 @@ public class AppContainer extends LocalStackContainer {
     public final String NETWORK_ALIAS = "localstack";
     private static final System.Logger LOGGER = System.getLogger(AppContainer.class.getName());
     public final Network NETWORK = Network.SHARED;
-    private static final DockerImageName localstackImage = DockerImageName.parse("localstack/localstack-pro:2.3.2");
+    private static final DockerImageName localstackImage = DockerImageName.parse("localstack/localstack-pro:3.0.0");
 
     private String restApiId;
     private String deploymentStageName;

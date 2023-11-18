@@ -142,12 +142,12 @@ module "get_user" {
     }
     EOT
   spring_cloud_function_definition_header_value = "getUser"
-  http_fail_status_codes = [
-    {
-      status_code = "403"
-      response_template = local.response_mapping_template
-    }
-  ]
+#  http_fail_status_codes = [
+#    {
+#      status_code = "403"
+#      response_template = local.response_mapping_template
+#    }
+#  ]
 }
 
 # ********* DELETE /users/me

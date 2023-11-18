@@ -21,23 +21,22 @@ jobs:
     secrets: inherit
 
   publish_on_pages:
+    needs: build
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
-      - name: Upload Code Coverage Artifacts
-        uses: actions/upload-artifact@v3
+      - uses: actions/download-artifact@v3
         with:
-          name: code-coverage-reports
-          path: code-coverage-report/build/reports/jacoco/testCodeCoverageReport
+          name: test-coverage-report
+          path: ${{ github.workspace }}/artifacts
       - name: Setup Pages
         uses: actions/configure-pages@v3
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v2
         with:
-          # Upload entire repository
-          path: './code-coverage-report/build/reports/jacoco/testCodeCoverageReport/html'
+          path: ${{ github.workspace }}/artifacts/html
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v2

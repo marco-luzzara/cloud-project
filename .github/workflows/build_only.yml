@@ -55,5 +55,10 @@ jobs:
           minimum_coverage: 50
           fail_below_threshold: false
           publish_only_summary: false
+      - name: Upload Test Coverage Reports
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-coverage-report
+          path: ${{ github.workspace }}/code-coverage-report/build/reports/jacoco/testCodeCoverageReport/
       - name: Add Coverage Job Summary
         run: echo "${{ steps.jacoco_reporter.outputs.coverageSummary }}" >> $GITHUB_STEP_SUMMARY

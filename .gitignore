@@ -46,4 +46,4 @@ out/
 *-production.*
 **/localstack/apikey.secret
 volumes/
-!src/test/resources/localstack/AwsSdkV2DisableCertificateValidation-1.0.jar
+!cloud/infrastructure/src/testFixtures/resources/localstack/AwsSdkV2DisableCertificateValidation-1.0.jar

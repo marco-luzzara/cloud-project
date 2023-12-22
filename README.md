@@ -33,6 +33,23 @@ The project is a multi-module application, including the modules:
 
 ---
 
+## How to run
+
+There are two ways to test the APIs developed:
+
+- **From the Docker Compose** - The compose file spawns one container for Localstack and another for Terraform. Then, by running `make start`, the localstack container is initialized with the defined resources. If the container is already up and you want to apply some changes to the current infrastructure, it is sufficient to run `make tf_apply`.
+
+  To make the deploy faster, two bind mounts are specified:
+  - **The Localstack persistence volume** - In this way, Localstack persists all the changes applied to the emulated environment and the next start will be faster
+  - **The Terraform state files** - It reflects the current resources that Terraform has applied to the AWS environment. 
+- **From the integration tests** - Testcontainer has a module for Localstack that allows to start it for the integration tests, but the procedure is basically the same of the previous way. It is particularly useful for the CI, that is taken care of by Github Actions. The command to run all tests is:
+
+  ```shell
+  gradle test -DIntegrationTestsEnabled=true
+  ```
+
+---
+
 ## Technologies 
 
 Many technologies are involved in this project:
@@ -49,25 +66,27 @@ Many technologies are involved in this project:
 - **Secrets Manager**: to store credentials (DB)
 - **IAM**: to grant only the necessary privileges to the used services
 
-### API Implementation
+### API
 
-As for the API implementation, they are written in Java, with the extensive usage of Spring Boot. In particular for the Lambda definition, I have used Spring Cloud Function, that allows to code a Lambda Function as if it were a `java.util.Function`. Each Java module is then compiled using Gradle, but all the common tasks and dependencies are found in the local Gradle plugin located in `buildSrc`.
+As for the API implementation, they are written in Java, with the extensive usage of Spring Boot. In particular for the Lambda implementation, I have used Spring Cloud Function, which allows to code a Lambda Function as if it were a `java.util.Function`. Each Java module is then compiled using Gradle, but all the common tasks and dependencies are found in the local Gradle plugin located in `buildSrc/src/main/groovy`. For the DB modeling and seeding I have used `liquibase`. 
+
+APIs are described using the OpenAPI specification, the file is written in YAML and is called `open-api.yml`.
 
 ### Testing
 
 Testing is a central point in this project, as I am showing how to run an emulation of AWS locally and in a CI pipeline. In order to do this, we need:
 
-- **Docker**: with a `docker-compose.yml`
+- **Docker**
 - **JUnit and Testcontainers**: for unit and integration tests
 - **Jacoco** : to analyse the code coverage (which does not include the Lambda Functions coverage)
 - **Localstack**: which is the platform that allows to build an emulation of AWS locally
 - **Github Actions**: they are basically the CI pipelines. Two pipelines exist:
-  - One for the feature branches that stops at the testing step and the only generated artifact is the code coverage report
+  - One for the feature branches that stops at the testing step and the generated artifacts include the code coverage report and the Github pages to publish (they are not published here, but only after a push on a `main` branch. By generating them as artifact, the second pipeline does not need to checkout the repository again).
   - One for the `main` branch where the coverage report and the APIs are published on Github Pages
 
 ### Others
 
-The infrastructure is built using Terraform to define resources and some shell scripts, placed in the `scripts` folder. A Makefile contains all the commands to run the infrastructure with Localstack.
+The infrastructure is built using Terraform to define resources and some shell scripts, placed in the `scripts` folder. A `Makefile` contains all the commands to run the infrastructure with Localstack.
 
 For the observability part, I have used OpenTelemetry APIs and the collector. Metrics are sent to Prometheus, while traces are sent to Jaeger. Grafana can then be used to query these data sources.
 
@@ -83,20 +102,6 @@ There is another claim in an access token: `dbId`. This claim maps the Cognito u
 
 ---
 
-## APIs
+## Observability
 
-The APIs are described using the Open Api Specification, open the `open-api.yml` file to see them. APIs are implemented in 3 Lambda functions, as many as the possible roles: admin, customer and shop. It is not a [mono-lambda APIs approach](https://aaronstuyvenberg.com/posts/monolambda-vs-individual-function-api) but neither a single-function APIs approach: it is a tradeoff that allows me to easily control the role authorization. In order to call the Lambda functions using HTTP Rest APIs, I needed the AWS Api Gateway. Each of the API is integrated with the corresponding Lambda function using an integration of type `AWS`. Also 4XX error cases are handled by creating different integration responses based on the `selection pattern`.
-
----
-
-## Introduction to Localstack
-
-There are two ways to run Localstack:
-
-- **From the integration tests** - Testcontainer has a module for Localstack that allows to start it for the integration tests. It is particularly useful for the CI, that is taken care of by Github Actions.
-- **From the Docker Compose** - The compose file spawns one container for Localstack and another for Terraform. Then, by running `make start` (or `make tf_apply` if already up), the localstack container is initialized with the defined resources.
-
-  To make the deploy faster, two bind mounts are specified:
-  - **The Localstack persistence volume** - In this way, Localstack persists all the changes applied to the emulated environment and the next start up will be faster
-  - **The Terraform state files** - It reflects the current resources that Terraform has applied to the AWS environment
-
+Another important aspect is observability, achieved thanks to OpenTelemetry tools.

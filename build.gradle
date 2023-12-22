@@ -3,3 +3,38 @@ plugins {
 	id 'org.liquibase.gradle' version '2.0.4' apply false
 	id 'io.freefair.aspectj.post-compile-weaving' version '8.4' apply false
 }
+
+// 'github-artifacts' is the folder where the coverage reports are downloaded
+
+task copyUIFolderForApi(type: Copy) {
+	from ("./open-api.yml")
+	from ("./tools/swagger-ui")
+	into('./github-pages/swagger-ui')
+}
+
+task copyTestCoverage(type: Copy) {
+	from ('./code-coverage-report/build/reports/jacoco/testCodeCoverageReport/html')
+	into('./github-pages/test-coverage')
+}
+
+task createGithubPagesDir {
+	dependsOn(copyTestCoverage)
+	dependsOn(copyUIFolderForApi)
+
+	doLast {
+		def content = """
+<html>
+	<head></head>
+	<body>
+		<ul>
+			<li><a href="./test-coverage/index.html">Test Coverage</a></li>
+			<li><a href="./swagger-ui/index.html">Swagger UI</a></li>
+		</ul>
+	</body>
+</html>
+		"""
+
+		def file = file("./github-pages/index.html")
+		file.write(content)
+	}
+}

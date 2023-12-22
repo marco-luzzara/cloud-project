@@ -60,5 +60,13 @@ jobs:
         with:
           name: test-coverage-report
           path: ${{ github.workspace }}/code-coverage-report/build/reports/jacoco/testCodeCoverageReport/
+#     Pages are generated here to avoid a further checkout in the main branch pipeline
+      - name: Generate Github Pages
+        run: ./gradlew createGithubPagesDir
+      - name: Upload Github Pages Folder
+        uses: actions/upload-artifact@v3
+        with:
+          name: github-pages-folder
+          path: ${{ github.workspace }}/github-pages
       - name: Add Coverage Job Summary
         run: echo "${{ steps.jacoco_reporter.outputs.coverageSummary }}" >> $GITHUB_STEP_SUMMARY

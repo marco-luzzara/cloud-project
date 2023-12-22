@@ -47,3 +47,4 @@ out/
 **/localstack/apikey.secret
 volumes/
 !cloud/infrastructure/src/testFixtures/resources/localstack/AwsSdkV2DisableCertificateValidation-1.0.jar
+github-pages/

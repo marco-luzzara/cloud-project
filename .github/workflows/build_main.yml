@@ -29,14 +29,14 @@ jobs:
     steps:
       - uses: actions/download-artifact@v3
         with:
-          name: test-coverage-report
-          path: ${{ github.workspace }}/artifacts
+          name: github-pages-folder
+          path: ${{ github.workspace }}/github-artifacts/github-pages-folder
       - name: Setup Pages
         uses: actions/configure-pages@v3
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v2
         with:
-          path: ${{ github.workspace }}/artifacts/html
+          path: ${{ github.workspace }}/github-artifacts/github-pages-folder
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v2

@@ -1,22 +1,15 @@
 package it.unimi.cloudproject.data.model;
 
 import it.unimi.cloudproject.bl.User;
-import it.unimi.cloudproject.data.repositories.ShopRepository;
 import it.unimi.cloudproject.infrastructure.annotations.codecoverage.Generated;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.With;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.jdbc.core.mapping.AggregateReference;
-import org.springframework.data.relational.core.mapping.MappedCollection;
 import org.springframework.data.relational.core.mapping.Table;
 
-import java.util.HashSet;
 import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @AllArgsConstructor(access = AccessLevel.PACKAGE)
 @Getter

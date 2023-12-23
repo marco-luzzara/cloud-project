@@ -9,9 +9,4 @@ public class ShopDtoFactory {
         var shop = ShopFactory.getShop(shopOwnerData.toUser());
         return new ShopCreation(shop.name(), shopOwnerData.getId(), shop.coordinates().longitude(), shop.coordinates().latitude());
     }
-
-//    public static ShopCreation createShopCreation(int seed) {
-//        var shop = ShopFactory.getShop(seed);
-//        return new ShopCreation(shop.name(), shop.coordinates().longitude(), shop.coordinates().latitude());
-//    }
 }

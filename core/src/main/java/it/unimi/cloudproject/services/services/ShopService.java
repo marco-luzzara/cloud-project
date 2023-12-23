@@ -60,11 +60,4 @@ public class ShopService {
                                 .formatted(shopData.getId()), new NullPointerException())),
                 shopData.getCoordinates().longitude(), shopData.getCoordinates().latitude());
     }
-
-//    public List<ShopInfo> getFavoriteShopsOfUser(int userId) {
-//        return this.shopRepository.findFavoriteShopsByUserId(userId).stream()
-//                .map(sd -> new ShopInfo(sd.getId(), sd.getName(),
-//                        sd.getCoordinates().longitude(), sd.getCoordinates().latitude()))
-//                .toList();
-//    }
 }

@@ -2,11 +2,9 @@ package it.unimi.cloudproject.api.bodyhandlers;
 
 import com.google.gson.Gson;
 
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.http.HttpResponse;
 import java.util.Map;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class GeneralBodyHandler<T> implements HttpResponse.BodyHandler<T> {

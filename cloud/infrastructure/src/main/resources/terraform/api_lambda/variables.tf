@@ -63,9 +63,3 @@ variable "extended_policy_statements" {
     Resource = list(string)
   }))
 }
-
-variable "additional_layers" {
-  description = "Additional custom layers for the lambda function"
-  type = list(string)
-  default = []
-}

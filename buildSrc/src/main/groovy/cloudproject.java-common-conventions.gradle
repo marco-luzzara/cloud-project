@@ -34,8 +34,6 @@ dependencies {
         // spring
         implementation "org.springframework.boot:spring-boot-starter:${SPRING_VERSION}"
         testFixturesImplementation "org.springframework.boot:spring-boot-starter:${SPRING_VERSION}"
-//        implementation "org.springframework.boot:spring-boot-starter-aop:${SPRING_VERSION}"
-        //	implementation 'org.springframework:spring-web:6.0.11'
         implementation "org.springframework.data:spring-data-jdbc:${SPRING_VERSION}"
         implementation "org.springframework.boot:spring-boot-starter-jdbc:${SPRING_VERSION}"
         implementation "org.springframework.cloud:spring-cloud-function-adapter-aws:4.0.5"

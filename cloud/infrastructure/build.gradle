@@ -8,21 +8,6 @@ dependencies {
 
     implementation "software.amazon.awssdk:sdk-core"
 
-    // spring
-//    implementation "org.springframework.boot:spring-boot-starter-aop"
-    implementation "org.springframework.cloud:spring-cloud-function-adapter-aws"
-    implementation "org.springframework.cloud:spring-cloud-function-web"
-
-    // monitoring
-    implementation("io.opentelemetry:opentelemetry-api")
-    implementation("io.opentelemetry:opentelemetry-sdk")
-    implementation("io.opentelemetry:opentelemetry-sdk-metrics")
-    implementation("io.opentelemetry:opentelemetry-semconv:1.22.0-alpha")
-    implementation 'io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations'
-    implementation 'io.opentelemetry.instrumentation:opentelemetry-logback-appender-1.0'
-
-    testFixturesImplementation "org.springframework.boot:spring-boot-starter"
-
     testFixturesImplementation 'com.google.code.gson:gson'
     testFixturesImplementation 'org.testcontainers:localstack'
 }

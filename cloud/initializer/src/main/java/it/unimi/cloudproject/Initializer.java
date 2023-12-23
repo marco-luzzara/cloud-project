@@ -8,10 +8,11 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 
 import java.util.function.Consumer;
-import java.util.function.Function;
 
-// TODO: https://docs.spring.io/spring-cloud-function/docs/current/reference/html/aws.html
-// to speed up cold starts
+/**
+ * This Lambda Functions creates the necessary database table by importing the
+ * liquibase runtime package. It is invoked before any other Lambda when the database is ready
+ */
 @SpringBootApplication
 @ComponentScan(basePackageClasses = {Initializer.class})
 public class Initializer {

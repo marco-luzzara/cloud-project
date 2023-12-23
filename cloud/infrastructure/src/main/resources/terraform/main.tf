@@ -1,20 +1,3 @@
-locals {
-  // the lambda layer does not work because of unsupported telemetry API for the runtime
-#  otel_java_agent_layer_info = {
-#    // the java agent does not support the RequestStreamHandler, so i have to use the wrapper
-#    // see https://docs.aws.amazon.com/lambda/latest/dg/java-tracing.html#java-adot
-#    name = "arn:aws:lambda:${var.aws_region}:901920570463:layer:aws-otel-java-wrapper-amd64-ver-1-30-0"
-#    version = "1"
-#  }
-  otel_collector_layer_info = {
-    // the java agent does not support the RequestStreamHandler, so i have to use the wrapper
-    // see https://docs.aws.amazon.com/lambda/latest/dg/java-tracing.html#java-adot
-    name = "arn:aws:lambda:${var.aws_region}:901920570463:layer:aws-otel-java-wrapper-amd64-ver-1-30-0"
-    version = "1"
-  }
-#  otel_java_agent_layer_arn = "${local.otel_java_agent_layer_info.name}:${local.otel_java_agent_layer_info.version}"
-}
-
 terraform {
   required_providers {
     aws = {
@@ -32,15 +15,6 @@ provider "aws" {
   region = var.aws_region
 }
 
-#module "observability" {
-#  source = "./observability"
-#
-#  is_testing = var.is_testing
-#  localstack_network = var.localstack_network
-#  prometheus_config_host_path = var.prometheus_config_host_path
-#  prometheus_exporter_config_host_path = var.prometheus_exporter_config_host_path
-#}
-
 module "authentication" {
   source = "./authentication"
 
@@ -53,14 +27,6 @@ module "webapp_db" {
   webapp_db_config = var.webapp_db_config
   webapp_db_credentials = var.webapp_db_credentials
 }
-
-#resource "aws_lambda_layer_version_permission" "lambda_layer_permission" {
-#  layer_name     = local.otel_java_agent_layer_info.name
-#  version_number = local.otel_java_agent_layer_info.version
-#  principal      = "886468871268" // see https://docs.localstack.cloud/user-guide/aws/lambda/#referencing-lambda-layers-from-aws
-#  action         = "lambda:GetLayerVersion"
-#  statement_id   = "openTelemetryLayerAccess1"
-#}
 
 resource "aws_s3_bucket" "lambda_bucket" {
   count = var.lambda_dist_bucket == "hot-reload" ? 0 : 1
@@ -82,7 +48,6 @@ module "initializer_lambda" {
     spring_datasource_username = var.webapp_db_credentials.username
     spring_datasource_password = var.webapp_db_credentials.password
   }
-#  additional_layers = [local.otel_java_agent_layer_arn]
   function_name = "initializer-lambda"
   is_observability_enabled = false
   is_testing = var.is_testing
@@ -155,7 +120,6 @@ module "shop_lambda" {
     spring_datasource_username = var.webapp_db_credentials.username
     spring_datasource_password = var.webapp_db_credentials.password
   }
-#  additional_layers = [local.otel_java_agent_layer_arn]
   function_name = "shop-lambda"
   main_class = "it.unimi.cloudproject.ShopApi"
   extended_policy_statements = [
@@ -187,7 +151,6 @@ module "admin_lambda" {
     spring_datasource_username = var.webapp_db_credentials.username
     spring_datasource_password = var.webapp_db_credentials.password
   }
-#  additional_layers = [local.otel_java_agent_layer_arn]
   lambda_additional_system_properties = <<EOT
     -Daws.cognito.user_pool_id=${module.authentication.cognito_main_pool_id}
   EOT
@@ -219,7 +182,7 @@ module "authorizer_lambda" {
   lambda_dist_path = var.authorizer_lambda_dist_path
   webapp_db_arn = module.webapp_db.arn
   is_testing = var.is_testing
-  // disabled here because the X-Ray Daemon seems to not work prop
+  // TODO: disabled here because the X-Ray Daemon seems to not work properly
   is_observability_enabled = false // var.is_observability_enabled
   lambda_system_properties = {
     logging_level = "INFO"
@@ -228,7 +191,6 @@ module "authorizer_lambda" {
     spring_datasource_username = var.webapp_db_credentials.username
     spring_datasource_password = var.webapp_db_credentials.password
   }
-#  additional_layers = [local.otel_java_agent_layer_arn]
   lambda_additional_system_properties = <<EOT
     -Daws.cognito.user_pool_id=${module.authentication.cognito_main_pool_id}
   EOT
@@ -271,7 +233,6 @@ module "webapp_apigw" {
     lambda_arn = module.authorizer_lambda.lambda_arn
   }
   cognito_user_pool_arn = module.authentication.cognito_main_pool_arn
-  #  when = terraform.workspace == "webapp"
 }
 
 resource "aws_api_gateway_deployment" "apigw_deployment" {

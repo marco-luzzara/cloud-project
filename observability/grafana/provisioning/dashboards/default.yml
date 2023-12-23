@@ -1,0 +1,22 @@
+apiVersion: 1
+
+providers:
+  # <string> an unique provider name. Required
+  - name: 'Cloud Project Dashboard'
+    # <int> Org id. Default to 1
+    orgId: 1
+    # <string> name of the dashboard folder.
+    folder: ''
+    # <string> folder UID. will be automatically generated if not specified
+    folderUid: ''
+    # <string> provider type. Default to 'file'
+    type: file
+    # <int> how often Grafana will scan for changed dashboards
+    updateIntervalSeconds: 5
+    # <bool> allow updating provisioned dashboards from the UI
+    # allowUiUpdates: false #you can set this value as per your need
+    options:
+      # <string, required> path to dashboard files on disk. Required when using the 'file' type
+      # though as per the documentation it says that the path for Linux is /var/lib/grafana
+      # but in docker (see step 1) it is like this.
+      path: /etc/grafana/provisioning/dashboards

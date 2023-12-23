@@ -4,7 +4,6 @@ import it.unimi.cloudproject.bl.errors.ValidationError;
 import it.unimi.cloudproject.infrastructure.annotations.codecoverage.Generated;
 
 import java.util.Objects;
-import java.util.Set;
 
 public record User(Integer id, String username) {
     public User {

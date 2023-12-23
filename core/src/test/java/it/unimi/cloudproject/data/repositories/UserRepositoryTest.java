@@ -1,24 +1,19 @@
 package it.unimi.cloudproject.data.repositories;
 
-import it.unimi.cloudproject.factories.data.ShopDataFactory;
-import it.unimi.cloudproject.factories.data.UserDataFactory;
 import it.unimi.cloudproject.data.model.UserData;
-import it.unimi.cloudproject.data.model.UserShopData;
 import it.unimi.cloudproject.factories.bl.UserFactory;
+import it.unimi.cloudproject.factories.data.UserDataFactory;
 import it.unimi.cloudproject.testutils.db.DbFactory;
 import it.unimi.cloudproject.testutils.spring.DynamicPropertiesInjector;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.jdbc.core.mapping.AggregateReference;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-
-import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -53,7 +48,7 @@ public class UserRepositoryTest {
 
         userData = userRepository.save(userData);
 
-        var retrievedUserData = userRepository.findById(userData.getId()).get();
+        var retrievedUserData = userRepository.findById(userData.getId()).orElseThrow();
         assertThat(retrievedUserData.getId()).isEqualTo(userData.getId());
         assertThat(retrievedUserData).isEqualTo(userData);
     }
@@ -67,31 +62,4 @@ public class UserRepositoryTest {
 
         assertThat(userRepository.findById(userData.getId())).isEmpty();
     }
-
-//    @Test
-//    void givenZeroUsersForShop_whenGetUsersOfAShop_thenReturnsZero() {
-//        var shopData = ShopDataFactory.createShop(this.shopRepository);
-//
-//        var users = userRepository.findUsersByShopId(shopData.getId());
-//
-//        assertThat(users).isEmpty();
-//    }
-//
-//    @Test
-//    void givenManyUsersForShop_whenGetUsersOfAShop_thenReturnsAll() {
-//        var shopData = ShopDataFactory.createShop(this.shopRepository);
-//        var userData1 = UserDataFactory.createUser(this.userRepository);
-//        var userData2 = UserDataFactory.createUser(this.userRepository);
-//        var userData3 = UserDataFactory.createUser(this.userRepository);
-//        userData1.getFavoriteShops().add(
-//                new UserShopData(AggregateReference.to(userData1.getId()), AggregateReference.to(shopData.getId())));
-//        userData2.getFavoriteShops().add(
-//                new UserShopData(AggregateReference.to(userData2.getId()), AggregateReference.to(shopData.getId())));
-//        userRepository.saveAll(List.of(userData1, userData2));
-//
-//        var foundUsers = userRepository.findUsersByShopId(shopData.getId());
-//
-//        assertThat(foundUsers).hasSize(2);
-//        assertThat(foundUsers).extracting(UserData::getId).contains(userData1.getId(), userData2.getId());
-//    }
 }

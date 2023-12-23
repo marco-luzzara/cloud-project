@@ -34,9 +34,9 @@ jobs:
       - name: Create API Key File
         if: ${{ env.INTEGRATION_TESTS_ENABLED == 'true' }}
         env:
-          LOCALSTACK_APIKEY: ${{ secrets.LOCALSTACK_APIKEY }}
+          LOCALSTACK_AUTH_TOKEN: ${{ secrets.LOCALSTACK_AUTH_TOKEN }}
         run: |
-            mkdir -p cloud/infrastructure/src/testFixtures/resources/localstack && echo "$LOCALSTACK_APIKEY" > cloud/infrastructure/src/testFixtures/resources/localstack/apikey.secret
+            mkdir -p cloud/infrastructure/src/testFixtures/resources/localstack && echo "$LOCALSTACK_AUTH_TOKEN" > cloud/infrastructure/src/testFixtures/resources/localstack/auth_token.secret
       - name: Build
         uses: gradle/gradle-build-action@749f47bda3e44aa060e82d7b3ef7e40d953bd629
         with:

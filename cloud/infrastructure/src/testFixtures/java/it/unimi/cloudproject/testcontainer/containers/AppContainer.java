@@ -40,7 +40,7 @@ public class AppContainer extends LocalStackContainer {
 
         this.localstackConfig = localstackConfig;
 
-        var apiKey = getApiKeyOrThrow();
+        var authToken = getAuthTokenOrThrow();
 
         // https://joerg-pfruender.github.io/software/testing/2020/09/27/localstack_and_lambda.html#1-networking
         withNetwork(NETWORK);
@@ -61,19 +61,19 @@ public class AppContainer extends LocalStackContainer {
                 LocalStackContainer.EnabledService.named("cognito-idp"));
         withEnv(Map.of(
                 "LAMBDA_DOCKER_NETWORK", ((Network.NetworkImpl) NETWORK).getName(),
-                "LOCALSTACK_API_KEY", apiKey,
+                "LOCALSTACK_AUTH_TOKEN", authToken,
                 "LS_LOG", this.localstackConfig.logLevel,
                 "ENFORCE_IAM", "1"
                 ));
     }
 
-    private String getApiKeyOrThrow() {
+    private String getAuthTokenOrThrow() {
         try {
             return new PathMatchingResourcePatternResolver()
-                    .getResource("localstack/apikey.secret")
+                    .getResource("localstack/auth_token.secret")
                     .getContentAsString(StandardCharsets.UTF_8);
         } catch (IOException e) {
-            throw new RuntimeException("Please create an accessible file called 'apikey.secret' with the Localstack API key in the folder src/test/resources/localstack");
+            throw new RuntimeException("Please create an accessible file called 'auth_token.secret' with the Localstack Auth Token in the folder src/test/resources/localstack");
         }
     }
 
@@ -91,8 +91,6 @@ public class AppContainer extends LocalStackContainer {
         this.restApiId = terraform.getOutputVar(TerraformContainer.OutputVar.REST_API_ID);
         this.deploymentStageName = terraform.getOutputVar(TerraformContainer.OutputVar.DEPLOYMENT_STAGE_NAME);
 
-//        this.copyFileToContainer(MountableFile.forClasspathResource("localstack/AwsSdkV2DisableCertificateValidation-1.0.jar"),
-//                "/var/task/AwsSdkV2DisableCertificateValidation-1.0.jar");
         this.copyScriptToContainer("localstack/scripts/%s".formatted(GET_LOGS_FROM_CW_SCRIPT_NAME));
 
         this.followOutput(outFrame ->

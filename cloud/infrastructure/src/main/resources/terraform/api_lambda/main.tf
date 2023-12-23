@@ -79,6 +79,7 @@ resource "aws_lambda_function" "api_lambda" {
 
   # -Dotel.java.enabled.resource.providers is necessary because the default one also includes EC2 and other resources that
   # localstack might not support
+  # add '-Dotel.javaagent.debug=true' to enable otel instrumentation logging
   environment {
     variables = {
       LAMBDA_DOCKER_DNS = "127.0.0.1"
@@ -98,7 +99,6 @@ resource "aws_lambda_function" "api_lambda" {
         -Dspring.datasource.password=${var.lambda_system_properties.spring_datasource_password}
         ${var.is_testing ? "-javaagent:/var/task/lib/AwsSdkV2DisableCertificateValidation-1.0.jar" : ""}
         ${var.is_observability_enabled ? "-javaagent:/var/task/lib/aws-opentelemetry-agent-1.31.0.jar" : ""}
-        -Dotel.javaagent.debug=true
         -Dotel.java.enabled.resource.providers=io.opentelemetry.javaagent.tooling.AutoVersionResourceProvider,io.opentelemetry.instrumentation.resources.ContainerResourceProvider,io.opentelemetry.instrumentation.resources.HostResourceProvider,io.opentelemetry.instrumentation.resources.JarServiceNameDetector,io.opentelemetry.instrumentation.resources.OsResourceProvider,io.opentelemetry.instrumentation.resources.ProcessResourceProvider,io.opentelemetry.instrumentation.resources.ProcessRuntimeResourceProvider,io.opentelemetry.instrumentation.spring.resources.SpringBootServiceNameDetector,io.opentelemetry.instrumentation.spring.resources.SpringBootServiceVersionDetector,io.opentelemetry.sdk.autoconfigure.internal.EnvironmentResourceProvider,io.opentelemetry.contrib.aws.resource.LambdaResourceProvider
       EOT
     }

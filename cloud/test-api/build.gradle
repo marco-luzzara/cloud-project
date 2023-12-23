@@ -12,6 +12,5 @@ dependencies {
     testImplementation(testFixtures(project(':cloud:customer-api')))
     testImplementation(testFixtures(project(':cloud:shop-api')))
 
-    testImplementation 'org.testcontainers:localstack'
     testImplementation "org.testcontainers:junit-jupiter"
 }

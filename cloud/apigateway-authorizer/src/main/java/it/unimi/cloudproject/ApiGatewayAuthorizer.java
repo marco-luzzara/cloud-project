@@ -2,29 +2,26 @@ package it.unimi.cloudproject;
 
 import com.amazonaws.services.lambda.runtime.events.APIGatewayCustomAuthorizerEvent;
 import com.amazonaws.services.lambda.runtime.events.IamPolicyResponse;
+import com.auth0.jwt.JWT;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import it.unimi.cloudproject.lambda.authorizer.errors.CannotAuthorizeRequest;
 import it.unimi.cloudproject.lambda.authorizer.errors.UnauthorizedUserForShopError;
-import it.unimi.cloudproject.utilities.AwsSdkUtils;
-import it.unimi.cloudproject.utilities.ExceptionUtils;
-import software.amazon.awssdk.core.internal.http.pipeline.stages.utils.ExceptionReportingUtils;
-import software.amazon.awssdk.services.cognitoidentityprovider.CognitoIdentityProviderClient;
-import software.amazon.awssdk.services.iam.IamClient;
-import com.auth0.jwt.JWT;
 import it.unimi.cloudproject.services.services.ShopService;
 import it.unimi.cloudproject.services.services.UserService;
+import it.unimi.cloudproject.utilities.AwsSdkUtils;
+import it.unimi.cloudproject.utilities.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
+import software.amazon.awssdk.services.cognitoidentityprovider.CognitoIdentityProviderClient;
+import software.amazon.awssdk.services.iam.IamClient;
 import software.amazon.awssdk.services.iam.model.ListRolePoliciesRequest;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -62,7 +59,6 @@ public class ApiGatewayAuthorizer {
             var principalId = jwt.getSubject();
 
             try {
-//                checkForExistingUser(jwt);
                 checkForCustomAuthorization(event, jwt);
 
                 var username = jwt.getClaim("cognito:username").asString();
@@ -117,16 +113,9 @@ public class ApiGatewayAuthorizer {
 				};
 		}
 
-//    private void checkForExistingUser(DecodedJWT jwt) {
-//        var dbIdClaim = jwt.getClaim("custom:dbId");
-//        var userId = Integer.parseInt(dbIdClaim.asString());
-//
-//        this.userService.getUser(userId);
-//    }
-
     /**
      * Does some additional checks on the shopId specified. It makes sure that the request is called
-     * sent by the owner of the shop
+     * by the owner of the shop
      * @param event
      * @param jwt
      */

@@ -1,10 +1,8 @@
 package it.unimi.cloudproject;
 
-import it.unimi.cloudproject.infrastructure.annotations.WithMeasuredExecutionTime;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.EnableLoadTimeWeaving;
 
 // TODO: https://docs.spring.io/spring-cloud-function/docs/current/reference/html/aws.html
 // to speed up cold starts

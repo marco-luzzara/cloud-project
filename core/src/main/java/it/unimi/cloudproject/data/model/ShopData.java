@@ -2,7 +2,6 @@ package it.unimi.cloudproject.data.model;
 
 import it.unimi.cloudproject.bl.Shop;
 import it.unimi.cloudproject.bl.valueobjects.Coordinates;
-import it.unimi.cloudproject.data.repositories.UserRepository;
 import it.unimi.cloudproject.infrastructure.annotations.codecoverage.Generated;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -14,7 +13,6 @@ import org.springframework.data.relational.core.mapping.Embedded;
 import org.springframework.data.relational.core.mapping.Table;
 
 import java.util.Objects;
-import java.util.Optional;
 
 @RequiredArgsConstructor(access = AccessLevel.PACKAGE)
 @Getter

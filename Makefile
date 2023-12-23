@@ -4,7 +4,7 @@ TERRAFORM_CONTAINER_NAME ?= terraform_for_localstack
 TERRAFORM_VOLUME_DIR ?= terraform
 LOCALSTACK_CONTAINER_NAME ?= localstackmain
 LOCALSTACK_VOLUME_DIR ?= localstack_persistence
-LOCALSTACK_API_KEY ?= $(shell cat cloud/infrastructure/src/testFixtures/resources/localstack/apikey.secret)
+LOCALSTACK_AUTH_TOKEN ?= $(shell cat cloud/infrastructure/src/testFixtures/resources/localstack/auth_token.secret)
 LOCALSTACK_PORT ?= 4566
 LOCALSTACK_PERSISTENCE ?= 1
 LOCALSTACK_NETWORK_NAME ?= localstack_network
@@ -12,7 +12,7 @@ export TERRAFORM_CONTAINER_NAME
 export TERRAFORM_VOLUME_DIR
 export LOCALSTACK_CONTAINER_NAME
 export LOCALSTACK_VOLUME_DIR
-export LOCALSTACK_API_KEY
+export LOCALSTACK_AUTH_TOKEN
 export LOCALSTACK_PORT
 export LOCALSTACK_PERSISTENCE
 export LOCALSTACK_NETWORK_NAME

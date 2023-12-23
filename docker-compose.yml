@@ -11,7 +11,7 @@ services:
     environment:
       - DEBUG=${DEBUG-}
       - PERSISTENCE=${LOCALSTACK_PERSISTENCE:-1}
-      - LOCALSTACK_API_KEY=${LOCALSTACK_API_KEY:?Create the env variable LOCALSTACK_API_KEY and fill it with the api key}
+      - LOCALSTACK_AUTH_TOKEN=${LOCALSTACK_AUTH_TOKEN:?Create the env variable LOCALSTACK_AUTH_TOKEN and fill it with the auth token}
       - DOCKER_HOST=unix:///var/run/docker.sock
       - SERVICES=lambda,s3,apigateway,logs,rds,cognito-idp,sns,secretsmanager,iam,ec2,ses,cloudwatch
       - LAMBDA_DOCKER_NETWORK=${LOCALSTACK_NETWORK_NAME-localstack_network}
@@ -72,6 +72,7 @@ services:
     container_name: grafana
     user: "0"
     environment:
+      - GF_PATHS_DATA=/var/lib/grafana
       - GF_PATHS_PROVISIONING=/etc/grafana/provisioning
     volumes:
       - "./volumes/grafana:/var/lib/grafana"

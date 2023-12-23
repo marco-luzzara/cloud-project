@@ -6,18 +6,18 @@ plugins {
 
 // 'github-artifacts' is the folder where the coverage reports are downloaded
 
-task copyUIFolderForApi(type: Copy) {
-	from ("./open-api.yml")
-	from ("./tools/swagger-ui")
+tasks.register('copyUIFolderForApi', Copy) {
+	from("./open-api.yml")
+	from("./tools/swagger-ui")
 	into('./github-pages/swagger-ui')
 }
 
-task copyTestCoverage(type: Copy) {
-	from ('./code-coverage-report/build/reports/jacoco/testCodeCoverageReport/html')
+tasks.register('copyTestCoverage', Copy) {
+	from('./code-coverage-report/build/reports/jacoco/testCodeCoverageReport/html')
 	into('./github-pages/test-coverage')
 }
 
-task createGithubPagesDir {
+tasks.register('createGithubPagesDir') {
 	dependsOn(copyTestCoverage)
 	dependsOn(copyUIFolderForApi)
 

@@ -6,11 +6,9 @@ plugins {
 dependencies {
     implementation project(':core')
     implementation project(':cloud:infrastructure')
-    testImplementation(testFixtures(project(':cloud:infrastructure')))
 
     implementation "software.amazon.awssdk:sns"
 
     testFixturesImplementation 'com.google.code.gson:gson'
-    testFixturesImplementation 'org.testcontainers:localstack'
     testFixturesImplementation(testFixtures(project(':cloud:infrastructure')))
 }

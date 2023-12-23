@@ -13,8 +13,4 @@ public class ShopFactory {
     public static Shop getShop(User shopOwner) {
         return new Shop(VALID_ID, shopOwner, VALID_SHOP_NAME, VALID_COORDINATES);
     }
-
-//    public static Shop getShop(int seed, User shopOwner) {
-//        return new Shop(seed, shopOwner, VALID_SHOP_NAME + seed, new Coordinates(seed, seed));
-//    }
 }

@@ -93,21 +93,4 @@ public class ShopServiceTest {
 
         assertThatThrownBy(() -> shopService.deleteShop(1000)).isInstanceOf(InvalidShopIdError.class);
     }
-
-//    @Test
-//    void givenManyShopsForUser_whenGetUserFavoriteShops_thenReturnThem() {
-//        var userData = UserDataFactory.createUser(this.userRepository);
-//        var shopData1 = ShopDataFactory.createShop(this.shopRepository);
-//        var shopData2 = ShopDataFactory.createShop(this.shopRepository);
-//        var shopData3 = ShopDataFactory.createShop(this.shopRepository);
-//        userData.getFavoriteShops().addAll(List.of(
-//                new UserShopData(AggregateReference.to(userData.getId()), AggregateReference.to(shopData1.getId())),
-//                new UserShopData(AggregateReference.to(userData.getId()), AggregateReference.to(shopData2.getId()))));
-//        userData = userRepository.save(userData);
-//
-//        var foundShops = shopService.getFavoriteShopsOfUser(userData.getId());
-//
-//        assertThat(foundShops).hasSize(2);
-//        assertThat(foundShops).extracting(ShopInfo::id).containsExactly(shopData1.getId(), shopData2.getId());
-//    }
 }

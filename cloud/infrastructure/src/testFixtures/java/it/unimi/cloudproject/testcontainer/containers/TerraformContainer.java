@@ -13,7 +13,6 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.*;
 
 public class TerraformContainer extends GenericContainer<TerraformContainer> {
@@ -76,7 +75,7 @@ public class TerraformContainer extends GenericContainer<TerraformContainer> {
         return ((Map<String, Object>) this.outputVars.get(outputVar.varName)).get("value").toString();
     }
 
-    private void copyLambdaDistributionToContainer(Path lambdaSubproject) throws IOException {
+    private void copyLambdaDistributionToContainer(Path lambdaSubproject) {
         final var lambdaSubprojectName = lambdaSubproject.getFileName();
         var distDir = lambdaSubproject.resolve("build").resolve("dist");
         var zipPath = distDir.resolve(lambdaSubproject.getFileName() + ".zip");
@@ -133,10 +132,6 @@ public class TerraformContainer extends GenericContainer<TerraformContainer> {
                     "/app" + tfResourcePath.substring("terraform".length()));
         });
     }
-
-//    private ExecResult execInContainerWithLogs(String cmd) throws IOException, InterruptedException {
-//        return this.execInContainer("sh", "-c", cmd + " &> /proc/1/fd/1");
-//    }
 
     public record TfVariables(String accessKey,
                               String secretKey,

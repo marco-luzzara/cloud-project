@@ -145,8 +145,6 @@ resource "aws_cognito_user_pool_client" "main_pool_client" {
   generate_secret = true
 }
 
-// create admin user. This special user is in the admin group and can promote other users
-
 resource "aws_secretsmanager_secret" "admin_user_credentials_secret" {
   description = "Admin user credentials"
   recovery_window_in_days = 0 // Overriding the default recovery window of 30 days, so that it can be immediately deleted
@@ -172,6 +170,7 @@ data "aws_secretsmanager_secret_version" "admin_user_credentials_secret_data" {
 #  }
 #}
 
+// create admin user. This special user is in the admin group and can promote other users
 resource "aws_cognito_user" "main_admin_user" {
   user_pool_id = aws_cognito_user_pool.main_pool.id
   username    = var.admin_user_credentials.username

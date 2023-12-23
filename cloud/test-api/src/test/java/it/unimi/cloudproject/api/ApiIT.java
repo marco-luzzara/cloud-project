@@ -5,13 +5,11 @@ import it.unimi.cloudproject.api.callers.AdminApiCaller;
 import it.unimi.cloudproject.api.callers.CustomerApiCaller;
 import it.unimi.cloudproject.api.callers.LocalstackApiCaller;
 import it.unimi.cloudproject.api.callers.ShopApiCaller;
-import it.unimi.cloudproject.api.callers.dto.ShopCreationBody;
 import it.unimi.cloudproject.api.callers.dto.ShopPublishMessageRequestBody;
 import it.unimi.cloudproject.helpers.api.CustomerApiHelper;
 import it.unimi.cloudproject.helpers.factories.ShopDataFactory;
 import it.unimi.cloudproject.helpers.factories.UserDataFactory;
 import it.unimi.cloudproject.lambda.admin.dto.responses.ShopCreationResponse;
-import it.unimi.cloudproject.lambda.customer.dto.requests.user.UserCreationRequest;
 import it.unimi.cloudproject.lambda.customer.dto.requests.user.UserLoginRequest;
 import it.unimi.cloudproject.lambda.customer.dto.responses.LoginResponse;
 import it.unimi.cloudproject.lambda.customer.dto.responses.UserGetInfoResponse;
@@ -31,12 +29,12 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-//@EnabledIfSystemProperty(named = "IntegrationTestsEnabled", matches = "true")
 @EnabledIfSystemProperty(named = "IntegrationTestsEnabled", matches = "true")
 @Testcontainers
 public class ApiIT {
     @Container
     private static final AppContainer app = new AppContainer();
+    // to generate logs of type trace use this AppContainer initialization
 //    private static final AppContainer app = new AppContainer(new AppContainer.LocalstackConfig(false, "trace"));
 
     @Container
@@ -47,23 +45,16 @@ public class ApiIT {
     private final AdminApiCaller adminApiCaller = new AdminApiCaller(app);
     private final LocalstackApiCaller localstackApiCaller = new LocalstackApiCaller(app);
 
-//    private static final String DB_CONTAINER_NAME = "localstack_db";
+    // Pgadmin container to check the postgres container while debugging
+    // @Container
+    // private static final GenericContainer<?> pgAdmin = new GenericContainer<>("dpage/pgadmin4:6")
+    // .withNetwork(tsvContainer.NETWORK)
+    // .withExposedPorts(80)
+    // .withEnv(new HashMap<>() {{
+    // put("PGADMIN_DEFAULT_EMAIL", "user@domain.com");
+    // put("PGADMIN_DEFAULT_PASSWORD", "SuperSecret");
+    // }});
 
-//    @Container
-//    private static final PostgreSQLContainer<?> localstackDb = DbFactory.getPostgresContainer()
-//            .withNetwork(app.NETWORK)
-//            .withCreateContainerCmdModifier((createContainerCmd) -> createContainerCmd.withName(DB_CONTAINER_NAME));
-
-//    // Pgadmin container to check the postgres container while debugging
-//    // @Container
-//    // private static final GenericContainer<?> pgAdmin = new GenericContainer<>("dpage/pgadmin4:6")
-//    // .withNetwork(tsvContainer.NETWORK)
-//    // .withExposedPorts(80)
-//    // .withEnv(new HashMap<>() {{
-//    // put("PGADMIN_DEFAULT_EMAIL", "user@domain.com");
-//    // put("PGADMIN_DEFAULT_PASSWORD", "SuperSecret");
-//    // }});
-//
     @BeforeAll
     static void initializeAll() throws IOException, InterruptedException {
         app.initialize(terraform);

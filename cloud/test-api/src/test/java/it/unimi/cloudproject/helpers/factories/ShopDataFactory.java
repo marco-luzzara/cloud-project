@@ -1,7 +1,6 @@
 package it.unimi.cloudproject.helpers.factories;
 
 import it.unimi.cloudproject.api.callers.dto.ShopCreationBody;
-import it.unimi.cloudproject.lambda.customer.dto.requests.user.UserCreationRequest;
 
 import java.util.Random;
 

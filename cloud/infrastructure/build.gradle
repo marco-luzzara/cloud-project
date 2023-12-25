@@ -8,6 +8,7 @@ dependencies {
 
     implementation "software.amazon.awssdk:sdk-core"
 
+    testFixturesImplementation "org.springframework.boot:spring-boot-starter"
     testFixturesImplementation 'com.google.code.gson:gson'
     testFixturesImplementation 'org.testcontainers:localstack'
 }

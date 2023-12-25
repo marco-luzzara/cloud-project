@@ -9,6 +9,7 @@ dependencies {
 
     implementation "software.amazon.awssdk:sns"
 
+    testFixturesImplementation 'org.testcontainers:localstack'
     testFixturesImplementation 'com.google.code.gson:gson'
     testFixturesImplementation(testFixtures(project(':cloud:infrastructure')))
 }

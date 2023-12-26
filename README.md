@@ -138,5 +138,15 @@ Another approach for automatic instrumentation is to use [special annotation](ht
 
 Manual instrumentation offers many more customizations, but it is also more difficult to configure. In this project, there is also an example of manual instrumentations: a `Meter` that produces a metric for the duration of the target methods. These methods are annotated with `@WithMeasuredExecutionTime` and the logic that sends the metric values to the collector is located in an [AspectJ aspect](core/src/main/java/it/unimi/cloudproject/infrastructure/aspects/ExecutionTimeAspect.java). This aspect is woven at post-compile time thanks to the Gradle plugin for AspectJ.
 
-### Configurations
-TODO: Data source provisioning
+### Grafana Configuration
+
+Grafana is used to analyze the metrics and traces exported to Prometheus and Jaeger, respectively. It is a very flexible tool because it provides a unique interface to analyze the observability signals; it can also be provision with dashboards and data sources. In this project, the data source provisioning consists of a YAML file containing the parameters necessary to connect to the corresponding data sources (see [default.yml](./observability/grafana/provisioning/datasources/default.yml)). Dashboards are provisioned using JSON files. [`prometheus_api_metrics.json`](./observability/grafana/provisioning/dashboards/prometheus_api_metrics.json) contains some panels for the API average execution time.
+
+---
+
+## CI with Github Actions
+
+There are two pipelines:
+
+- Feature branch pipeline: the project is built and tests are run. If the `INTEGRATION_TESTS_ENABLED` variable is set, then the tests with Localstack are executed, otherwise they are disabled. After that, the test coverage is generated and published as an artifact. The HTML for the Github Pages is generated too and published as an artifact.
+- Main branch pipeline: the previous pipeline is executed, the artifact for the Github Pages is downloaded and deployed. The HTML is created in the previous pipeline in order to avoid the project checkout in this pipeline as well.

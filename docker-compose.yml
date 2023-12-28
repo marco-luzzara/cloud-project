@@ -79,9 +79,13 @@ services:
       - "./observability/grafana/provisioning:/etc/grafana/provisioning"
     ports:
       - '3000:3000'
+    depends_on:
+      prometheus:
+        condition: service_healthy
+      jaeger-all-in-one:
+        condition: service_healthy
     networks:
       - localstack_network
-
 
 networks:
   localstack_network:

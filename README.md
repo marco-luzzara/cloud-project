@@ -47,6 +47,14 @@ There are two ways to test the APIs developed:
   ```shell
   gradle test -DIntegrationTestsEnabled=true
   ```
+  
+Both approaches share the same deployment process, which includes:
+1. Building the project and generates the Lambda Function code zips.
+2. Creating the Localstack and Terraform containers.
+3. Copying the zip files, .tf files and the environment-specific .tfvars files to the Terraform container
+4. Running `terraform apply` targeting the Localstack container
+
+![Deployment process](./doc/deployment_process.png)
 
 ---
 
@@ -65,6 +73,8 @@ Many technologies are involved in this project:
 - **SNS**: used to send notifications to users subscribed to a certain shop when it publishes a new message
 - **Secrets Manager**: to store credentials (DB)
 - **IAM**: to grant only the necessary privileges to the used services
+
+![App Workflow](./doc/app_workflow.png)
 
 ### API
 
@@ -99,6 +109,8 @@ Users sign up and log in using AWS Cognito. When users are created, they are add
 User groups are important to define the authorizations a certain user has when calls an API. Everytime a user logs in, he/she receives a OAuth2 token, that has to use in order to call the APIs that requires authentication. Among the claims in the token (both the `accessToken` or `idToken` are valid) the user group is automatically inserted by AWS Cognito. The authorizer, which is a Lambda Function, compares the requested API Arn with the ones that the associated user groups can access to and establish whether to allow or deny the request. A shop owner belongs to both the `customer` group and the `shop` group.
 
 There is another claim in an access token: `dbId`. This claim maps the Cognito user to the corresponding user in the Database. In order to store the basic information about customers and shop, an instance of RDS is used. I have chosen a SQL db because there are just 2 tables and no complex relationships.
+
+![User Authentication/Authorization](./doc/auth.png)
 
 ---
 
@@ -138,6 +150,8 @@ Another approach for automatic instrumentation is to use [special annotation](ht
 
 Manual instrumentation offers many more customizations, but it is also more difficult to configure. In this project, there is also an example of manual instrumentations: a `Meter` that produces a metric for the duration of the target methods. These methods are annotated with `@WithMeasuredExecutionTime` and the logic that sends the metric values to the collector is located in an [AspectJ aspect](core/src/main/java/it/unimi/cloudproject/infrastructure/aspects/ExecutionTimeAspect.java). This aspect is woven at post-compile time thanks to the Gradle plugin for AspectJ.
 
+![Observability](./doc/observability.png)
+
 ### Grafana Configuration
 
 Grafana is used to analyze the metrics and traces exported to Prometheus and Jaeger, respectively. It is a very flexible tool because it provides a unique interface to analyze the observability signals; it can also be provision with dashboards and data sources. In this project, the data source provisioning consists of a YAML file containing the parameters necessary to connect to the corresponding data sources (see [default.yml](./observability/grafana/provisioning/datasources/default.yml)). Dashboards are provisioned using JSON files. [`prometheus_api_metrics.json`](./observability/grafana/provisioning/dashboards/prometheus_api_metrics.json) contains some panels for the API average execution time.
@@ -150,3 +164,5 @@ There are two pipelines:
 
 - Feature branch pipeline: the project is built and tests are run. If the `INTEGRATION_TESTS_ENABLED` variable is set, then the tests with Localstack are executed, otherwise they are disabled. After that, the test coverage is generated and published as an artifact. The HTML for the Github Pages is generated too and published as an artifact.
 - Main branch pipeline: the previous pipeline is executed, the artifact for the Github Pages is downloaded and deployed. The HTML is created in the previous pipeline in order to avoid the project checkout in this pipeline as well.
+
+![CI with Github Actions](./doc/ci.png)

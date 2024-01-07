@@ -90,7 +90,7 @@ dependencies {
 test {
     // used by :could:infrastructure module because terraform needs the distribution zip of all the lambdas
     systemProperty("rootProjectDir", rootProject.rootDir)
-    systemProperty "IntegrationTestsEnabled", System.getProperty("IntegrationTestsEnabled")
+    systemProperty "IntegrationTestsEnabled", project.property("IntegrationTestsEnabled")
     useJUnitPlatform()
     testLogging {
         exceptionFormat = 'full'

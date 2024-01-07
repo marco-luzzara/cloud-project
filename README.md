@@ -45,7 +45,7 @@ There are two ways to test the APIs developed:
 - **From the integration tests** - Testcontainer has a module for Localstack that allows to start it for the integration tests, but the procedure is basically the same of the previous way. It is particularly useful for the CI, that is taken care of by Github Actions. The command to run all tests is:
 
   ```shell
-  gradle test -DIntegrationTestsEnabled=true
+  INTEGRATION_TESTS_ENABLED=true gradle test
   ```
   
 Both approaches share the same deployment process, which includes:

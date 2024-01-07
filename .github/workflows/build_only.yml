@@ -42,7 +42,6 @@ jobs:
         with:
           arguments: |
               build
-              -DIntegrationTestsEnabled=$INTEGRATION_TESTS_ENABLED
       - name: JaCoCo Code Coverage Report
         id: jacoco_reporter
         uses: PavanMudigonda/jacoco-reporter@v4.8

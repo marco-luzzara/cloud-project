@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -41,6 +42,16 @@ public class AppContainer extends LocalStackContainer {
 
         this.localstackConfig = localstackConfig;
 
+        var localstackEnv = new HashMap<>(Map.of(
+                "LAMBDA_DOCKER_NETWORK", ((Network.NetworkImpl) NETWORK).getName(),
+                "LS_LOG", this.localstackConfig.logLevel,
+                "ENFORCE_IAM", "1"
+        ));
+        if (System.getenv("LOCALSTACK_API_KEY") != null)
+            localstackEnv.put("LOCALSTACK_API_KEY", System.getenv("LOCALSTACK_API_KEY"));
+        else
+            localstackEnv.put("LOCALSTACK_AUTH_TOKEN", Optional.ofNullable(System.getenv("LOCALSTACK_AUTH_TOKEN")).orElseThrow());
+
         // https://joerg-pfruender.github.io/software/testing/2020/09/27/localstack_and_lambda.html#1-networking
         withNetwork(NETWORK);
         withNetworkAliases(NETWORK_ALIAS);
@@ -58,13 +69,7 @@ public class AppContainer extends LocalStackContainer {
                 Service.SES,
                 LocalStackContainer.EnabledService.named("rds"),
                 LocalStackContainer.EnabledService.named("cognito-idp"));
-        withEnv(Map.of(
-                "LAMBDA_DOCKER_NETWORK", ((Network.NetworkImpl) NETWORK).getName(),
-                "LOCALSTACK_API_KEY", Optional.ofNullable(System.getenv("LOCALSTACK_API_KEY")).orElse(""),
-                "LOCALSTACK_AUTH_TOKEN", Optional.ofNullable(System.getenv("LOCALSTACK_AUTH_TOKEN")).orElseThrow(),
-                "LS_LOG", this.localstackConfig.logLevel,
-                "ENFORCE_IAM", "1"
-                ));
+        withEnv(localstackEnv);
     }
 
     /**

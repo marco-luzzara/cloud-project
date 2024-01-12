@@ -2,7 +2,6 @@ name: Build
 
 env:
   INTEGRATION_TESTS_ENABLED: ${{ (startsWith(github.event.head_commit.message, '[ITENABLED]') || github.event.inputs.integrationTestsEnabled == 'true') && 'true' || 'false' }}
-  LOCALSTACK_AUTH_TOKEN: ${{ secrets.LOCALSTACK_AUTH_TOKEN }}
   LOCALSTACK_API_KEY: ${{ secrets.LOCALSTACK_API_KEY }}
 
 on:

@@ -15,6 +15,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 public class AppContainer extends LocalStackContainer {
     public final String NETWORK_ALIAS = "localstack";
@@ -40,8 +41,6 @@ public class AppContainer extends LocalStackContainer {
 
         this.localstackConfig = localstackConfig;
 
-        var authToken = getAuthTokenOrThrow();
-
         // https://joerg-pfruender.github.io/software/testing/2020/09/27/localstack_and_lambda.html#1-networking
         withNetwork(NETWORK);
         withNetworkAliases(NETWORK_ALIAS);
@@ -61,20 +60,11 @@ public class AppContainer extends LocalStackContainer {
                 LocalStackContainer.EnabledService.named("cognito-idp"));
         withEnv(Map.of(
                 "LAMBDA_DOCKER_NETWORK", ((Network.NetworkImpl) NETWORK).getName(),
-                "LOCALSTACK_AUTH_TOKEN", authToken,
+                "LOCALSTACK_API_KEY", Optional.ofNullable(System.getenv("LOCALSTACK_API_KEY")).orElse(""),
+                "LOCALSTACK_AUTH_TOKEN", Optional.ofNullable(System.getenv("LOCALSTACK_AUTH_TOKEN")).orElseThrow(),
                 "LS_LOG", this.localstackConfig.logLevel,
                 "ENFORCE_IAM", "1"
                 ));
-    }
-
-    private String getAuthTokenOrThrow() {
-        try {
-            return new PathMatchingResourcePatternResolver()
-                    .getResource("localstack/auth_token.secret")
-                    .getContentAsString(StandardCharsets.UTF_8);
-        } catch (IOException e) {
-            throw new RuntimeException("Please create an accessible file called 'auth_token.secret' with the Localstack Auth Token in the folder src/test/resources/localstack");
-        }
     }
 
     /**

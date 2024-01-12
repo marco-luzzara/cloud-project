@@ -2,6 +2,8 @@ name: Build
 
 env:
   INTEGRATION_TESTS_ENABLED: ${{ (startsWith(github.event.head_commit.message, '[ITENABLED]') || github.event.inputs.integrationTestsEnabled == 'true') && 'true' || 'false' }}
+  LOCALSTACK_AUTH_TOKEN: ${{ secrets.LOCALSTACK_AUTH_TOKEN }}
+  LOCALSTACK_API_KEY: ${{ secrets.LOCALSTACK_API_KEY }}
 
 on:
   workflow_call:
@@ -31,17 +33,10 @@ jobs:
           distribution: 'corretto'
       - name: Validate Gradle wrapper
         uses: gradle/wrapper-validation-action@ccb4328a959376b642e027874838f60f8e596de3
-      - name: Create API Key File
-        if: ${{ env.INTEGRATION_TESTS_ENABLED == 'true' }}
-        env:
-          LOCALSTACK_AUTH_TOKEN: ${{ secrets.LOCALSTACK_AUTH_TOKEN }}
-        run: |
-            mkdir -p cloud/infrastructure/src/testFixtures/resources/localstack && echo "$LOCALSTACK_AUTH_TOKEN" > cloud/infrastructure/src/testFixtures/resources/localstack/auth_token.secret
-      - name: Build
-        uses: gradle/gradle-build-action@749f47bda3e44aa060e82d7b3ef7e40d953bd629
-        with:
-          arguments: |
-              build
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v2
+      - name: Run build with Gradle Wrapper
+        run: ./gradlew build
       - name: JaCoCo Code Coverage Report
         id: jacoco_reporter
         uses: PavanMudigonda/jacoco-reporter@v4.8

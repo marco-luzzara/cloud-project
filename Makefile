@@ -4,7 +4,7 @@ TERRAFORM_CONTAINER_NAME ?= terraform_for_localstack
 TERRAFORM_VOLUME_DIR ?= terraform
 LOCALSTACK_CONTAINER_NAME ?= localstackmain
 LOCALSTACK_VOLUME_DIR ?= localstack_persistence
-LOCALSTACK_AUTH_TOKEN ?= $(shell cat cloud/infrastructure/src/testFixtures/resources/localstack/auth_token.secret)
+LOCALSTACK_AUTH_TOKEN ?= $(shell cat secrets/localstack/auth_token.secret)
 LOCALSTACK_PORT ?= 4566
 LOCALSTACK_PERSISTENCE ?= 1
 LOCALSTACK_NETWORK_NAME ?= localstack_network
@@ -43,3 +43,6 @@ follow_lambda_logs:
 
 get_rest_api_id:
 	docker exec "${LOCALSTACK_CONTAINER_NAME}" awslocal apigateway get-rest-apis --output text --query "items[0].id"
+
+test_all:
+	INTEGRATION_TESTS_ENABLED=true gradle build

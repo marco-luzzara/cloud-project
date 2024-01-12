@@ -54,7 +54,7 @@ Both approaches share the same deployment process, which includes:
 3. Copying the zip files, .tf files and the environment-specific .tfvars files to the Terraform container
 4. Running `terraform apply` targeting the Localstack container
 
-![Deployment process](./doc/deployment_process.png)
+![Deployment process](./presentation/public/deployment_process.png)
 
 ---
 
@@ -74,7 +74,7 @@ Many technologies are involved in this project:
 - **Secrets Manager**: to store credentials (DB)
 - **IAM**: to grant only the necessary privileges to the used services
 
-![App Workflow](./doc/app_workflow.png)
+![App Workflow](./presentation/public/app_workflow.png)
 
 ### API
 
@@ -110,7 +110,7 @@ User groups are important to define the authorizations a certain user has when c
 
 There is another claim in an access token: `dbId`. This claim maps the Cognito user to the corresponding user in the Database. In order to store the basic information about customers and shop, an instance of RDS is used. I have chosen a SQL db because there are just 2 tables and no complex relationships.
 
-![User Authentication/Authorization](./doc/auth.png)
+![User Authentication/Authorization](./presentation/public/auth.png)
 
 ---
 
@@ -150,7 +150,7 @@ Another approach for automatic instrumentation is to use [special annotation](ht
 
 Manual instrumentation offers many more customizations, but it is also more difficult to configure. In this project, there is also an example of manual instrumentations: a `Meter` that produces a metric for the duration of the target methods. These methods are annotated with `@WithMeasuredExecutionTime` and the logic that sends the metric values to the collector is located in an [AspectJ aspect](core/src/main/java/it/unimi/cloudproject/infrastructure/aspects/ExecutionTimeAspect.java). This aspect is woven at post-compile time thanks to the Gradle plugin for AspectJ.
 
-![Observability](./doc/observability.png)
+![Observability](./presentation/public/observability.png)
 
 ### Grafana Configuration
 
@@ -165,4 +165,4 @@ There are two pipelines:
 - Feature branch pipeline: the project is built and tests are run. If the `INTEGRATION_TESTS_ENABLED` variable is set, then the tests with Localstack are executed, otherwise they are disabled. After that, the test coverage is generated and published as an artifact. The HTML for the Github Pages is generated too and published as an artifact.
 - Main branch pipeline: the previous pipeline is executed, the artifact for the Github Pages is downloaded and deployed. The HTML is created in the previous pipeline in order to avoid the project checkout in this pipeline as well.
 
-![CI with Github Actions](./doc/ci.png)
+![CI with Github Actions](./presentation/public/ci.png)

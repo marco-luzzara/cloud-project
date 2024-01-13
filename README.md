@@ -74,7 +74,7 @@ Many technologies are involved in this project:
 - **Secrets Manager**: to store credentials (DB)
 - **IAM**: to grant only the necessary privileges to the used services
 
-![App Workflow](./presentation/public/app_workflow.png)
+![App Workflow](./presentation/public/architecture.jpg)
 
 ### API
 

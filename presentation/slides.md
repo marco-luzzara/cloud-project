@@ -212,8 +212,6 @@ How?
 
 - ❌ AWS CLI - Requires scripting, hard to maintain
 - ✅ Terraform - Based on a declarative language (HCL) and efficient
-  - Organization in modules
-  - Idempotent
 
 ---
 
@@ -228,5 +226,101 @@ APIs can be directly tested on AWS on a testing environment, but...
 - ❌ Slower development (especially if test-driven)
 - ❌ DevOps pipeline? Regression tests? Test automation?
 
+Solution? Deploying locally
+
 ---
 
+# Localstack
+
+*"LocalStack is a cloud service emulator that runs in a single container on your laptop or in your CI environment"*
+
+- Available as a Docker container (port 4566)
+- Localstack and AWS APIs' are the same
+- Integrates with Terraform
+- Speeds up development thanks to features such as Lambda Function Hot-Reloading
+- ...
+
+---
+
+# Localstack in a Test Pipeline
+
+Localstack proves valuable for Lambda Functions (API) testing during development, but a test pipeline should not assume the presence of any pre-existing container
+
+Solution? Testcontainers
+
+*"Testcontainers is a library that provides easy and lightweight APIs for bootstrapping local development and test dependencies with real services wrapped in Docker containers."*
+
+- ✅ Localstack setup/teardown can be managed by Testcontainers with its Module
+- ❌ IaC for resource provisioning? No Testcontainers module for Terraform
+
+Testcontainers is extendable with custom modules...
+
+---
+layout: center
+---
+
+# Deploying on Localstack
+
+<img src="/deployment_process.png" class="h-100 rounded shadow" />
+
+---
+
+# CI with Github Actions
+
+Localstack Pro can be integrated into a CI pipeline, but limited by a credit system
+
+There are two types of pipelines:
+1. Commit on a feature branch - Run tests and publish the coverage as artifact
+2. Commit on a main branch - Same as #1, but also publishes the coverage and the APIs documentation on Github Pages
+
+❌ Running Localstack tests on Github Actions every time there is a commit would deplete the credits...
+
+Solution? These tests are executed exclusively when
+
+```plain
+startsWith(github.event.head_commit.message, '[ITENABLED]') || 
+  github.event.inputs.integrationTestsEnabled == 'true'
+```
+
+---
+layout: center
+---
+
+# Observability (#1)
+
+<img src="/observability.png" class="h-100 rounded shadow" />
+
+---
+
+# Observability (#2)
+
+Officially, Localstack does not support tracing <mingcute-arrow-right-fill /> The Lambda Function Runtime sometimes fails
+
+Two types of instrumentation:
+
+- Auto-Instrumentation with the `-javaagent:/var/task/lib/aws-opentelemetry-agent.jar`
+- Manual Instrumentation (for custom metrics and tracing)
+  - `@WithSpan` annotated methods represent new spans
+  - `@WithMeasuredExecutionTime` annotated methods generate new metrics of type histogram called `method.{method_signature}.execution.time`
+
+---
+layout: two-cols-header
+---
+
+# Localstack Pros & Cons
+
+::left::
+
+### Pros ✅
+
+- Rapid development (and potentially TDD) within an environment mirroring AWS
+- Growing community of contributors
+- Ad-hoc features for the local development
+
+::right::
+
+### Cons ❌
+
+- Some APIs are not implemented yet
+- AWS != Localstack <mingcute-arrow-right-fill /> Checkpoint on AWS are recommended
+- Limited CI (100 pipelines per month with the educational license)

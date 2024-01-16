@@ -1,0 +1,12 @@
+.v-lane {
+  display: inline-block;
+  width: 40%;
+  vertical-align: top;
+  margin-top: 10%;
+  margin-left: 5%;
+  margin-right: 5%;
+}
+
+.slidev-vclick-prior {
+    opacity: 50%;
+}

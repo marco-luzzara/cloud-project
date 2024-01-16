@@ -1,0 +1,127 @@
+apiVersion: 1
+groups:
+    - orgId: 1
+      name: lambda-alerts
+      folder: alerts
+      interval: 10s
+      rules:
+        - uid: d44f87bb-5556-411d-adfd-46951e0f22d5
+          title: Customer Lambda Invocations
+          condition: C
+          data:
+            - refId: A
+              relativeTimeRange:
+                from: 21600
+                to: 0
+              datasourceUid: P034F075C744B399F
+              model:
+                alias: ""
+                datasource:
+                    type: cloudwatch
+                    uid: P034F075C744B399F
+                dimensions:
+                    FunctionName:
+                        - customer-lambda
+                expression: ""
+                id: ""
+                intervalMs: 1000
+                label: ""
+                logGroups: []
+                matchExact: true
+                maxDataPoints: 43200
+                metricEditorMode: 0
+                metricName: Invocations
+                metricQueryType: 0
+                namespace: AWS/Lambda
+                period: "120"
+                queryMode: Metrics
+                refId: A
+                region: us-east-1
+                sql:
+                    from:
+                        property:
+                            name: AWS/Lambda
+                            type: string
+                        type: property
+                    select:
+                        name: MIN
+                        parameters:
+                            - name: Invocations
+                              type: functionParameter
+                        type: function
+                    where:
+                        expressions:
+                            - operator:
+                                name: =
+                                value: customer-lambda
+                              property:
+                                name: FunctionName
+                                type: string
+                              type: operator
+                        type: and
+                sqlExpression: SELECT MIN(Invocations) FROM "AWS/Lambda" WHERE FunctionName = 'customer-lambda'
+                statistic: SampleCount
+            - refId: B
+              datasourceUid: __expr__
+              model:
+                conditions:
+                    - evaluator:
+                        params: []
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params:
+                            - B
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                datasource:
+                    type: __expr__
+                    uid: __expr__
+                expression: A
+                intervalMs: 1000
+                maxDataPoints: 43200
+                reducer: last
+                refId: B
+                type: reduce
+            - refId: C
+              datasourceUid: __expr__
+              model:
+                conditions:
+                    - evaluator:
+                        params:
+                            - 10
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params:
+                            - C
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                datasource:
+                    type: __expr__
+                    uid: __expr__
+                expression: B
+                intervalMs: 1000
+                maxDataPoints: 43200
+                refId: C
+                type: threshold
+          dashboardUid: ccaaaf12-af83-4927-b492-a3722f86b7da
+          panelId: 1
+          noDataState: NoData
+          execErrState: Error
+          for: 10s
+          annotations:
+            __dashboardUid__: ccaaaf12-af83-4927-b492-a3722f86b7da
+            __panelId__: "1"
+            description: ""
+            runbook_url: ""
+            summary: ""
+          labels:
+            "": ""
+          isPaused: false

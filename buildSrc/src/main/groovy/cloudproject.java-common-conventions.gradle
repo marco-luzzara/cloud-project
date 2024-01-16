@@ -21,7 +21,7 @@ def LIQUIBASE_VERSION = '4.23.0'
 def LOG4J_VERSION = '2.17.1'
 def TESTCONTAINERS_VERSION = '1.18.3'
 def GSON_VERSION = '2.10.1'
-def OPENTELEMETRY_VERSION = '1.31.0'
+def OPENTELEMETRY_VERSION = '1.32.0'
 
 dependencies {
     implementation platform("software.amazon.awssdk:bom:2.20.150")

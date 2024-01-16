@@ -97,6 +97,42 @@ public class ApiIT {
     }
 
     @Test
+    void givenTwoShopOwner_whenShopOwnerSendsUsingDifferentShopId_thenThrow() throws IOException, InterruptedException {
+        final var admin = UserDataFactory.getAdminUser();
+        // admin login
+        final var adminLoginResponse = customerApiCaller.<LoginResponse>callUserLoginApi(new UserLoginRequest(admin.username(), admin.password()));
+        final var adminIdToken = adminLoginResponse.body().idToken();
+
+        // create user 1
+        final var userCreation1 = UserDataFactory.getNewUser();
+        var newUserInfo1 = CustomerApiHelper.createUserAndLoginSuccessfully(customerApiCaller, userCreation1);
+        var id1 = newUserInfo1.userId();
+        var idToken1 = newUserInfo1.idToken();
+
+        // create user 2
+        final var userCreation2 = UserDataFactory.getNewUser();
+        var newUserInfo2 = CustomerApiHelper.createUserAndLoginSuccessfully(customerApiCaller, userCreation2);
+        var id2 = newUserInfo2.userId();
+        var idToken2 = newUserInfo2.idToken();
+
+        // create shop 1
+        var shopCreationBody1 = ShopDataFactory.getNewShop(id1);
+        var adminCreateShopApiResponse1 = adminApiCaller.<ShopCreationResponse>callAdminCreateShopApi(shopCreationBody1, adminIdToken);
+        final var shopId1 = adminCreateShopApiResponse1.body().shopId();
+        assertThat(shopId1).isGreaterThanOrEqualTo(1);
+
+        // create shop 2
+        var shopCreationBody2 = ShopDataFactory.getNewShop(id2);
+        var adminCreateShopApiResponse2 = adminApiCaller.<ShopCreationResponse>callAdminCreateShopApi(shopCreationBody2, adminIdToken);
+        final var shopId2 = adminCreateShopApiResponse2.body().shopId();
+        assertThat(shopId2).isGreaterThanOrEqualTo(shopId1);
+
+        var shopPublishMessageResponse = shopApiCaller.callShopPublishMessageApi(
+                new ShopPublishMessageRequestBody("test message"), idToken1, shopId2);
+        assertThat(shopPublishMessageResponse.statusCode()).isEqualTo(HttpStatus.SC_FORBIDDEN);
+    }
+
+    @Test
     void givenUserSubscribedToShop_whenShopSendMessage_UserReceivesIt() throws IOException, InterruptedException
     {
         final var admin = UserDataFactory.getAdminUser();

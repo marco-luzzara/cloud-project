@@ -98,7 +98,7 @@ resource "aws_lambda_function" "api_lambda" {
         -Dspring.datasource.username=${var.lambda_system_properties.spring_datasource_username}
         -Dspring.datasource.password=${var.lambda_system_properties.spring_datasource_password}
         ${var.is_testing ? "-javaagent:/var/task/lib/AwsSdkV2DisableCertificateValidation-1.0.jar" : ""}
-        ${var.is_observability_enabled ? "-javaagent:/var/task/lib/aws-opentelemetry-agent-1.31.0.jar" : ""}
+        ${var.is_observability_enabled ? "-javaagent:/var/task/lib/aws-opentelemetry-agent-1.32.0.jar" : ""}
         -Dotel.java.enabled.resource.providers=io.opentelemetry.javaagent.tooling.AutoVersionResourceProvider,io.opentelemetry.instrumentation.resources.ContainerResourceProvider,io.opentelemetry.instrumentation.resources.HostResourceProvider,io.opentelemetry.instrumentation.resources.JarServiceNameDetector,io.opentelemetry.instrumentation.resources.OsResourceProvider,io.opentelemetry.instrumentation.resources.ProcessResourceProvider,io.opentelemetry.instrumentation.resources.ProcessRuntimeResourceProvider,io.opentelemetry.instrumentation.spring.resources.SpringBootServiceNameDetector,io.opentelemetry.instrumentation.spring.resources.SpringBootServiceVersionDetector,io.opentelemetry.sdk.autoconfigure.internal.EnvironmentResourceProvider,io.opentelemetry.contrib.aws.resource.LambdaResourceProvider
       EOT
     }

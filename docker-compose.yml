@@ -1,7 +1,7 @@
 services:
   localstack:
     container_name: "${LOCALSTACK_CONTAINER_NAME-localstackmain}"
-    image: localstack/localstack-pro:3.0.0
+    image: localstack/localstack-pro:3.0.2
     ports:
       - "127.0.0.1:${LOCALSTACK_PORT:-4566}:4566"            # LocalStack Gateway
       - "127.0.0.1:4510-4559:4510-4559"  # external services port range
@@ -52,6 +52,12 @@ services:
     image: prom/prometheus:v2.47.2
     volumes:
       - "./observability/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml"
+    healthcheck:
+      test: [ "CMD", "wget", "http://localhost:9090" ]
+      interval: 5s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
     ports:
       - "9090:9090"
     networks:
@@ -81,8 +87,6 @@ services:
       - '3000:3000'
     depends_on:
       prometheus:
-        condition: service_healthy
-      jaeger-all-in-one:
         condition: service_healthy
     networks:
       - localstack_network

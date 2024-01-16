@@ -143,7 +143,7 @@ Metrics and traces are exported using the OLTP protocol to http://otel-collector
 OpenTelemetry currently provides two ways to instrument Java code: manual and automatic instrumentation. Automatic instrumentation is very useful because it creates default metrics/spans for most popular libraries, like Spring or AWS calls. As for AWS, it creates a span (or trace if there is no parent trace) for each AWS service called. To enable automatic instrumentation, specify the following Java Agent, that must be included in the Lambda Function archive:
 
 ```shell
--javaagent:/var/task/lib/aws-opentelemetry-agent-1.31.0.jar
+-javaagent:/var/task/lib/aws-opentelemetry-agent-1.32.0.jar
 ```
 
 Another approach for automatic instrumentation is to use [special annotation](https://opentelemetry.io/docs/instrumentation/java/automatic/annotations/): each API method defines its own parent span through the `@WithSpan` annotation. The API input is passed as a parameter to the span using the `@SpanAttribute("input")` annotation.

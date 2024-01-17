@@ -103,7 +103,7 @@ Requirements:
 <v-clicks>
 
 - Event-based system <mingcute-arrow-right-fill /> Every product released is an event
-- Pub/Sub system <mingcute-arrow-right-fill /> Events are selectively delivered
+- Pub/Sub architecture <mingcute-arrow-right-fill /> Events are selectively delivered
 
 </v-clicks>
 
@@ -224,7 +224,7 @@ What happens when an authenticated user calls an API?
 <v-clicks>
 
 1. The AWS API Gateway receives the request and tries to match the request with an existing API
-2. The API Gateway contacts Amazon Cognito User Pools to validate the Auth token
+2. The API Gateway contacts Amazon Cognito User Pool Client to validate the Auth token
 3. The API Gateway contacts Amazon Cognito Federated Identities to temporarily give the authenticated user the privilege to call the APIs specified in its Role policy (IAM-based authorization)
 4. The API Gateway verifies whether the policy actions include the requested API
 
